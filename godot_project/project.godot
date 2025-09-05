@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Choose Your Own Quantum Adventure"
+run/main_scene="uid://baeb3r511rshg"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -19,6 +20,7 @@ config/icon="res://icon.svg"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/borderless=true
+window/stretch/mode="viewport"
 
 [rendering]
 

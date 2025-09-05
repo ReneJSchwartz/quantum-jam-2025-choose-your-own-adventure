@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://bidtuh27qoll"]
+
+[ext_resource type="Script" uid="uid://y4waxpo5evch" path="res://source/dialogue/dialogue_ui_manager.gd" id="1_y3syv"]
+[ext_resource type="Script" uid="uid://br6rg6nrw3c6c" path="res://source/dialogue/dialogue.gd" id="2_sd0pw"]
+
+[node name="DialogueUI" type="Node"]
+
+[node name="Scripts" type="Node" parent="."]
+
+[node name="DialogueUiManager" type="Node" parent="Scripts" node_paths=PackedStringArray("ui_container")]
+script = ExtResource("1_y3syv")
+text_speeds_slow_normal_fast = Array[float]([0.1, 0.15, 0.2])
+ui_container = NodePath("../../ContainerPageView")
+
+[node name="Dialogue" type="Node" parent="Scripts"]
+script = ExtResource("2_sd0pw")
+
+[node name="ContainerPageView" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ContainerScrollView" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

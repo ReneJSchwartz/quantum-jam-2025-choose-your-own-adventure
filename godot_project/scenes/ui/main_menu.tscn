@@ -7,8 +7,9 @@
 
 [node name="Scripts" type="Node" parent="."]
 
-[node name="MainMenuScreen" type="Node" parent="Scripts" node_paths=PackedStringArray("main_menu_container")]
+[node name="MainMenuScreen" type="Node" parent="Scripts" node_paths=PackedStringArray("first_selected_element", "main_menu_container")]
 script = ExtResource("1_sl1te")
+first_selected_element = NodePath("../../Container/VBoxContainer/NewGame")
 main_menu_container = NodePath("../../Container")
 
 [node name="Container" type="Control" parent="."]
@@ -62,3 +63,5 @@ text = "Game Name"
 fit_content = true
 autowrap_mode = 0
 horizontal_alignment = 1
+
+[connection signal="pressed" from="Container/VBoxContainer/NewGame" to="Scripts/MainMenuScreen" method="_on_b_new_game_pressed"]

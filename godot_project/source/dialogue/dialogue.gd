@@ -20,10 +20,11 @@ func _ready() -> void:
 	# option can add dynamic continuation to dialogue with add_texts and add_options
 	#add_options([DialogueOption.create("doStuff", func(): print("do stuff callback"))])
 	#start_dialogue()
+	beginning()
 	pass
 
 ## Helper method for adding dialogue. 
-func add_text(text, name, image):
+func add_text(text, name = "", image = ""):
 	steps.append(DialogueStep.create(false, [], DialogueContent.create(text, name, image)))
 
 ## Helper method for adding dialogue player options. 
@@ -55,3 +56,22 @@ func continue_dialogue():
 		DialogueUiManager.instance.show_text(step.content)
 	
 	current_dialogue_step += 1
+
+# Game specific dialogue.
+func beginning():
+	add_text("The laboratory is stark - clean surfaces and white walls.")
+	add_text("
+	Before you sits your half finished experiment in quantum computing.")
+	add_text("
+	A bright burst of light flares across your eyes.")
+	add_text("
+	And before you can blink it's gone, it's after effects glowing at the edges of your sight.")
+	var opts: Array[DialogueOption] = []
+	opts.append(DialogueOption.create("Check your readings", func(): pass))
+	opts.append(DialogueOption.create("Close your eyes", func(): pass))
+	opts.append(DialogueOption.create("I think it's time for a coffee break...", func(): pass))
+	add_options(opts)
+	start_dialogue()
+
+func passage_a():
+	pass

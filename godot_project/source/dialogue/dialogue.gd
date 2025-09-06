@@ -11,6 +11,8 @@ static var dialogue_running: bool = false
 var steps: Array[DialogueStep] = []
 static var instance: Dialogue
 
+func _init():
+	SignalBus.sub("game_started", func(data): beginning())
 
 func _ready() -> void:
 	instance = self
@@ -20,8 +22,6 @@ func _ready() -> void:
 	# option can add dynamic continuation to dialogue with add_texts and add_options
 	#add_options([DialogueOption.create("doStuff", func(): print("do stuff callback"))])
 	#start_dialogue()
-	beginning()
-	pass
 
 ## Helper method for adding dialogue. 
 func add_text(text, name = "", image = ""):

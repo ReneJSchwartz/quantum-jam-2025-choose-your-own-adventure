@@ -16,4 +16,5 @@ func _on_b_quit_game_pressed() -> void:
 
 func _on_b_new_game_pressed() -> void:
 	main_menu_container.visible = false
+	SignalBus.pub("game_started")
 	# todo start game

@@ -10,7 +10,7 @@
 [node name="DialogueUiManager" type="Node" parent="Scripts" node_paths=PackedStringArray("ui_container", "text_area", "speaker_name", "dialogue_options")]
 script = ExtResource("1_y3syv")
 text_speeds_slow_normal_fast = Array[float]([10.0, 15.0, 20.0])
-ui_container = NodePath("../../ContainerPageView")
+ui_container = NodePath("../../ContainerScrollView")
 text_area = NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/MarginContainer/ScrollingDialogueBox")
 speaker_name = NodePath("../../ContainerPageView/SpeakerName")
 dialogue_options = [NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 1"), NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 2"), NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 3"), NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 4")]

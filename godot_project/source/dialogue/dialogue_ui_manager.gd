@@ -106,17 +106,17 @@ func show_dialogue_overlay() -> void:
 
 func hide_dialogue_overlay(instantly: bool = false) -> void:
 	print(hide_dialogue_overlay.get_method().get_basename())
-	
-	if instantly:
-		ui_container.position = Vector2(0, container_down_y_position_that_hides_player_options)
-		return
-	
-	var tween = get_tree().create_tween()
-	tween.tween_property(
-		ui_container, 
-		"position", 
-		Vector2(0, container_down_y_position_that_hides_player_options), 
-		hide_tween_duration)
+	ui_container.visible = false	
+	#if instantly:
+		#ui_container.position = Vector2(0, container_down_y_position_that_hides_player_options)
+		#return
+	#
+	#var tween = get_tree().create_tween()
+	#tween.tween_property(
+		#ui_container, 
+		#"position", 
+		#Vector2(0, container_down_y_position_that_hides_player_options), 
+		#hide_tween_duration)
 
 ## Handles runtime testing functions.
 func _process(_delta: float):

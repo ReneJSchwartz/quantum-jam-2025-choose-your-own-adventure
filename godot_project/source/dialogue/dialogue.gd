@@ -11,6 +11,7 @@ static var dialogue_running: bool = false
 var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
 var temp_options: Array[DialogueOption]
+var on_dialogue_end_callback: Callable = func(): pass
 static var instance: Dialogue
 
 func _init():
@@ -55,6 +56,8 @@ func start_dialogue():
 ## dialogue.
 func continue_dialogue():
 	if len(steps) <= current_dialogue_step:
+		on_dialogue_end_callback.call()
+		on_dialogue_end_callback = func(): pass
 		DialogueUiManager.instance.hide_dialogue_overlay()
 		dialogue_running = false
 		steps = []

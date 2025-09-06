@@ -70,6 +70,8 @@ var next_dialogue_callback: Callable
 ## Options the player can select (option's topmost node), these are dynamically
 ## populated.
 @export var dialogue_options: Array[Button]
+## Reference to the quantum echo service for text transformation  
+var quantum_echo_service: Node
 
 
 func _ready():
@@ -79,6 +81,10 @@ func _ready():
 	instance = self
 	
 	ui_container.visible = false
+	
+	# Initialize quantum echo service
+	quantum_echo_service = preload("res://source/dialogue/quantum_echo_service.gd").new()
+	add_child(quantum_echo_service)
 	
 	# Default text speed, remove when options script sets this. 
 	set_text_speed(TextSpeedOption.NORMAL)
@@ -104,7 +110,7 @@ func show_dialogue_overlay() -> void:
 		Vector2(0, 0), 
 		show_tween_duration)
 
-func hide_dialogue_overlay(instantly: bool = false) -> void:
+func hide_dialogue_overlay(_instantly: bool = false) -> void:
 	print(hide_dialogue_overlay.get_method().get_basename())
 	ui_container.visible = false	
 	#if instantly:
@@ -158,19 +164,21 @@ func show_text(content: DialogueContent):
 
 ## Main method of the class that writes text to a dialogue text box and shows
 ## other info to the player as well. Showing player selectable options is done
-## in show_player_options() however.
-func write_text(bbcode_text: String, talker: String, talker_image: String):
+## in show_player_options() however. Now enhanced with quantum echo processing!
+func write_text(bbcode_text: String, talker: String, _speaker_image: String):
 	# reset variables
 	text_speed_multiplier = 1
 	current_typewriter_audio_index = 0
 	text_area.visible_characters = 0
-	# set correct texts and images
-	text_area.text = bbcode_text
+	
+	# set speaker name first (no quantum processing for names)
 	speaker_name.text = talker
 	speaker_name.visible_characters = 0
 	
+	# Show "Processing quantum echo..." while we wait for the server
+	text_area.text = "⟨ Processing quantum echo... ⟩"
+	
 	var length_adjusted_speaker_name_text_speed = text_speed / speaker_name.get_total_character_count()
-	var length_adjusted_text_speed = text_speed / text_area.get_total_character_count()
 	
 	if delay_before_writing_speaker_name > 0:
 		await get_tree().create_timer(delay_before_writing_speaker_name).timeout
@@ -182,6 +190,23 @@ func write_text(bbcode_text: String, talker: String, talker_image: String):
 	if delay_after_speaker_name > 0:
 		await get_tree().create_timer(delay_after_speaker_name).timeout
 	
+	# Process text through quantum echo server (using SCRAMBLE for now)
+	quantum_echo_service.process_quantum_echo(
+		bbcode_text, 
+		quantum_echo_service.EchoType.SCRAMBLE,
+		_on_quantum_text_received,
+		bbcode_text # fallback to original text
+	)
+
+## Called when quantum echo server returns processed text
+func _on_quantum_text_received(processed_text: String):
+	# Set the quantum-processed text
+	text_area.text = processed_text
+	text_area.visible_characters = 0
+	
+	var length_adjusted_text_speed = text_speed / text_area.get_total_character_count()
+	
+	# Animate the quantum text appearing
 	while !is_text_finished():
 		text_area.visible_ratio += length_adjusted_text_speed * get_process_delta_time() * text_speed_multiplier
 		

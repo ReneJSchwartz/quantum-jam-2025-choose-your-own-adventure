@@ -17,10 +17,21 @@ var hide_dialogue_delay: float = 0
 static var instance: Dialogue
 
 func _init():
-	SignalBus.sub("game_started", func(data): beginning())
+	# Find SignalBus in the scene tree when ready
+	pass
 
 func _ready() -> void:
 	instance = self
+	# Connect to game_started signal once SignalBus is available
+	call_deferred("_connect_signal_bus")
+	
+func _connect_signal_bus():
+	var signal_bus = get_node("/root/GameTree/Scripts/SignalBus")
+	if signal_bus:
+		signal_bus.sub("game_started", func(_data): beginning())
+	else:
+		print("Warning: SignalBus not found!")
+	
 	# testing non-interactive demo
 	#add_text("text sample <b>bold</b>", "speaker name", "not used yet")
 	#add_text("second page", "speaker name 2", "_")
@@ -29,8 +40,8 @@ func _ready() -> void:
 	#start_dialogue()
 
 ## Helper method for adding dialogue. 
-func add_text(text, name = "", image = ""):
-	steps.append(DialogueStep.create(false, [], DialogueContent.create(text, name, image)))
+func add_text(text, speaker_name = "", image = ""):
+	steps.append(DialogueStep.create(false, [], DialogueContent.create(text, speaker_name, image)))
 
 ## Helper method for adding dialogue player options. 
 func add_options(opt: Array[DialogueOption]):

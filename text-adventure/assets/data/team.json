@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "David 'DJ' Grimsley",
+    "role": "Website & Game Developer",
+    "discordName": "MrDJ2U",
+    "portfolioLink": "https://davidjgrimsley.com/",
+    "linkedInProfile": "https://LinkedIn.com/in/davidjgrimsley",
+    "artstationProfile": "https://www.artstation.com/davidgrimsley5",
+    "contribution": "Hosted the game on a temporary domain on my vps. I used expo with React Native to give the possibility of moving the game to mobile in the future with little trouble."
+  },
+  {
+    "id": 2,
+    "name": "Jane Doe",
+    "role": "Artist",
+    "discordName": "JaneDoeArt",
+    "portfolioLink": "https://janedoeart.com/",
+    "linkedInProfile": "https://LinkedIn.com/in/janedoeart",
+    "artstationProfile": "https://www.artstation.com/janedoeart",
+    "contribution": "Created the stunning visuals and artwork for the game."
+  }
+]

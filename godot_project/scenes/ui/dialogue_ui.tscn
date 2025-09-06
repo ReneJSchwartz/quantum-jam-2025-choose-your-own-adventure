@@ -7,10 +7,11 @@
 
 [node name="Scripts" type="Node" parent="."]
 
-[node name="DialogueUiManager" type="Node" parent="Scripts" node_paths=PackedStringArray("ui_container")]
+[node name="DialogueUiManager" type="Node" parent="Scripts" node_paths=PackedStringArray("ui_container", "text_area")]
 script = ExtResource("1_y3syv")
 text_speeds_slow_normal_fast = Array[float]([0.1, 0.15, 0.2])
 ui_container = NodePath("../../ContainerPageView")
+text_area = NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/MarginContainer/ScrollingDialogueBox")
 
 [node name="Dialogue" type="Node" parent="Scripts"]
 script = ExtResource("2_sd0pw")
@@ -30,3 +31,62 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ContainerScrollView"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 100
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ContainerScrollView/MarginContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_right = 200
+
+[node name="ScrollingDialogueBox" type="RichTextLabel" parent="ContainerScrollView/MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 32
+text = "Scrolling text box"
+scroll_following = true
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+
+[node name="ChoiceMargin" type="MarginContainer" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_override_constants/margin_left = 500
+theme_override_constants/margin_right = 500
+
+[node name="DialogueChoices" type="VBoxContainer" parent="ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin"]
+layout_mode = 2
+
+[node name="Choice 1" type="Button" parent="ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices"]
+layout_mode = 2
+text = "Choice 1"
+
+[node name="Choice 2" type="Button" parent="ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices"]
+layout_mode = 2
+text = "Choice 2"
+
+[node name="Choice 3" type="Button" parent="ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices"]
+layout_mode = 2
+text = "Choice 3"
+
+[node name="Choice 4" type="Button" parent="ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices"]
+layout_mode = 2
+text = "Choice 4"

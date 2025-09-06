@@ -141,13 +141,85 @@ Theo arrives at the lab, tension etched on his face. “We need to do this right
 	queue_added_options()
 
 func discovery_a_capture():
+	add_text("""Your hands steady, you initiate the capture protocol. The burst pulses—then disappears. Your instruments register a faint echo signal.
+Kaela (thinking): "It’s fragile—this quantum presence is like a ghost trapped between realities."
+Ava: “The data here is not strong enough to be read. I suggest feeding captured signal into the Echo Processor.”
+""")
+
+	add_option("Proceed to feed the captured signal into the Echo Processor.", processor)
+	queue_added_options()
 	
-	pass
 
 func discovery_b_diagnostics():
+	add_text("""You decide caution is best and run diagnostics. Unexpectedly, a critical error warning flashes.
+Theo: "Kaela, the system’s unstable! We could crash the entire quantum circuit if we proceed without fixing it."
+""")
+	add_option("Fix the error immediately", discovery_b_diagnostics_fix)
+	add_option("Take a risk and capture anyway", discovery_a_capture)
+	queue_added_options()
 	
-	pass
+func discovery_b_diagnostics_fix():
+	
+	add_text("""Kaela: “Ava, run a workaround while we fix this.”""")
+	
+	add_text("""It looks like someone has tried to hack the system, but you caught it in time.
+	Theo (comms): “I think we’re ready.”""")
+	
+	add_option("Proceed to feed the captured signal into the Echo Processor.", processor)
+	queue_added_options()	
 
 func discovery_c_consult():
+	add_text("""Theo: "These echoes aren’t just data. They’re unstable quantum memories. How we handle them could rewrite what reality remembers."
+Kaela: “How do we find out more about them?”
+Theo: “We should run a diagnostic. Capturing them directly without more information could make them unpredictable."
+""")
+
+	add_option("Listen to Theo’s advice and run diagnostics", discovery_b_diagnostics_fix)
+	add_option("Insist on capturing immediately", discovery_a_capture)
+	queue_added_options()
 	
+func processor():
+	add_text("""Theo (Engineer): “Kaela, timing is critical here. Feed the qubits gently into the processor. Each quantum gate you apply must be precise — one wrong flip could collapse the entire superposition. The echoes are fragile but hold the key to forgotten memories.”
+
+Kaela: “And what happens if I fail?”
+
+Theo: “... Don’t.”""")
+
+	if randi() % 2 == 0:
+		
+		pass
+	else:
+		processor_bit_flip
+		pass  
+	add_option("Apply a bit-flip gate first.", processor_bit_flip)
+	
+	pass
+	
+func processor_bit_flip():
+	add_text("""You apply the bit-flip gate. The echo pulses brighter but wavers unpredictably.
+Kaela: "The echoes react... I hope this reveals more than it conceals."
+Apply gates to stabilize the echo""")
+
+	if randi() % 2 == 0:
+		processor_bit_flip_pass()
+	else:
+		processor_bit_flip_fail()
+		
+func processor_bit_flip_pass():
+	add_text("""Bit-flip - Pass
+The flip succeeds and the bit-flip gate is applied.
+A transparent memory, this very lab, scientists running similar tests.
+	Kaela: A quantum memory, past and present converging.
+
+Somewhere beneath the surface, faint voices murmur, their messages lost to time but not entirely extinguished. This memory beckons you to listen closely — to gather shards of forgotten knowledge, piecing together a past only partially remembered.
+But it fades before you can learn anything.
+
+Theo: It’s holding stable.""")
+
+	add_option("Phase-flip gate.", processor_phase_flip)
+	
+func processor_bit_flip_fail():
+	pass
+	
+func processor_phase_flip(): 
 	pass

@@ -12,6 +12,8 @@ var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
 var temp_options: Array[DialogueOption]
 var on_dialogue_end_callback: Callable = func(): pass
+## Delay hiding dialogue by this amount. 
+var hide_dialogue_delay: float = 0
 static var instance: Dialogue
 
 func _init():
@@ -58,7 +60,8 @@ func continue_dialogue():
 	if len(steps) <= current_dialogue_step:
 		on_dialogue_end_callback.call()
 		on_dialogue_end_callback = func(): pass
-		DialogueUiManager.instance.hide_dialogue_overlay()
+		get_tree().create_timer(hide_dialogue_delay).timeout.connect(
+			DialogueUiManager.instance.hide_dialogue_overlay)
 		dialogue_running = false
 		steps = []
 		return

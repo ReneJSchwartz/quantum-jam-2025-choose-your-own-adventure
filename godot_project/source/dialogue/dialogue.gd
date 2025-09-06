@@ -67,11 +67,79 @@ func beginning():
 	add_text("
 	And before you can blink it's gone, it's after effects glowing at the edges of your sight.")
 	var opts: Array[DialogueOption] = []
-	opts.append(DialogueOption.create("Check your readings", func(): pass))
+	opts.append(DialogueOption.create(
+		"Check your readings", 
+		func(): passage_a()))
 	opts.append(DialogueOption.create("Close your eyes", func(): pass))
 	opts.append(DialogueOption.create("I think it's time for a coffee break...", func(): pass))
 	add_options(opts)
 	start_dialogue()
 
 func passage_a():
+	add_text("The burst of light... it seems to be a quantum signature. 
+Data trapper in an alternate quantum state, here on second... gone the next. Lost.
+
+But maybe...")
+
+	var opts: Array[DialogueOption] = []
+	opts.append(DialogueOption.create(
+		"I should try to restest and get it to reappear", 
+		func(): passage_a_1()))
+	opts.append(DialogueOption.create(
+		"I should be careful and run some tests",
+		func(): passage_a_2_test()))
+		
+	add_options(opts)
+
+func passage_a_1(): # a 1 reappear
+	add_text("Wow, I made it reappear! 
+The burst is brighter than before, lasting longer.
+But when it fades it leaves behind an afterimage in its wake.
+The air seems to quiver where it floated.
+
+It looks like the after image of a previous experiment.
+Like this has been done before.")
+	
+	var opts: Array[DialogueOption] = []
+	opts.append(DialogueOption.create(
+		"Keep going and try again", 
+		func(): passage_a_1()))
+	opts.append(DialogueOption.create(
+		"I should be careful and run some tests",
+		func(): passage_a_2_test( )))
+	
+	add_options(opts)
+	
+# when at 3 continue a passage non test side. at 1 because we just continued
+var keep_going_amt = 1
+func passage_a_1_continue(): # keep going and try again
+	add_text("Keep testing.
+
+The light burns brighter and longer.
+And I can see the experiment and the scientist...
+
+But something seems to be going wrong.")
+
+	var opts: Array[DialogueOption] = []
+	opts.append(DialogueOption.create(
+		"Keep going, I need to find out what happens", 
+		func():
+			keep_going_amt += 1
+			if keep_going_amt >= 3:
+				passage_a_1_triple_continue()
+			else:
+				passage_a_1_continue())) # recursion until 3 keep goings
+	opts.append(DialogueOption.create(
+		"I should be careful and run some tests",
+		func(): 
+			passage_a_2_test()))
+	add_options(opts)
+
+func passage_a_1_triple_continue():
+	
+	pass
+
+
+func passage_a_2_test():
+	
 	pass

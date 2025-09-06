@@ -76,83 +76,67 @@ func continue_dialogue():
 
 # Game specific dialogue.
 func beginning():
-	add_text("The laboratory is stark - clean surfaces and white walls.")
-	add_text("
-	Before you sits your half finished experiment in quantum computing.")
-	add_text("
-	A bright burst of light flares across your eyes.")
-	add_text("
-	And before you can blink it's gone, it's after effects glowing at the edges of your sight.")
-	var opts: Array[DialogueOption] = []
-	opts.append(DialogueOption.create(
-		"Check your readings", 
-		func(): passage_a()))
-	opts.append(DialogueOption.create("Close your eyes", func(): pass))
-	opts.append(DialogueOption.create("I think it's time for a coffee break...", func(): pass))
-	add_options(opts)
+	# todo you got mail sound
+	add_text("""NovaCore
+Quantum Gate Operation
+
+Attention: Dr. Kaela
+
+With the recent discovery of the unusual quantum effect called the "Higgs Echo", you have been recruited to study and harness this quantum echo.
+
+As a leading physicist in your field, we except your experimentation with quantum superconductors to recapture and demonstrate the burst of brilliant light that mysteriously vanishes – the echo.
+
+NovaCore envisions using the control of these echoes to unlock lost knowledge, resurrect moments from the past and potentially communicate across alternate timelines. This Echo-tech has the potential to change the face of the world.
+
+We expect an accelerated timeline with your work, however manipulating echoes is perilous. Reviving the vanished light requires precise timing and interference of quantum pulses, risking unpredictable quantum feedback and fractures in reality. You have been chosen for this skill.
+
+There have been security breaches in the recent days since the discovery. NovaCore reminds you of the NDA you have signed and stress the consequences of any contact with those outside the lab.
+
+You have been assigned Engineer Theo and AI Assistant Ava to assist.
+
+Any delay may lead to the technology falling into the wrong hands.
+
+Kaela - you must master quantum echo technology.""")
+	
+	# todo insert scene swap
+	discovery()
+	
 	start_dialogue()
 
-func passage_a():
-	add_text("The burst of light... it seems to be a quantum signature. 
-Data trapper in an alternate quantum state, here on second... gone the next. Lost.
 
-But maybe...")
+func discovery():
+	add_text("""That was three days ago and you, Theo and Ava have been locked away behind heavy security doors in the secure lab working hard.
 
-	add_option("I should try to restest and get it to reappear", 
-		func(): passage_a_1())
-	add_option("I should be careful and run some tests",
-		func(): passage_a_2_test())
+NovaCore are breathing down the back of your neck.
+
+But today —  you have finally managed to recreate the original experiment.
+
+You stand before the quantum echo lab console, the vanished burst of light now flickering faintly on the screen.
+
+It fades slowly, leaving the lab dim and silent in the afterglow.
+
+Kaela:
+“This burst... it’s not just light fading away.”
+
+“It’s a quantum trace — a hidden echo waiting to be pulled back from nothingness.”
+
+“If I can capture and feed this into the Echo Processor, maybe we can uncover what vanished with it?”
+
+Theo arrives at the lab, tension etched on his face. “We need to do this right. What do you choose?”""")
+
+	add_option("Attempt to capture the burst carefully.", func(): discovery_a_capture())
+	add_option("Run a full diagnostic on the Echo Processor first.", func(): discovery_b_diagnostics())
+	add_option("Consult with Theo before proceeding.", func(): discovery_c_consult())
 	queue_added_options()
 
-func passage_a_1(): # a 1 reappear
-	add_text("Wow, I made it reappear! 
-The burst is brighter than before, lasting longer.
-But when it fades it leaves behind an afterimage in its wake.
-The air seems to quiver where it floated.
-
-It looks like the after image of a previous experiment.
-Like this has been done before.")
-	
-	var opts: Array[DialogueOption] = []
-	opts.append(DialogueOption.create(
-		"Keep going and try again", 
-		func(): passage_a_1()))
-	opts.append(DialogueOption.create(
-		"I should be careful and run some tests",
-		func(): passage_a_2_test( )))
-	
-	add_options(opts)
-	
-# when at 3 continue a passage non test side. at 1 because we just continued
-var keep_going_amt = 1
-func passage_a_1_continue(): # keep going and try again
-	add_text("Keep testing.
-
-The light burns brighter and longer.
-And I can see the experiment and the scientist...
-
-But something seems to be going wrong.")
-
-	var opts: Array[DialogueOption] = []
-	opts.append(DialogueOption.create(
-		"Keep going, I need to find out what happens", 
-		func():
-			keep_going_amt += 1
-			if keep_going_amt >= 3:
-				passage_a_1_triple_continue()
-			else:
-				passage_a_1_continue())) # recursion until 3 keep goings
-	opts.append(DialogueOption.create(
-		"I should be careful and run some tests",
-		func(): 
-			passage_a_2_test()))
-	add_options(opts)
-
-func passage_a_1_triple_continue():
+func discovery_a_capture():
 	
 	pass
 
+func discovery_b_diagnostics():
+	
+	pass
 
-func passage_a_2_test():
+func discovery_c_consult():
 	
 	pass

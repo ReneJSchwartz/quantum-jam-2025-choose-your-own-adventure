@@ -16,9 +16,5 @@ func _on_b_quit_game_pressed() -> void:
 
 func _on_b_new_game_pressed() -> void:
 	main_menu_container.visible = false
-	var signal_bus = get_node("/root/GameTree/Scripts/SignalBus")
-	if signal_bus:
-		signal_bus.pub("game_started")
-	else:
-		print("Warning: SignalBus not found in main menu!")
+	SignalBus.instance.pub("game_started")
 	# todo start game

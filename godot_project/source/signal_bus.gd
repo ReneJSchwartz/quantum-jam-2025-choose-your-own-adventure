@@ -4,6 +4,11 @@ extends Node
 ## reliable signal buses. Usage of parameters is optional and not checked.
 ## Can of course be extended also with specified signals.
 
+static var instance: SignalBus
+
+func _ready() -> void:
+	instance = self
+
 func pub(signal_name: String, data = null):
 	if has_signal(signal_name): 
 		emit_signal(signal_name, data)

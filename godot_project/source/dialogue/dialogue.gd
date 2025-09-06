@@ -9,6 +9,8 @@ var current_dialogue_step = 0
 static var dialogue_running: bool = false
 ## Stores the used dialogue.
 var steps: Array[DialogueStep] = []
+## Stores temporary options that can be fed to add_options()
+var temp_options: Array[DialogueOption]
 static var instance: Dialogue
 
 func _init():
@@ -29,7 +31,16 @@ func add_text(text, name = "", image = ""):
 
 ## Helper method for adding dialogue player options. 
 func add_options(opt: Array[DialogueOption]):
-	steps.append(DialogueStep.create(true, opt))
+		steps.append(DialogueStep.create(true, opt))
+
+# adds to temp options, needs confirming with add_built_options_step()
+func add_option(text: String, action: Callable):
+	temp_options.append(DialogueOption.create(text, action))
+
+# allows building options in steps using add_option()
+func queue_added_options():
+	steps.append(DialogueStep.create(true, temp_options))
+	temp_options = []
 
 func start_dialogue():
 	current_dialogue_step = 0
@@ -81,15 +92,11 @@ Data trapper in an alternate quantum state, here on second... gone the next. Los
 
 But maybe...")
 
-	var opts: Array[DialogueOption] = []
-	opts.append(DialogueOption.create(
-		"I should try to restest and get it to reappear", 
-		func(): passage_a_1()))
-	opts.append(DialogueOption.create(
-		"I should be careful and run some tests",
-		func(): passage_a_2_test()))
-		
-	add_options(opts)
+	add_option("I should try to restest and get it to reappear", 
+		func(): passage_a_1())
+	add_option("I should be careful and run some tests",
+		func(): passage_a_2_test())
+	queue_added_options()
 
 func passage_a_1(): # a 1 reappear
 	add_text("Wow, I made it reappear! 

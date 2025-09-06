@@ -190,13 +190,51 @@ func write_text(bbcode_text: String, talker: String, _speaker_image: String):
 	if delay_after_speaker_name > 0:
 		await get_tree().create_timer(delay_after_speaker_name).timeout
 	
-	# Process text through quantum echo server (using SCRAMBLE for now)
-	quantum_echo_service.process_quantum_echo(
-		bbcode_text, 
-		quantum_echo_service.EchoType.SCRAMBLE,
-		_on_quantum_text_received,
-		bbcode_text # fallback to original text
-	)
+	# 🌟 NEW: Choose quantum transformation based on dialogue content
+	_process_text_with_quantum_effects(bbcode_text, talker)
+
+## 🌟 NEW: Smart quantum processing based on context
+func _process_text_with_quantum_effects(text: String, speaker: String):
+	# Check for memory-related keywords in the text
+	var lower_text = text.to_lower()
+	
+	if "memory" in lower_text or "remember" in lower_text or "forgot" in lower_text or "vanished" in lower_text:
+		# Use quantum memory effects for memory-related dialogue
+		print("🧠 Using quantum memory effects for: ", text.substr(0, 50))
+		quantum_echo_service.process_quantum_memory(
+			text,
+			quantum_echo_service.QuantumMemoryType.FRAGMENTED,
+			0.7,  # High intensity for dramatic memory effects
+			_on_quantum_text_received,
+			text
+		)
+	elif speaker == "Ava" or speaker == "AI Assistant":
+		# Use quantum entanglement-like effects for AI dialogue
+		print("🤖 Using quantum caps for AI: ", text.substr(0, 50))
+		quantum_echo_service.process_quantum_echo(
+			text, 
+			quantum_echo_service.EchoType.QUANTUM_CAPS,
+			_on_quantum_text_received,
+			text
+		)
+	elif "echo" in lower_text or "quantum" in lower_text or "burst" in lower_text:
+		# Use ghost effects for quantum-related terminology
+		print("👻 Using ghost effects for quantum terms: ", text.substr(0, 50))
+		quantum_echo_service.process_quantum_echo(
+			text, 
+			quantum_echo_service.EchoType.GHOST,
+			_on_quantum_text_received,
+			text
+		)
+	else:
+		# Default scramble effect
+		print("🌀 Using default scramble for: ", text.substr(0, 50))
+		quantum_echo_service.process_quantum_echo(
+			text, 
+			quantum_echo_service.EchoType.SCRAMBLE,
+			_on_quantum_text_received,
+			text
+		)
 
 ## Called when quantum echo server returns processed text
 func _on_quantum_text_received(processed_text: String):

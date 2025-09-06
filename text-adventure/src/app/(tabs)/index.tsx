@@ -12,10 +12,16 @@ export default function HomeScreen() {
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
+        <>
+          <Image
+            source={require('@/assets/images/HUD_Qubit.png')}
+            style={styles.qubit}
+          />
+          <Image
+            source={require('@/assets/images/HUD_GridBackground.png')}
+            style={styles.novacore}
+          />
+        </>
       }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome!</ThemedText>
@@ -52,11 +58,22 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
+  qubit: {
+    height: 290,
     width: 290,
+    top: 25,
     bottom: 0,
-    left: 0,
+    left: 500,
+  },
+  novacore: {
+    height: '100%',
+    width: '100%',
+    zIndex: -1,
+    // height: 290,
+    // width: 290,
+    // top: 25,
+    // bottom: 0,
+    // left: 100,
     position: 'absolute',
   },
 });

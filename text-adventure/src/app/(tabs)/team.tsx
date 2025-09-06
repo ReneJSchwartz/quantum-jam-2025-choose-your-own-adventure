@@ -15,10 +15,10 @@ interface TeamMember {
   id: number;
   name: string;
   role: string;
-  discordName: string;
-  portfolioLink: string;
-  linkedInProfile: string;
-  artstationProfile: string;
+  discordName?: string;
+  portfolioLink?: string;
+  linkedInProfile?: string;
+  artstationProfile?: string;
   contribution: string;
 }
 
@@ -51,14 +51,18 @@ export default function TabTwoScreen() {
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerBackgroundColor={{ light: '#a1cedc2f', dark: '#e8eaea3b' }}
       headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
+        <>
+                  <Image
+                    source={require('@/assets/images/HUD_Qubit.png')}
+                    style={styles.qubit}
+                  />
+                  <Image
+                    source={require('@/assets/images/HUD_GridBackground.png')}
+                    style={styles.novacore}
+                  />
+                </>
       }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Team</ThemedText>
@@ -156,5 +160,23 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
+  },
+  qubit: {
+    height: 290,
+    width: 290,
+    top: 25,
+    bottom: 0,
+    left: 500,
+  },
+  novacore: {
+    height: '100%',
+    width: '100%',
+    zIndex: -1,
+    // height: 290,
+    // width: 290,
+    // top: 25,
+    // bottom: 0,
+    // left: 100,
+    position: 'absolute',
   },
 });

@@ -337,10 +337,13 @@ def quantum_gate_endpoint():
             print(f"[Flask] ❌ ERROR: Invalid gate_type: '{gate_type}'")
             return jsonify({'error': f'Invalid gate_type: {gate_type}. Use: bit_flip, phase_flip, or rotation'}), 400
         
-        # Measure the result
+        # Calculate superposition strength BEFORE measurement
+        print("[Flask] 📊 Calculating superposition strength...")
+        superposition = qubit.get_superposition_strength()
+        
+        # Now measure the result
         print("[Flask] 📊 Measuring qubit...")
         measurement = qubit.measure()
-        superposition = qubit.get_superposition_strength()
         
         success = measurement == 0  # Success if measurement collapses to |0>
         

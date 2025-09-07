@@ -19,18 +19,21 @@ interface TeamMember {
   portfolioLink?: string;
   linkedInProfile?: string;
   artstationProfile?: string;
+  instagramProfile?: string;
   contribution: string;
 }
 
 export default function TabTwoScreen() {
   const renderTeamMember = ({ item }: { item: TeamMember }) => (
-    <Collapsible title={`${item.name} - ${item.role}`}>
+    <Collapsible title={`${item.name}${item.role ? ` - ${item.role}` : ''}`}>
       <ThemedText>
         <ThemedText type="defaultSemiBold">Discord:</ThemedText> {item.discordName}
       </ThemedText>
-      <ThemedText>
-        <ThemedText type="defaultSemiBold">Contribution:</ThemedText> {item.contribution}
-      </ThemedText>
+      {item.contribution && (
+        <ThemedText>
+          <ThemedText type="defaultSemiBold">Contribution:</ThemedText> {item.contribution}
+        </ThemedText>
+      )}
       {item.portfolioLink && (
         <ExternalLink href={item.portfolioLink as any}>
           <ThemedText type="link">Portfolio</ThemedText>
@@ -44,6 +47,11 @@ export default function TabTwoScreen() {
       {item.artstationProfile && (
         <ExternalLink href={item.artstationProfile as any}>
           <ThemedText type="link">ArtStation</ThemedText>
+        </ExternalLink>
+      )}
+      {item.instagramProfile && (
+        <ExternalLink href={item.instagramProfile as any}>
+          <ThemedText type="link">Instagram</ThemedText>
         </ExternalLink>
       )}
     </Collapsible>

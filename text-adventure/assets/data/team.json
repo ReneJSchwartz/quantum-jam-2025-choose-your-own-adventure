@@ -7,16 +7,62 @@
     "portfolioLink": "https://davidjgrimsley.com/",
     "linkedInProfile": "https://LinkedIn.com/in/davidjgrimsley",
     "artstationProfile": "https://www.artstation.com/davidgrimsley5",
+    "instagramProfile": "",
     "contribution": "Hosted the game on a temporary domain on my vps. I used expo with React Native to give the possibility of moving the game to mobile in the future with little trouble."
   },
   {
     "id": 2,
-    "name": "Jane Doe",
-    "role": "Artist",
-    "discordName": "JaneDoeArt",
-    "portfolioLink": "https://janedoeart.com/",
-    "linkedInProfile": "https://LinkedIn.com/in/janedoeart",
-    "artstationProfile": "https://www.artstation.com/janedoeart",
-    "contribution": "Created the stunning visuals and artwork for the game."
+    "name": "Saara March",
+    "role": "Narrative and art",
+    "discordName": "saara (nettlecakes)",
+    "portfolioLink": "https://pumpkinsparkle.itch.io/",
+    "linkedInProfile": "www.linkedin.com/in/saara-march",
+    "artstationProfile": "",
+    "instagramProfile": "",
+    "contribution": "Narrative design, writing and art"
+  },
+  {
+    "id": 3,
+    "name": "Rene Schwartz",
+    "role": "Godot Dev",
+    "discordName": "rene.dev",
+    "portfolioLink": "https://linktr.ee/renejs",
+    "linkedInProfile": "https://www.linkedin.com/in/rene-schwartz-732a8649/",
+    "artstationProfile": "",
+    "instagramProfile": "",
+    "contribution": "Godot code (dialogue manager, main menu). Importing dialogue in Godot."
+  },
+  {
+    "id": 4,
+    "name": "MajaQ",
+    "role": "quantum and narrative",
+    "discordName": "___maja___",
+    "portfolioLink": "majaq.ich.io",
+    "linkedInProfile": "",
+    "artstationProfile": "",
+    "instagramProfile": "",
+    "contribution": "tied our quantum theme with the storyline and wrote quantum code and narrative and dialouge"
+  },
+  {
+    "id": 5,
+    "name": "Neo Kinnunen",
+    "role": "",
+    "discordName": "neopuroki",
+    "portfolioLink": "https://neopuroki.itch.io/",
+    "linkedInProfile": "https://www.linkedin.com/in/neo-kinnunen-786009259/",
+    "artstationProfile": "",
+    "instagramProfile": "",
+    "contribution": ""
+  },
+  {
+    "id": 6,
+    "name": "Dáigoro Ventura",
+    "role": "Music and SFX",
+    "discordName": "Dventuram",
+    "portfolioLink": "https://daigorogabriel9.wixsite.com/d-igoro-ventura-comp/blank-3",
+    "linkedInProfile": "https://www.linkedin.com/in/d%C3%A1igoro-ventura-ab93a8226?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
+    "artstationProfile": "",
+    "instagramProfile": "https://www.instagram.com/daigoro_ventura?igsh=cTk5ZWo5Yzk2NHFi&utm_source=qr",
+    "contribution": "music and sfx"
   }
 ]

@@ -512,11 +512,14 @@ func dilemma_refuse():
 
 Rival Leader: “Then we will destroy your Echo Processor!”
 
-Kaela: Defiant, you refuse, using the echo processor to shift the system and drive out the rivals.
-
-Gameplay Challenge: Stabilize the quantum system during a sabotage-induced quantum collapse.
-
-Having succeeded you are determined to safeguard the precious echoes.
+Kaela: Defiant, you refuse, using the echo processor to shift the system and drive out the rivals.""")
+	
+	add_option("Stabilize the quantum system during a sabotage-induced quantum collapse.", 
+		func(): dilemma_refuse_drive_out())
+	queue_added_options()
+	
+func dilemma_refuse_drive_out():
+	add_text("""Having succeeded you are determined to safeguard the precious echoes.
 You secure the quantum memory deep within NovaCore’s vaults. 
 The lights dim as the complex locks down, shadows stretching across gleaming consoles. 
 Here, progress will be measured, but also driven by unwavering hope. 

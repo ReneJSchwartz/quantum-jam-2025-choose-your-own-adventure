@@ -12,7 +12,6 @@ var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
 var temp_options: Array[DialogueOption]
 var on_dialogue_end_callback: Callable = func(): pass
-var next_proceed_callback = func(): pass
 ## Delay hiding dialogue by this amount. 
 var hide_dialogue_delay: float = 0
 static var instance: Dialogue
@@ -69,17 +68,13 @@ func start_dialogue():
 ## Called by DialogueUiManager after first step. Either supplies the next step or ends the
 ## dialogue.
 func continue_dialogue():
-	next_proceed_callback.call()
-	next_proceed_callback = func(): pass
-	
 	if len(steps) <= current_dialogue_step:
-		# game basically ended
-		#get_tree().create_timer(hide_dialogue_delay).timeout.connect(
-			#DialogueUiManager.instance.hide_dialogue_overlay)
-		dialogue_running = false
-		steps = []
 		on_dialogue_end_callback.call()
 		on_dialogue_end_callback = func(): pass
+		get_tree().create_timer(hide_dialogue_delay).timeout.connect(
+			DialogueUiManager.instance.hide_dialogue_overlay)
+		dialogue_running = false
+		steps = []
 		return
 	
 	var step = steps[current_dialogue_step]
@@ -113,12 +108,10 @@ You have been assigned Engineer Theo and AI Assistant Ava to assist.
 Any delay may lead to the technology falling into the wrong hands.
 
 Kaela - you must master quantum echo technology.""")
-
-	on_dialogue_end_callback = func():
-		discovery()
-		GameGraphics.instance.show_widgets_at_right()
-		GameGraphics.instance.show_ava()
-		
+	
+	# todo insert scene swap
+	discovery()
+	
 	start_dialogue()
 
 
@@ -134,24 +127,23 @@ You stand before the quantum echo lab console, the vanished burst of light now f
 It fades slowly, leaving the lab dim and silent in the afterglow.
 
 Kaela:
-“This burst... it’s not just light fading away.”
+"This burst... it's not just light fading away."
 
-“It’s a quantum trace — a hidden echo waiting to be pulled back from nothingness.”
+"It's a quantum trace — a hidden echo waiting to be pulled back from nothingness."
 
-“If I can capture and feed this into the Echo Processor, maybe we can uncover what vanished with it?”
+"If I can capture and feed this into the Echo Processor, maybe we can uncover what vanished with it?"
 
-Theo arrives at the lab, tension etched on his face. “We need to do this right. What do you choose?”""")
+Theo arrives at the lab, tension etched on his face. "We need to do this right. What do you choose?""")
 
 	add_option("Attempt to capture the burst carefully.", func(): discovery_a_capture())
 	add_option("Run a full diagnostic on the Echo Processor first.", func(): discovery_b_diagnostics())
 	add_option("Consult with Theo before proceeding.", func(): discovery_c_consult())
 	queue_added_options()
-	start_dialogue()
 
 func discovery_a_capture():
 	add_text("""Your hands steady, you initiate the capture protocol. The burst pulses—then disappears. Your instruments register a faint echo signal.
-Kaela (thinking): "It’s fragile—this quantum presence is like a ghost trapped between realities."
-Ava: “The data here is not strong enough to be read. I suggest feeding captured signal into the Echo Processor.”
+Kaela (thinking): "It's fragile—this quantum presence is like a ghost trapped between realities."
+Ava: "The data here is not strong enough to be read. I suggest feeding captured signal into the Echo Processor."
 """)
 
 	add_option("Proceed to feed the captured signal into the Echo Processor.", processor)
@@ -160,7 +152,7 @@ Ava: “The data here is not strong enough to be read. I suggest feeding capture
 
 func discovery_b_diagnostics():
 	add_text("""You decide caution is best and run diagnostics. Unexpectedly, a critical error warning flashes.
-Theo: "Kaela, the system’s unstable! We could crash the entire quantum circuit if we proceed without fixing it."
+Theo: "Kaela, the system's unstable! We could crash the entire quantum circuit if we proceed without fixing it."
 """)
 	add_option("Fix the error immediately", discovery_b_diagnostics_fix)
 	add_option("Take a risk and capture anyway", discovery_a_capture)
@@ -168,21 +160,21 @@ Theo: "Kaela, the system’s unstable! We could crash the entire quantum circuit
 	
 func discovery_b_diagnostics_fix():
 	
-	add_text("""Kaela: “Ava, run a workaround while we fix this.”""")
+	add_text("""Kaela: "Ava, run a workaround while we fix this." """)
 	
 	add_text("""It looks like someone has tried to hack the system, but you caught it in time.
-	Theo (comms): “I think we’re ready.”""")
+	Theo (comms): "I think we're ready." """)
 	
 	add_option("Proceed to feed the captured signal into the Echo Processor.", processor)
 	queue_added_options()	
 
 func discovery_c_consult():
-	add_text("""Theo: "These echoes aren’t just data. They’re unstable quantum memories. How we handle them could rewrite what reality remembers."
-Kaela: “How do we find out more about them?”
-Theo: “We should run a diagnostic. Capturing them directly without more information could make them unpredictable."
+	add_text("""Theo: "These echoes aren't just data. They're unstable quantum memories. How we handle them could rewrite what reality remembers."
+Kaela: "How do we find out more about them?"
+Theo: "We should run a diagnostic. Capturing them directly without more information could make them unpredictable."
 """)
 
-	add_option("Listen to Theo’s advice and run diagnostics", discovery_b_diagnostics_fix)
+	add_option("Listen to Theo's advice and run diagnostics", discovery_b_diagnostics_fix)
 	add_option("Insist on capturing immediately", discovery_a_capture)
 	queue_added_options()
 	
@@ -193,11 +185,11 @@ var completed_phase_flip: bool
 var completed_rotation: bool
 
 func processor():
-	add_text("""Theo (Engineer): “Kaela, timing is critical here. Feed the qubits gently into the processor. Each quantum gate you apply must be precise — one wrong flip could collapse the entire superposition. The echoes are fragile but hold the key to forgotten memories.”
+	add_text("""Theo (Engineer): "Kaela, timing is critical here. Feed the qubits gently into the processor. Each quantum gate you apply must be precise — one wrong flip could collapse the entire superposition. The echoes are fragile but hold the key to forgotten memories."
 
-Kaela: “And what happens if I fail?”
+Kaela: "And what happens if I fail?"
 
-Theo: “... Don’t.”""")
+Theo: "... Don't." """)
   
 	add_option("Apply a bit-flip gate first.", func(): 
 		completed_bit_flip = true
@@ -211,26 +203,174 @@ Theo: “... Don’t.”""")
 	queue_added_options()
 	
 func processor_bit_flip():
-	add_text("""You apply the bit-flip gate. The echo pulses brighter but wavers unpredictably.
-Kaela: The echoes react... I hope this reveals more than it conceals.""")
+	add_text("""You apply the bit-flip gate. The echo pulses brighter but waivers unpredictably.
+Kaela: "The echoes react... I hope this reveals more than it conceals."
+Apply gates to stabilize the echo""")
 
-	add_option("Apply gates to stabilize the echo", func():
-		if randi() % 2 == 0:
-			processor_bit_flip_pass()
+	# Use quantum gate endpoint for bit-flip
+	await quantum_gate_request("bit_flip")
+
+func processor_phase_flip(): 
+	add_text("""The echo's glow shifts hues as the phase flips. You sense a whisper of a memory trying to surface.
+AI Ava: Phase adjustments detected. Memory fragment integrity increased."
+""")
+
+	# Use quantum gate endpoint for phase-flip
+	await quantum_gate_request("phase_flip")
+
+func processor_rotate():
+	add_text("""As you rotate the superposition, complex interference patterns emerge, revealing multiple potential memories branching within the echo.
+Kaela (awed): "So many possibilities... which reality do I choose to remember?" """)
+	
+	# Use quantum gate endpoint for rotation
+	await quantum_gate_request("rotation")
+
+# Unified quantum gate request function
+func quantum_gate_request(gate_type: String):
+	print("[Quantum] =========================")
+	print("[Quantum] Starting quantum gate request: ", gate_type)
+	print("[Quantum] =========================")
+	
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+	
+	# Store gate_type in the HTTPRequest node for later retrieval
+	http_request.set_meta("gate_type", gate_type)
+	
+	# Prepare request data
+	var request_data = {
+		"gate_type": gate_type,
+		"rotation_angle": 0.5  # Default rotation angle
+	}
+	
+	var json_string = JSON.stringify(request_data)
+	print("[Quantum] Request JSON: ", json_string)
+	
+	var headers = ["Content-Type: application/json"]
+	
+	# Configure request - FIXED: Don't bind parameters, use metadata instead
+	http_request.request_completed.connect(_on_quantum_gate_response)
+	
+	var server_url = "http://108.175.12.95:8000/quantum_gate"
+	print("[Quantum] Sending request to: ", server_url)
+	
+	var error = http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)
+	
+	if error != OK:
+		print("[Quantum] ❌ Failed to make quantum gate request, error code: ", error)
+		# Fallback to classical random
+		var success = randi() % 2 == 0
+		print("[Quantum] 🎲 Classical fallback result: ", "SUCCESS" if success else "FAILURE")
+		if success:
+			processor_gate_success(gate_type)
 		else:
-			processor_bit_flip_fail())
-	queue_added_options()
+			processor_gate_failure(gate_type)
+	else:
+		print("[Quantum] ✅ HTTP request sent successfully")
 
+# FIXED: Proper signal handler signature
+func _on_quantum_gate_response(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
+	print("[Quantum] =========================")
+	print("[Quantum] Received HTTP response!")
+	print("[Quantum] Result code: ", result)
+	print("[Quantum] Response code: ", response_code)
+	print("[Quantum] Headers: ", headers)
+	print("[Quantum] Body length: ", body.size())
+	print("[Quantum] =========================")
+	
+	# Find the HTTPRequest node that sent the signal
+	var http_request = null
+	var gate_type = ""
+	
+	for child in get_children():
+		if child is HTTPRequest and child.has_meta("gate_type"):
+			http_request = child
+			gate_type = child.get_meta("gate_type")
+			print("[Quantum] 📡 Found HTTPRequest with gate_type: ", gate_type)
+			break
+	
+	# Clean up the HTTPRequest node
+	if http_request:
+		http_request.queue_free()
+		print("[Quantum] 🧹 Cleaned up HTTPRequest node")
+	else:
+		print("[Quantum] ⚠️ Could not find HTTPRequest node with metadata!")
+		return
+	
+	if response_code == 200:
+		var response_text = body.get_string_from_utf8()
+		print("[Quantum] 📄 Response body: ", response_text)
+		
+		var json = JSON.new()
+		var parse_result = json.parse(response_text)
+		
+		if parse_result == OK:
+			var response_data = json.data
+			print("[Quantum] 📊 Parsed response data: ", response_data)
+			
+			# Check if the gate operation was successful
+			if response_data.has("success"):
+				var success = response_data["success"]
+				print("[Quantum] 🎯 Gate operation success: ", success)
+				
+				if success:
+					print("[Quantum] ✅ Quantum gate SUCCESS for: ", gate_type)
+					processor_gate_success(gate_type)
+				else:
+					print("[Quantum] ❌ Quantum gate FAILURE for: ", gate_type)
+					processor_gate_failure(gate_type)
+			else:
+				print("[Quantum] ⚠️ No 'success' field in response, treating as failure")
+				processor_gate_failure(gate_type)
+		else:
+			print("[Quantum] ❌ Failed to parse JSON response, error: ", parse_result)
+			# Fallback to classical random
+			var success = randi() % 2 == 0
+			print("[Quantum] 🎲 JSON parse fallback: ", "SUCCESS" if success else "FAILURE")
+			if success:
+				processor_gate_success(gate_type)
+			else:
+				processor_gate_failure(gate_type)
+	else:
+		print("[Quantum] ❌ Server error response code: ", response_code)
+		# Fallback to classical random
+		var success = randi() % 2 == 0
+		print("[Quantum] 🎲 Server error fallback: ", "SUCCESS" if success else "FAILURE") 
+		if success:
+			processor_gate_success(gate_type)
+		else:
+			processor_gate_failure(gate_type)
+
+func processor_gate_success(gate_type: String):
+	print("[Quantum] Processing SUCCESS for gate: ", gate_type)
+	
+	if gate_type == "bit_flip":
+		processor_bit_flip_pass()
+	elif gate_type == "phase_flip":
+		processor_phase_flip_pass()
+	elif gate_type == "rotation":
+		processor_rotate_success()
+
+func processor_gate_failure(gate_type: String):
+	print("[Quantum] Processing FAILURE for gate: ", gate_type)
+	
+	if gate_type == "bit_flip":
+		processor_bit_flip_fail()
+	elif gate_type == "phase_flip":
+		processor_phase_flip_fail()
+	elif gate_type == "rotation":
+		processor_rotate_failure()
 
 func processor_bit_flip_pass():
-	add_text("""The flip succeeds and the bit-flip gate is applied.
+	add_text("""Bit-flip - Pass
+The flip succeeds and the bit-flip gate is applied.
 A transparent memory, this very lab, scientists running similar tests.
 	Kaela: A quantum memory, past and present converging.
 
 Somewhere beneath the surface, faint voices murmur, their messages lost to time but not entirely extinguished. This memory beckons you to listen closely — to gather shards of forgotten knowledge, piecing together a past only partially remembered.
 But it fades before you can learn anything.
 
-Theo: It’s holding stable.""")
+Theo: It's holding stable.""")
 
 	if completed_bit_flip and completed_phase_flip and completed_rotation:
 		processor_complete()
@@ -254,19 +394,13 @@ Before all is swallowed in a blink of light.
 Kaela: What was that?
 Ava: Quantum decoherence
 Kaela: No, before that, like it was showing us something that had happened before. A quantum memory, past and present converging.
-Theo: Not just that, we’ve got some anomalies here…
-Kaele: The light, it’s growing-
+Theo: Not just that, we've got some anomalies here…
+Kaele: The light, it's growing-
 A blink of light swallows everything.
 
 THE END.""")
 ##ends the game
 	
-func processor_phase_flip(): 
-	add_text("""The echo’s glow shifts hues as the phase flips. You sense a whisper of a memory trying to surface.
-AI Ava: Phase adjustments detected. Memory fragment integrity increased."
-""")
-	processor_phase_flip_pass()
-
 func processor_phase_flip_pass():
 	add_text("""Theo: The second gate is up.
 
@@ -274,12 +408,12 @@ The light dims and warps. Shadows gather, and the memory becomes fragmentary—b
 
 Faint echoes of disquiet stir the air—whispers of failures, lost experiments, and fading hopes.
 A sense of melancholy seeps deep—a silent testament to the quantum echoes trapped in limbo, lost and waiting for remembrance. The boundary between memory and oblivion blurs here, unveiling the fragile nature of what once was and what might have been.
-Kaela: "They… were here, once.”
-“Dreams and despair intertwined in fragile quantum webs.”
+Kaela: "They… were here, once."
+"Dreams and despair intertwined in fragile quantum webs."
 The Light and the voices fade.
 	
-Theo: It’s holding stable. Choose the next gate carefully to avoid collapse.""")
-##This can only succeed, because fail is not found in story text
+Theo: It's holding stable. Choose the next gate carefully to avoid collapse.""")
+
 	if completed_bit_flip and completed_phase_flip and completed_rotation:
 		processor_complete()
 	else:
@@ -293,23 +427,45 @@ Theo: It’s holding stable. Choose the next gate carefully to avoid collapse.""
 				processor_rotate())
 		queue_added_options()
 
-func processor_rotate():
-	add_text("""As you rotate the superposition, complex interference patterns emerge, revealing multiple potential memories branching within the echo.
-Kaela (awed): "So many possibilities... which reality do I choose to remember?""")
+func processor_phase_flip_fail():
+	add_text("""The phase flip destabilizes the quantum state. The echo fractures, scattering fragments of memory across the void.
+Kaela: "It's breaking apart... the memories are slipping away!"
+Theo: "We need to stabilize it quickly!"
+Ava: "Quantum coherence dropping rapidly. Risk of total collapse increasing."
+
+The quantum echo shatters into chaotic fragments, each carrying pieces of lost memories that fade into oblivion before they can be reassembled.
+
+THE END.""")
+
+func processor_rotate_success():
+	add_text("""The rotation reveals hidden quantum states, exposing multiple memory pathways.
+Kaela: "I can see them... different versions of what happened, branching like quantum possibilities."
+Theo: "Choose wisely - each path could lead to different revelations."
+Ava: "Quantum superposition stabilized. Memory integrity maintained." """)
 	
 	add_option("Brightest memory path.", brightest_memory_path)
 	add_option("Faint echoes.", explore_faint_echoes)
 	queue_added_options()
-	
+
+func processor_rotate_failure():
+	add_text("""The rotation causes quantum interference, destabilizing the superposition.
+Kaela: "It's becoming unstable... the memories are interfering with each other!"
+Theo: "We need to collapse it to a single state before it collapses entirely!"
+Ava: "Quantum interference detected. Risk of decoherence increasing."
+
+The quantum superposition collapses chaotically, scattering the memories into quantum noise.
+
+THE END.""")
+
 func brightest_memory_path():
 	add_text("""The chamber fills with a radiant glow, shadows lifting to reveal the sharp outlines of a bustling research floor. 
 Scientists catalog data with nervous excitement; Kaela stands before a massive console, her face illuminated by cascading holograms of quantum patterns. 
 This memory captures the very moment the team surpassed a monumental barrier — the quantum echoes stabilizing for the first time, a symphony of light and hope woven into every pulse.
 You sense not just a technical achievement, but a profound awakening — the birth of a new era where memory and reality blur, and possibilities expand beyond the imaginable.
-Dialogue (Kaela’s Voice):
-“We stood on the edge of the unknown, hearts pounding with anticipation and fear. 
+Dialogue (Kaela's Voice):
+"We stood on the edge of the unknown, hearts pounding with anticipation and fear. 
 Each signal from the quantum echoes was a promise whispered across time and space—proof that our understanding was just beginning. 
-This moment was our beacon, the light piercing the darkness. It taught me that even in uncertainty, resolve and belief create miracles.”
+This moment was our beacon, the light piercing the darkness. It taught me that even in uncertainty, resolve and belief create miracles."
 
 The memory from the flare fades.""")
 
@@ -330,13 +486,13 @@ func explore_faint_echoes():
 	add_text("""You're drawn into a prism of possibilities—the memory fractures into two divergent
 timelines, each pulsing with life and consequence.
 In one, the project flourishes beyond all expectations. New cures, quantum communication, and technologies blossom rapidly, illuminating the world with unprecedented advancements. The energy is vibrant, full of hope and renewal, where Kaela and her cohorts stand triumphant, celebrated as pioneers of a new age.
-Yet, the other timeline is draped in darkness. Catastrophe follows unchecked ambition. Quantum experiments spiral out of control, rending spacetime itself. Cities fall into chaos, memories become fragmented and lost, and despair taints every human connection. Here, Kaela’s gamble with quantum echoes ends in ruin.
+Yet, the other timeline is draped in darkness. Catastrophe follows unchecked ambition. Quantum experiments spiral out of control, rending spacetime itself. Cities fall into chaos, memories become fragmented and lost, and despair taints every human connection. Here, Kaela's gamble with quantum echoes ends in ruin.
 The quantum reality bends before you—a choice crystallizes. Which timeline will you preserve? The world of radiant hope or the one scarred by quantum chaos? The echoes do not judge; they await your hand to collapse the infinite possibilities into one enduring reality.
 Dialogue (Echo Whisper, overlapping voices):
-“Two paths diverged in the quantum cloud, each bearing the weight of all we dared and feared.”
-“One blooms with light—the promise of what might be, if we hold fast to courage and wisdom.”
-“The other darkens, a warning etched in shattered echoes—of power unchecked and lines crossed.”
-“Your choice will echo across time, shaping the future’s fragile fabric. Choose well, for you are the weaver of worlds.”
+"Two paths diverged in the quantum cloud, each bearing the weight of all we dared and feared."
+"One blooms with light—the promise of what might be, if we hold fast to courage and wisdom."
+"The other darkens, a warning etched in shattered echoes—of power unchecked and lines crossed."
+"Your choice will echo across time, shaping the future's fragile fabric. Choose well, for you are the weaver of worlds."
 
 Kaela (reflective):
 So much hangs in the balance...
@@ -360,13 +516,13 @@ I must decide which world the echoes will sing… and which will fade into silen
 func processor_complete():
 	add_text("""The light flickers and pulses but settles.
 
-Theo: “It’s stable! You did it!”
-Kaela: Let’s see what we’ve unlocked.
+Theo: "It's stable! You did it!"
+Kaela: Let's see what we've unlocked.
 
 Reality splinters before you— the memory of the laboratory overlapping here and now.
 
 The scientists mill about the lab, the bright quantum light in the memory, looks stable.
-A mirror image of the light you’ve managed to stabilize.
+A mirror image of the light you've managed to stabilize.
 
 Out of the corner of your eye you see a scientist pocket a USB.
 They sneak out when none of the phantom scientists are watching.
@@ -389,7 +545,7 @@ Before all is swallowed in a bright flare of light.
 The lab is left empty, the light and memory fading.
 -
 Kaela: What just happened?
-Ava: “Memory chamber unlocked.”
+Ava: "Memory chamber unlocked."
 
 A new stable memory forms. 
 
@@ -399,36 +555,34 @@ The memory pulses with a cascade of elegant quantum algorithms and blueprints—
 As the quantum echo memory stabilizes, the walls around you dissolve into shifting streams of light and shadow. 
 a whisper forms into a voice — not just data, but a sentient consciousness trapped within the echoes.
 The image of Dr. Mira Selwyn flickers before you, her eyes haunted, her voice trembling with urgency.
-Dialogue (Mira’s Voice):
+Dialogue (Mira's Voice):
  "I… remember the silence that followed the catastrophe. The project was our beacon, our hope. Yet… beneath that light, betrayal festered like a shadow. I was there, Kaela. I saw the sabotage, felt the fracture in our reality. You must finish what was started, untangle the web of lies woven in dark corridors. I sacrificed everything to preserve these memories — you must not let them be lost again."
 (soft echoing) "Trust the echoes, even when they falter. Find the truth… before it fades forever."
 	The light and the memory fade.""")
 	
-	quantum_memory()
-	
 func quantum_memory():
 	add_text("""AI Assistant Ava: 
-“Echo signals from a forgotten past are reconstructing… Can you feel it, Kaela? The quantum whispers of those lost, waiting for you to listen.”
+"Echo signals from a forgotten past are reconstructing… Can you feel it, Kaela? The quantum whispers of those lost, waiting for you to listen."
 
-Kaela: “NovaCore didn’t tell me they had almost succeeded before this - that they’d lost so many people.”
+Kaela: "NovaCore didn't tell me they had almost succeeded before this - that they'd lost so many people."
 
 Theo: 
-“Unlocking and harnessing Echo-tech is a priority. 
-You saw one of the scientists stole our data, it was the only record left of the experiment after the accident. And now it’s in the hands of our rivals.
+"Unlocking and harnessing Echo-tech is a priority. 
+You saw one of the scientists stole our data, it was the only record left of the experiment after the accident. And now it's in the hands of our rivals.
 But if we can apply our own obfuscation on the quantum memories we unlock here…
-We could rewrite it and make it like it never happened.Keep Echo-Tech our”
+We could rewrite it and make it like it never happened.Keep Echo-Tech our"
 
-Ava: “Can you hear them?”
+Ava: "Can you hear them?"
 
-Kaela: “That’s what quantum presence is. Their memories are lost, like ghosts trapped between realities. And you want to rewrite memory, so none of those scientists existed?”
+Kaela: "That's what quantum presence is. Their memories are lost, like ghosts trapped between realities. And you want to rewrite memory, so none of those scientists existed?"
 
 Theo frowns and shakes his head.
-Theo: “Echo-tech belongs to NovaCore - they belong to NovaCore. We can keep them stable and safe and learn from the echoes. Without us, they will be lost.”
+Theo: "Echo-tech belongs to NovaCore - they belong to NovaCore. We can keep them stable and safe and learn from the echoes. Without us, they will be lost."
 
 Alarms flare and red light flashes across the lab.
 
 
-“WARNING. SECURITY BREACH. WARN-”
+"WARNING. SECURITY BREACH. WARN-"
 
 The warning is cut off, the lights flicker back to normal.
 
@@ -440,53 +594,53 @@ And the heavy security doors slide open.""")
 func dilemma():
 	add_text("""A woman in a sharp suit walks into the lab flanked by two heavily armed guards.
 
-Rival Leader: “Now that’s better. All that shouting, all those lights. We have a very delicate situation here and we wouldn’t want any accidents to occur, now would we?”""")
+Rival Leader: "Now that's better. All that shouting, all those lights. We have a very delicate situation here and we wouldn't want any accidents to occur, now would we?""")
 	add_option("Of course not.", dilemma_continue_first)
-	add_option("No, ma’am.", dilemma_continue_first)
+	add_option("No, ma'am.", dilemma_continue_first)
 	queue_added_options()
 	
 func dilemma_continue_first():
 	add_text("""The stranger smiles blandly. 
-Rival Leader: “It wasn’t a question.”
+Rival Leader: "It wasn't a question."
 
 She turns and looks at the stable quantum echo with interest.
-Rival Leader: “So this it it, the Quantum Echo Processor?”
+Rival Leader: "So this it it, the Quantum Echo Processor?"
 
-Theo: “It is property of NovaCore and you can go back and tell WaveVector that they’re playing with fire.” 
-Theo: “Trespassing, property damage… Theft.”
-Theo: “Don’t tell me you weren’t behind sabotaging the last experiment.”
-Theo: “That collapse was your fault!”
+Theo: "It is property of NovaCore and you can go back and tell WaveVector that they're playing with fire." 
+Theo: "Trespassing, property damage… Theft."
+Theo: "Don't tell me you weren't behind sabotaging the last experiment."
+Theo: "That collapse was your fault!"
 
-The woman shrugs. “Personally, no. Not my fault.”
+The woman shrugs. "Personally, no. Not my fault."
 She turns to Kaela.
 Rival Leader:
-“You don’t understand the power you’re playing with. These echoes could rewrite the past, control futures. Do you want that sort of tech being controlled by NovaCore?”""")
+"You don't understand the power you're playing with. These echoes could rewrite the past, control futures. Do you want that sort of tech being controlled by NovaCore?""")
 
-	add_option("""“I’m not sure”""", dilemma_continue_second)
-	add_option("""“I don’t trust either of you.”""", dilemma_continue_second)
-	add_option("""“Can’t we work together?”""", dilemma_continue_second)
+	add_option("""I'm not sure""", dilemma_continue_second)
+	add_option("""I don't trust either of you.""", dilemma_continue_second)
+	add_option("""Can't we work together?""", dilemma_continue_second)
 	queue_added_options()
 	
 func dilemma_continue_second():
-	add_text("""Rival Leader: “It doesn’t matter. Hand over the Echo Processor, or everything you’ve built will vanish — like your precious quantum light.”
+	add_text("""Rival Leader: "It doesn't matter. Hand over the Echo Processor, or everything you've built will vanish — like your precious quantum light."
 
-Theo: “You’ll destroy everything?! How does that benefit anyone? NovaCore wants to use Echo Tech to create a better world.”
+Theo: "You'll destroy everything?! How does that benefit anyone? NovaCore wants to use Echo Tech to create a better world."
 
-Rival Leader: “NovaCore wants to build a better world? Please, we have evidence NovaCore was planning to use this technology to rewrite quantum memory.”
+Rival Leader: "NovaCore wants to build a better world? Please, we have evidence NovaCore was planning to use this technology to rewrite quantum memory."
 
-Theo: “For the better!”
+Theo: "For the better!"
 
 Kaela looks at them both, unsure.
-Kaela: “And what does WaveVector plan to do with it?”
+Kaela: "And what does WaveVector plan to do with it?"
 
-Rival Leader: “WaveVector will make sure no one can have that power. And we will destroy everything here, including you to stop that.”
+Rival Leader: "WaveVector will make sure no one can have that power. And we will destroy everything here, including you to stop that."
 
-Kaela: “I hold the cornerstone of tomorrow’s network—secure, encrypted, and resilient beyond classical means.”
-“This is the master key to the quantum internet, an unbreakable vault for global communication and knowledge sharing.”
+Kaela: "I hold the cornerstone of tomorrow's network—secure, encrypted, and resilient beyond classical means."
+"This is the master key to the quantum internet, an unbreakable vault for global communication and knowledge sharing."
 
-“You can’t destroy it.”
+"You can't destroy it."
 
-“The echoes will guide me.”""")
+"The echoes will guide me.""")
 
 	add_option("Hand over control to avoid conflict.", dilemma_hand_over)
 	add_option("Refuse, risking a quantum cascade failure.", dilemma_refuse)
@@ -503,21 +657,21 @@ Dialogue (Rival Leader):
 To hold it is to hold the future. But with this power comes peril— with this, we will transcend the limits the masses dare not challenge. Power born from the vanished light shall be ours to command. 
 Prepare yourself—what comes next will change everything, for better or worse."
 Kaela (internal monologue):
- "Have I condemned the future to their control? Or sparked a new era of unimaginable discovery? Only time will tell if I’ve made the right choice…"
+ "Have I condemned the future to their control? Or sparked a new era of unimaginable discovery? Only time will tell if I've made the right choice…"
 THE END""")
 
 func dilemma_refuse():
-	add_text("""Kaela: "The echoes won’t be silenced today! I will keep them safe!"
-“But only NovaCore can help keep them stable.”
+	add_text("""Kaela: "The echoes won't be silenced today! I will keep them safe!"
+"But only NovaCore can help keep them stable."
 
-Rival Leader: “Then we will destroy your Echo Processor!”
+Rival Leader: "Then we will destroy your Echo Processor!"
 
 Kaela: Defiant, you refuse, using the echo processor to shift the system and drive out the rivals.
 
 Gameplay Challenge: Stabilize the quantum system during a sabotage-induced quantum collapse.
 
 Having succeeded you are determined to safeguard the precious echoes.
-You secure the quantum memory deep within NovaCore’s vaults. 
+You secure the quantum memory deep within NovaCore's vaults. 
 The lights dim as the complex locks down, shadows stretching across gleaming consoles. 
 Here, progress will be measured, but also driven by unwavering hope. 
 With each pulse of the quantum echoes, the promise of a brighter tomorrow persists—under your watchful eyes.
@@ -528,16 +682,16 @@ Our journey is just beginning, and this time, we will steer the echoes to better
 Theo:
 "Kaela, burdened with hope, burdened with risk. But you carry it nobly. 
 Kalea:
-“Now we build, cautiously, for the world awaits what we will become."
+"Now we build, cautiously, for the world awaits what we will become."
 
 	THE END.""")
 	
 func dilemma_negotiate():
-	add_text("""Kaela: “I don’t trust either of you, but this technology needs to be developed. 
+	add_text("""Kaela: "I don't trust either of you, but this technology needs to be developed. 
 It is risky… but so is isolation. 
 In an unprecedented move, you open the gates of cooperation, inviting rival factions and allies alike to share the quantum echo memory. 
-Theo: "Together, no shadow can claim dominion over the echoes. This collaboration is our light against the unknown—a pact forged in quantum threads.”
-Rival Leader: “Let us weave a future that honors all our dreams, where memory and science coexist in harmony."
+Theo: "Together, no shadow can claim dominion over the echoes. This collaboration is our light against the unknown—a pact forged in quantum threads."
+Rival Leader: "Let us weave a future that honors all our dreams, where memory and science coexist in harmony."
 A tense but hopeful assembly forms, uniting disparate visions into a fragile alliance. 
 As the echoes pulse through shared quantum processors, knowledge multiplies and expands beyond any single mind. The future flickers not with conflict, but with potential synergy.
 

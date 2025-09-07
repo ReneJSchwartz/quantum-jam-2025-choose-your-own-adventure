@@ -501,4 +501,8 @@ def index():
     })
 
 if __name__ == '__main__':
+    # For HTTPS deployment - you'll need SSL certificates on your VPS
+    # app.run(host='0.0.0.0', port=8000, ssl_context='adhoc', debug=True)
+    
+    # For HTTP (current setup)
     app.run(host='0.0.0.0', port=8000, debug=True)

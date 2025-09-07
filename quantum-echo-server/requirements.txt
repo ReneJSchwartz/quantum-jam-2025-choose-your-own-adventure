@@ -4,3 +4,4 @@ qiskit>=2.1.0
 qiskit-aer>=0.17.0
 numpy>=2.3.0
 requests>=2.31.0
+pyopenssl>=24.0.0

@@ -1,3 +1,4 @@
+class_name GameGraphics
 extends Control
 
 @export var grid: TextureRect
@@ -10,7 +11,11 @@ extends Control
 @export var ava_volume: TextureRect
 @export var light: TextureRect
 
+static var instance: GameGraphics
+
 func _ready() -> void:
+	instance = self
+	#SignalBus.instance.sub("game_started", func (data): show_text_box())
 	_hide_all()
 
 func _hide_all():
@@ -22,6 +27,7 @@ func _hide_all():
 	ava_volume.visible = false
 
 func show_text_box():
+	print("show_text_box")
 	text_box_bg.visible = true
 
 func show_widgets_at_right():

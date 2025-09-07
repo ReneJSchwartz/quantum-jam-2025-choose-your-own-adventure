@@ -15,6 +15,8 @@ func _on_b_quit_game_pressed() -> void:
 	get_tree().quit()
 
 func _on_b_new_game_pressed() -> void:
+	print("_on_b_new_game_pressed")
 	main_menu_container.visible = false
 	SignalBus.instance.pub("game_started")
+	GameGraphics.instance.show_text_box()
 	# todo start game

@@ -69,6 +69,7 @@ func start_dialogue():
 ## dialogue.
 func continue_dialogue():
 	if len(steps) <= current_dialogue_step:
+		# game basically ended
 		on_dialogue_end_callback.call()
 		on_dialogue_end_callback = func(): pass
 		get_tree().create_timer(hide_dialogue_delay).timeout.connect(
@@ -256,6 +257,7 @@ func processor_phase_flip():
 	add_text("""The echo’s glow shifts hues as the phase flips. You sense a whisper of a memory trying to surface.
 AI Ava: Phase adjustments detected. Memory fragment integrity increased."
 """)
+	processor_phase_flip_pass()
 
 func processor_phase_flip_pass():
 	add_text("""Theo: The second gate is up.
@@ -270,6 +272,18 @@ The Light and the voices fade.
 	
 Theo: It’s holding stable. Choose the next gate carefully to avoid collapse.""")
 ##This can only succeed, because fail is not found in story text
+	if completed_bit_flip and completed_phase_flip and completed_rotation:
+		processor_complete()
+	else:
+		if completed_bit_flip == false:
+			add_option("Apply a bit-flip gate.", func():
+				completed_bit_flip = true
+				processor_bit_flip())
+		if completed_rotation == false:
+			add_option("Rotate the qubit superposition to reveal hidden states.", func():
+				completed_rotation = true
+				processor_rotate())
+		queue_added_options()
 
 func processor_rotate():
 	add_text("""As you rotate the superposition, complex interference patterns emerge, revealing multiple potential memories branching within the echo.

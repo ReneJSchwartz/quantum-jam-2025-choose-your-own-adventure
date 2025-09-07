@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bidtuh27qoll"]
+[gd_scene load_steps=4 format=3 uid="uid://bidtuh27qoll"]
 
 [ext_resource type="Script" uid="uid://y4waxpo5evch" path="res://source/dialogue/dialogue_ui_manager.gd" id="1_y3syv"]
 [ext_resource type="Script" uid="uid://br6rg6nrw3c6c" path="res://source/dialogue/dialogue.gd" id="2_sd0pw"]
+[ext_resource type="Texture2D" uid="uid://dclgsq517tgjg" path="res://assets/hud_textbox_without_grid.png" id="3_ysedr"]
 
 [node name="DialogueUI" type="Node"]
 
@@ -9,21 +10,29 @@
 
 [node name="DialogueUiManager" type="Node" parent="Scripts" node_paths=PackedStringArray("ui_container", "text_area", "speaker_name", "dialogue_options")]
 script = ExtResource("1_y3syv")
-play_sound_pattern = null
-on_skip_dialogue_jump_instantly_to_end = null
-dialogue_skip_speed_multiplier = null
 text_speeds_slow_normal_fast = Array[float]([10.0, 15.0, 20.0])
-delay_before_writing_speaker_name = null
-delay_after_speaker_name = null
-test_show_overlay = null
-test_hide_overlay = null
 ui_container = NodePath("../../ContainerScrollView")
-text_area = NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/MarginContainer/ScrollingDialogueBox")
+text_area = NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ScrollingDialogueBox")
 speaker_name = NodePath("../../ContainerPageView/SpeakerName")
 dialogue_options = [NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 1"), NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 2"), NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 3"), NodePath("../../ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin/DialogueChoices/Choice 4")]
 
 [node name="Dialogue" type="Node" parent="Scripts"]
 script = ExtResource("2_sd0pw")
+
+[node name="PlacementHelper" type="TextureRect" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -562.0
+offset_top = -522.0
+offset_right = 562.0
+offset_bottom = 522.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_ysedr")
 
 [node name="ContainerPageView" type="Control" parent="."]
 visible = false
@@ -55,25 +64,21 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 100
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 100
+theme_override_constants/margin_left = 455
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 450
 theme_override_constants/margin_bottom = 100
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ContainerScrollView/MarginContainer"]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/margin_left = 200
-theme_override_constants/margin_right = 200
-
-[node name="ScrollingDialogueBox" type="RichTextLabel" parent="ContainerScrollView/MarginContainer/VBoxContainer/MarginContainer"]
+[node name="ScrollingDialogueBox" type="RichTextLabel" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 32
+bbcode_enabled = true
 text = "Scrolling text box"
+scroll_active = false
 scroll_following = true
 vertical_alignment = 1
 
@@ -85,8 +90,8 @@ size_flags_stretch_ratio = 0.05
 [node name="ChoiceMargin" type="MarginContainer" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
-theme_override_constants/margin_left = 500
-theme_override_constants/margin_right = 500
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_right = 50
 
 [node name="DialogueChoices" type="VBoxContainer" parent="ContainerScrollView/MarginContainer/VBoxContainer/ChoiceMargin"]
 layout_mode = 2

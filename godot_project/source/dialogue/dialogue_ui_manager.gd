@@ -112,7 +112,7 @@ func show_dialogue_overlay() -> void:
 
 func hide_dialogue_overlay(_instantly: bool = false) -> void:
 	print(hide_dialogue_overlay.get_method().get_basename())
-	ui_container.visible = false	
+	#ui_container.visible = false
 	#if instantly:
 		#ui_container.position = Vector2(0, container_down_y_position_that_hides_player_options)
 		#return
@@ -280,13 +280,14 @@ func is_text_finished() -> bool: return text_area.visible_ratio == 1
 
 ## Called by input handling.
 func on_skip_text() -> void:
+	print("on_skip_text")
 	if (text_area.visible_ratio < 1):
 		if on_skip_dialogue_jump_instantly_to_end:
 			text_area.visible_ratio = 1
 			speaker_name.visible_ratio = 1
 		else:
 			text_speed_multiplier = dialogue_skip_speed_multiplier
-	elif Dialogue.dialogue_running:
+	elif Dialogue.dialogue_running and !dialogue_options[0].visible:
 		next_dialogue_callback.call()
 
 

@@ -178,22 +178,29 @@ Theo: “We should run a diagnostic. Capturing them directly without more inform
 	add_option("Insist on capturing immediately", discovery_a_capture)
 	queue_added_options()
 	
+##All three options need to be done to proceed
+
+var completed_bit_flip: bool
+var completed_phase_flip: bool
+var completed_rotation: bool
+
 func processor():
 	add_text("""Theo (Engineer): “Kaela, timing is critical here. Feed the qubits gently into the processor. Each quantum gate you apply must be precise — one wrong flip could collapse the entire superposition. The echoes are fragile but hold the key to forgotten memories.”
 
 Kaela: “And what happens if I fail?”
 
 Theo: “... Don’t.”""")
-
-	if randi() % 2 == 0:
-		
-		pass
-	else:
-		processor_bit_flip
-		pass  
-	add_option("Apply a bit-flip gate first.", processor_bit_flip)
-	
-	pass
+  
+	add_option("Apply a bit-flip gate first.", func(): 
+		completed_bit_flip = true
+		processor_bit_flip())
+	add_option("Start with a phase-flip gate.", func():
+		completed_phase_flip = true
+		processor_phase_flip()) 
+	add_option("Rotate the qubit superposition to reveal hidden states", func():
+		completed_rotation = true
+		processor_rotate())
+	queue_added_options()
 	
 func processor_bit_flip():
 	add_text("""You apply the bit-flip gate. The echo pulses brighter but wavers unpredictably.
@@ -216,10 +223,195 @@ But it fades before you can learn anything.
 
 Theo: It’s holding stable.""")
 
-	add_option("Phase-flip gate.", processor_phase_flip)
+	if completed_bit_flip and completed_phase_flip and completed_rotation:
+		processor_complete()
+	else:
+		if completed_phase_flip == false:
+			add_option("Phase-flip gate.", func():
+				completed_phase_flip = true
+				processor_phase_flip())
+		if completed_rotation == false:
+			add_option("Rotate the qubit superposition to reveal hidden states.", func():
+				completed_rotation = true
+				processor_rotate())
+		queue_added_options()
 	
 func processor_bit_flip_fail():
-	pass
+	add_text("""It fails and the light vanishes in a blink as the superposition collapses.
+But not before a memory, a flash of this same lab superimposed on this lab appears.
+	Panicked scientists turn to run.
+Before all is swallowed in a blink of light.
+-
+Kaela: What was that?
+Ava: Quantum decoherence
+Kaela: No, before that, like it was showing us something that had happened before. A quantum memory, past and present converging.
+Theo: Not just that, we’ve got some anomalies here…
+Kaele: The light, it’s growing-
+A blink of light swallows everything.
+
+THE END.""")
+##ends the game
 	
 func processor_phase_flip(): 
+	add_text("""The echo’s glow shifts hues as the phase flips. You sense a whisper of a memory trying to surface.
+AI Ava: Phase adjustments detected. Memory fragment integrity increased."
+""")
+
+func processor_phase_flip_pass():
+	add_text("""Theo: The second gate is up.
+
+The light dims and warps. Shadows gather, and the memory becomes fragmentary—blurred shapes shift in and out of focus, voices murmur softly but indistinctly, like being half-remembered in a dream. 
+
+Faint echoes of disquiet stir the air—whispers of failures, lost experiments, and fading hopes.
+A sense of melancholy seeps deep—a silent testament to the quantum echoes trapped in limbo, lost and waiting for remembrance. The boundary between memory and oblivion blurs here, unveiling the fragile nature of what once was and what might have been.
+Kaela: "They… were here, once.”
+“Dreams and despair intertwined in fragile quantum webs.”
+The Light and the voices fade.
+	
+Theo: It’s holding stable. Choose the next gate carefully to avoid collapse.""")
+##This can only succeed, because fail is not found in story text
+
+func processor_rotate():
+	add_text("""As you rotate the superposition, complex interference patterns emerge, revealing multiple potential memories branching within the echo.
+Kaela (awed): "So many possibilities... which reality do I choose to remember?""")
+	
+	add_option("Brightest memory path.", brightest_memory_path)
+	add_option("Faint echoes.", explore_faint_echoes)
+	queue_added_options()
+	
+func brightest_memory_path():
+	add_text("""The chamber fills with a radiant glow, shadows lifting to reveal the sharp outlines of a bustling research floor. 
+Scientists catalog data with nervous excitement; Kaela stands before a massive console, her face illuminated by cascading holograms of quantum patterns. 
+This memory captures the very moment the team surpassed a monumental barrier — the quantum echoes stabilizing for the first time, a symphony of light and hope woven into every pulse.
+You sense not just a technical achievement, but a profound awakening — the birth of a new era where memory and reality blur, and possibilities expand beyond the imaginable.
+Dialogue (Kaela’s Voice):
+“We stood on the edge of the unknown, hearts pounding with anticipation and fear. 
+Each signal from the quantum echoes was a promise whispered across time and space—proof that our understanding was just beginning. 
+This moment was our beacon, the light piercing the darkness. It taught me that even in uncertainty, resolve and belief create miracles.”
+
+The memory from the flare fades.""")
+
+	if completed_bit_flip and completed_phase_flip and completed_rotation:
+		processor_complete()
+	else:
+		if completed_phase_flip == false:
+			add_option("Phase-flip gate.", func():
+				completed_phase_flip = true
+				processor_phase_flip())
+		if completed_bit_flip == false:
+			add_option("Apply a bit-flip gate.", func():
+				completed_bit_flip = true
+				processor_bit_flip())
+		queue_added_options()
+
+func explore_faint_echoes():
+	add_text("""You're drawn into a prism of possibilities—the memory fractures into two divergent
+timelines, each pulsing with life and consequence.
+In one, the project flourishes beyond all expectations. New cures, quantum communication, and technologies blossom rapidly, illuminating the world with unprecedented advancements. The energy is vibrant, full of hope and renewal, where Kaela and her cohorts stand triumphant, celebrated as pioneers of a new age.
+Yet, the other timeline is draped in darkness. Catastrophe follows unchecked ambition. Quantum experiments spiral out of control, rending spacetime itself. Cities fall into chaos, memories become fragmented and lost, and despair taints every human connection. Here, Kaela’s gamble with quantum echoes ends in ruin.
+The quantum reality bends before you—a choice crystallizes. Which timeline will you preserve? The world of radiant hope or the one scarred by quantum chaos? The echoes do not judge; they await your hand to collapse the infinite possibilities into one enduring reality.
+Dialogue (Echo Whisper, overlapping voices):
+“Two paths diverged in the quantum cloud, each bearing the weight of all we dared and feared.”
+“One blooms with light—the promise of what might be, if we hold fast to courage and wisdom.”
+“The other darkens, a warning etched in shattered echoes—of power unchecked and lines crossed.”
+“Your choice will echo across time, shaping the future’s fragile fabric. Choose well, for you are the weaver of worlds.”
+
+Kaela (reflective):
+So much hangs in the balance...
+Our dreams, our fears... trapped in quantum shadows.
+But this is more than a choice — it is the destiny we forge.
+I must decide which world the echoes will sing… and which will fade into silence.""")
+
+	if completed_bit_flip and completed_phase_flip and completed_rotation:
+		processor_complete()
+	else:
+		if completed_phase_flip == false:
+			add_option("Phase-flip gate.", func():
+				completed_phase_flip = true
+				processor_phase_flip())
+		if completed_bit_flip == false:
+			add_option("Apply a bit-flip gate.", func():
+				completed_bit_flip = true
+				processor_bit_flip())
+		queue_added_options()
+
+func processor_complete():
+	add_text("""The light flickers and pulses but settles.
+
+Theo: “It’s stable! You did it!”
+Kaela: Let’s see what we’ve unlocked.
+
+Reality splinters before you— the memory of the laboratory overlapping here and now.
+
+The scientists mill about the lab, the bright quantum light in the memory, looks stable.
+A mirror image of the light you’ve managed to stabilize.
+
+Out of the corner of your eye you see a scientist pocket a USB.
+They sneak out when none of the phantom scientists are watching.
+Only moments later NovaCore guards enter the lab.
+
+But their orders are silent, drowned out by the murmuring voices.
+But they drag one of the scientists out, struggling.
+
+Panic sets in and the Higgs echo destabilizes under observation.
+
+The memory light flickers and flares. Your own light flares in response. An echo.
+
+What you see unfolding is chaos. 
+Panicked scientists turn to run as the light glows brighter.
+Others are hunched over their desks typing furiously.
+
+Before all is swallowed in a bright flare of light.
+
+
+The lab is left empty, the light and memory fading.
+-
+Kaela: What just happened?
+Ava: “Memory chamber unlocked.”
+
+A new stable memory forms. 
+
+The memory chamber resonates around you.
+
+The memory pulses with a cascade of elegant quantum algorithms and blueprints—fractal in complexity, shimmering like a living code. 
+As the quantum echo memory stabilizes, the walls around you dissolve into shifting streams of light and shadow. 
+a whisper forms into a voice — not just data, but a sentient consciousness trapped within the echoes.
+The image of Dr. Mira Selwyn flickers before you, her eyes haunted, her voice trembling with urgency.
+Dialogue (Mira’s Voice):
+ "I… remember the silence that followed the catastrophe. The project was our beacon, our hope. Yet… beneath that light, betrayal festered like a shadow. I was there, Kaela. I saw the sabotage, felt the fracture in our reality. You must finish what was started, untangle the web of lies woven in dark corridors. I sacrificed everything to preserve these memories — you must not let them be lost again."
+(soft echoing) "Trust the echoes, even when they falter. Find the truth… before it fades forever."
+	The light and the memory fade.""")
+	
+func quantum_memory():
+	add_text("""AI Assistant Ava: 
+“Echo signals from a forgotten past are reconstructing… Can you feel it, Kaela? The quantum whispers of those lost, waiting for you to listen.”
+
+Kaela: “NovaCore didn’t tell me they had almost succeeded before this - that they’d lost so many people.”
+
+Theo: 
+“Unlocking and harnessing Echo-tech is a priority. 
+You saw one of the scientists stole our data, it was the only record left of the experiment after the accident. And now it’s in the hands of our rivals.
+But if we can apply our own obfuscation on the quantum memories we unlock here…
+We could rewrite it and make it like it never happened.Keep Echo-Tech our”
+
+Ava: “Can you hear them?”
+
+Kaela: “That’s what quantum presence is. Their memories are lost, like ghosts trapped between realities. And you want to rewrite memory, so none of those scientists existed?”
+
+Theo frowns and shakes his head.
+Theo: “Echo-tech belongs to NovaCore - they belong to NovaCore. We can keep them stable and safe and learn from the echoes. Without us, they will be lost.”
+
+Alarms flare and red light flashes across the lab.
+
+
+“WARNING. SECURITY BREACH. WARN-”
+
+The warning is cut off, the lights flicker back to normal.
+
+And the heavy security doors slide open.""")
+
+func dilemma():
+	
+	
 	pass
+	

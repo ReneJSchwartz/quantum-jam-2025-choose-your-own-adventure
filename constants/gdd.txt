@@ -1,0 +1,119 @@
+Game Design Document
+
+Game Design Document
+Basic info
+Jam theme
+Genre description & game examples
+Story
+Graphics
+User interface
+Hotkeys
+Audio List
+Graphics List
+Sketches
+“* keep in mind the table of contents is buggy when copy pasted content is added and probably won’t show everything as copy paste does not keep text style and all text is converted into “normal text”.
+Basic info
+{game name} is a choose your own adventure game where x // todo
+
+Game genre: Choose your own adventure (CYOA), Sci-Fi
+Story genre: Sci-Fi
+Players: 1?
+Platform: Web PC (so easy to play/start & show)?
+Used engines: Twine + Godot 
+Audience: adults, young adults?
+Game length: 5-10-15 min? Depends on the amount of content?
+Etc
+
+
+Jam theme
+Echo
+
+
+Theme images/slides by jam organizers.
+
+Genre description & game examples
+In choose your own adventure the player goes through a story and makes choices, much like in a visual novel. There can be other game mechanics also such as player inventory or health etc but those are not necessary.
+
+
+Examples of real(?) CYOA books.
+
+Modern game examples:
+
+Story
+General info and details about story: (moved to google doc)
+Story can be found in Miro: https://miro.com/app/board/uXjVJVbA1wM=/
+
+Graphics
+General info about graphics:
+Some bits of the story do not have associated graphics.
+To save time and resources we can opt out of the main menu?
+There’s a computer screen interface: see discord (Saara’s sketch)
+
+
+User interface
+Users can press a choice which moves them in the story. The player can use for example a keyboard to control the game (up, down, enter).
+
+Currently there is not a polished main menu, but one can probably be created when background assets are ready.
+Hotkeys
+Keyboard hotkeys and pressable buttons in addition or instead. Depends on platform.
+
+Up -> Select menu item 
+Down -> Select menu item 
+Enter -> Activate Menu item 
+Enter -> Make text proceed faster
+Other?
+
+
+
+// NEEDED ASSETS: VISUALS, AUDIO, FONTS, ETC
+Audio List
+SFX
+Switching page (computerized wavy sound)
+Clicking the button. Like a bell/ding. Just a thought
+ Dum dum dum or just a ‘bad event’ sound if the player chooses a path that has bad stuff?
+Light flare (https://www.youtube.com/shorts/MPkiKEMoMv8)
+Intro email:  keyboard typing sound of letter getting generated, new mail sound?
+Ava appears with a positive little ping/jingle
+Theo arrives at the lab: Male Footsteps
+Capture protocol: Glitchy computer noise 1
+Diagnostics: Glitchy computer noise 2
+Bit-flip Gate/Phaseflip/Rotation Success: Positive glitchy computer jingle
+Voices murmuring
+Final stable memory (page13) - music if time
+Security Alarms 
+Heavy security doors slide open
+Womans footsteps
+	
+Music
+Intro music or background sound (short loop of synthesized sounds)
+Gameplay music (wavy, spooky, synthesized)
+Climax music (Intense, upbeat, highs and lows)
+Music Style Suggestions
+Ambient Electronic Soundscapes
+Use layered synths, soft pads, and textured drones to create an otherworldly, immersive atmosphere reflecting quantum echoes and unseen dimensions.
+Slow evolving sounds and subtle rhythmic pulses can mimic the fragile, fluctuating nature of quantum states.
+Minimalist Orchestral Elements
+Incorporate sparse piano, strings, and soft brass for emotional resonance, especially in narrative and memory sequences.
+Build crescendos gradually to heighten tension during puzzles or final reveals.
+Futuristic Synthwave and IDM Influences
+Add dynamic, glitchy beats and digital effects during gameplay to underscore the blend of hard science and speculative fiction.
+This style supports a tech-driven, cerebral vibe befitting the quantum theme.
+
+Graphics List
+Probably something when player wins game :D 
+Probably a book? We got 1 book in discord team messages. Is that ok as is or as edited?
+Bunch of cool pictures that go with the story?
+Light Flare 
+Echo signals?
+
+
+Fonts
+In the game we use font {font name} everywhere.
+
+Tools
+Miro for designing dialogue, Godot for visuals.
+
+
+Sketches
+
+Initial game layout sketches / options. The artist suggested the image to be optional so the layout needs to allow it.

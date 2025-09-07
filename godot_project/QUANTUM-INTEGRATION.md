@@ -36,7 +36,7 @@ This integration connects your Godot choose-your-own-adventure game to the Quant
 ## ⚡ **Current Configuration**
 
 - **Echo Type**: SCRAMBLE (you can easily change this in `dialogue_ui_manager.gd`)
-- **Server URL**: `http://108.175.12.95:5000`
+- **Server URL**: `http://108.175.12.95:8000`
 - **Fallback**: Shows original text if server is unavailable
 
 ## 🎨 **Available Echo Types**

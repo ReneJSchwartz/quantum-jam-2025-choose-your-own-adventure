@@ -7,7 +7,7 @@ Run this to verify the server is working correctly
 import requests
 import json
 
-def test_server(base_url="http://localhost:5000"):
+def test_server(base_url="http://108.175.12.95:8000"):
     """Test all endpoints of the quantum echo server."""
     
     print(f"Testing Quantum Echo Server at {base_url}")
@@ -80,5 +80,5 @@ if __name__ == "__main__":
     import sys
     
     # Allow custom URL as command line argument
-    url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5000"
+    url = sys.argv[1] if len(sys.argv) > 1 else "http://108.175.12.95:8000"
     test_server(url)

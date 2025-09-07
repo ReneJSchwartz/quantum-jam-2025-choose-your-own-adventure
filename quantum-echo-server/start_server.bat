@@ -18,7 +18,7 @@ echo Installing requirements...
 pip install -r requirements.txt
 
 REM Start the server
-echo Starting server on http://localhost:5000
+echo Starting server on http://108.175.12.95:8000
 python app.py
 
 pause

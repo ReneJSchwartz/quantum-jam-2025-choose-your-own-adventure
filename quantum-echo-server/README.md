@@ -49,7 +49,7 @@ A Flask-based quantum computing server that uses Qiskit to create "quantum echoe
 
 5. **Test the Server**:
    ```bash
-   curl -X POST http://localhost:5000/quantum_echo \
+   curl -X POST http://108.175.12.95:8000/quantum_echo \
         -H "Content-Type: application/json" \
         -d '{"text": "Hello quantum world!", "echo_type": "scramble"}'
    ```
@@ -118,7 +118,7 @@ A Flask-based quantum computing server that uses Qiskit to create "quantum echoe
 
 2. **Run with Gunicorn**:
    ```bash
-   gunicorn --bind 0.0.0.0:5000 --workers 4 app:app
+   gunicorn --bind 0.0.0.0:8000 --workers 4 app:app
    ```
 
 #### Option 3: Using Docker
@@ -133,14 +133,14 @@ A Flask-based quantum computing server that uses Qiskit to create "quantum echoe
 
    COPY app.py .
 
-   EXPOSE 5000
+   EXPOSE 8000
    CMD ["python", "app.py"]
    ```
 
 2. **Build and Run**:
    ```bash
    docker build -t quantum-echo .
-   docker run -p 5000:5000 quantum-echo
+   docker run -p 8000:8000 quantum-echo
    ```
 
 ### Nginx Reverse Proxy (Optional)
@@ -163,7 +163,7 @@ To serve on port 80/443 with SSL:
        server_name your-domain.com;
 
        location / {
-           proxy_pass http://127.0.0.1:5000;
+           proxy_pass http://127.0.0.1:8000;
            proxy_set_header Host $host;
            proxy_set_header X-Real-IP $remote_addr;
            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -235,7 +235,7 @@ Health check endpoint.
 extends Node
 
 var http_request: HTTPRequest
-var server_url = "http://localhost:5000"  # Change to your VPS URL
+var server_url = "http://108.175.12.95:8000"  # Change to your VPS URL
 
 func _ready():
     http_request = HTTPRequest.new()
@@ -297,7 +297,7 @@ Create a `.env` file for production:
 FLASK_ENV=production
 FLASK_DEBUG=False
 HOST=0.0.0.0
-PORT=5000
+PORT=8000
 ```
 
 ### Security Considerations
@@ -329,13 +329,13 @@ python app.py  # Logs will appear in terminal
 Test all endpoints:
 ```bash
 # Health check
-curl http://your-server:5000/health
+curl http://your-server:8000/health
 
 # Echo types
-curl http://your-server:5000/quantum_echo_types
+curl http://your-server:8000/quantum_echo_types
 
 # Quantum echo
-curl -X POST http://your-server:5000/quantum_echo \
+curl -X POST http://your-server:8000/quantum_echo \
      -H "Content-Type: application/json" \
      -d '{"text": "Test message", "echo_type": "scramble"}'
 ```
@@ -350,3 +350,307 @@ curl -X POST http://your-server:5000/quantum_echo \
 ## Contributing
 
 Feel free to extend the quantum transformations by adding new echo types or improving the quantum circuits!
+
+
+######
+yes. look at my original file. I feel like you're not using the quantumgate class or quantumcircuitmanager class like you should. 
+
+# Quantum Gate Operation
+
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit.quantum_info import Statevector
+
+# Create a single qubit circuit
+qc = QuantumCircuit(1)
+
+# Initial state |0> by default
+
+# Bit flip (X gate)
+def bit_flip(circuit):
+    circuit.x(0)  # Apply X gate to qubit 0
+
+# Phase flip (Z gate)
+def phase_flip(circuit):
+    circuit.z(0)  # Apply Z gate to qubit 0
+
+# Rotation around Y axis (Ry gate)
+def rotate(circuit, theta):
+    circuit.ry(theta, 0)  # Rotate qubit 0 by theta radians about Y axis
+
+# Example usage:
+# Initialize circuit
+qc = QuantumCircuit(1)
+
+# Apply bit flip
+bit_flip(qc)
+
+# Apply phase flip
+phase_flip(qc)
+
+# Apply rotation by theta = pi/2
+from math import pi
+rotate(qc, pi/2)
+
+# Get final statevector of the qubit after operations
+backend = Aer.get_backend('statevector_simulator')
+result = execute(qc, backend).result()
+state = result.get_statevector()
+
+print("Final statevector:", state)
+
+
+
+# Represents a single qubit with superposition amplitudes
+
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit.quantum_info import Statevector
+import numpy as np
+import random
+
+class Qubit:
+    def __init__(self):
+        # Start in |0> state, amplitudes alpha=1, beta=0
+        self.state = Statevector([1, 0])
+    
+    def bit_flip(self):
+        # Apply X gate (bit flip)
+        qc = QuantumCircuit(1)
+        qc.x(0)
+        self.state = self.state.evolve(qc)
+        self._update_visuals()
+    
+    def phase_flip(self):
+        # Apply Z gate (phase flip)
+        qc = QuantumCircuit(1)
+        qc.z(0)
+        self.state = self.state.evolve(qc)
+        self._update_visuals()
+    
+    def rotate_y(self, theta):
+        # Apply Ry(theta) gate (rotation around Y axis)
+        qc = QuantumCircuit(1)
+        qc.ry(theta, 0)
+        self.state = self.state.evolve(qc)
+        self._update_visuals()
+    
+    def measure(self):
+        # Simulate measurement probabilistically, collapsing state
+        probabilities = self.state.probabilities_dict()
+        p0 = probabilities.get('0', 0)
+        rand_val = random.random()
+        if rand_val < p0:
+            self.state = Statevector([1, 0])  # Collapse to |0>
+            self._update_visuals()
+            return 0
+        else:
+            self.state = Statevector([0, 1])  # Collapse to |1>
+            self._update_visuals()
+            return 1
+    
+    def _update_visuals(self):
+        # Placeholder for updating visuals based on state amplitudes
+        alpha, beta = self.state.data
+        superposition_strength = abs(abs(alpha)**2 - abs(beta)**2)
+        # Here you could update a graphical element based on superposition_strength
+        # For example: print or set color intensity
+        print(f"Superposition strength: {superposition_strength:.3f}")
+    
+    def get_amplitudes(self):
+        # Optional method to get alpha and beta amplitudes
+        return self.state.data
+
+# Example usage:
+qubit = Qubit()
+qubit.bit_flip()
+qubit.phase_flip()
+qubit.rotate_y(np.pi/4)
+print("Measurement result:", qubit.measure())
+
+
+
+# Represents a quantum gate that can be applied to qubits and dialouge and sceen management parts
+
+from qiskit import QuantumCircuit, Aer, execute
+from enum import Enum
+
+# Quantum gate types
+class GateType(Enum):
+    BIT_FLIP = 1
+    PHASE_FLIP = 2
+    ROTATE_Y = 3
+
+class Qubit:
+    def __init__(self):
+        self.state = [1, 0]  # Placeholder, real state vector managed by QuantumCircuit
+
+class QuantumGate:
+    def __init__(self, gate_type: GateType, rotation_angle: float = 0.0):
+        self.gate_type = gate_type
+        self.rotation_angle = rotation_angle
+
+    def apply_to(self, qc: QuantumCircuit, qubit_index: int):
+        if self.gate_type == GateType.BIT_FLIP:
+            qc.x(qubit_index)
+        elif self.gate_type == GateType.PHASE_FLIP:
+            qc.z(qubit_index)
+        elif self.gate_type == GateType.ROTATE_Y:
+            qc.ry(self.rotation_angle, qubit_index)
+
+class QuantumCircuitManager:
+    def __init__(self, num_qubits: int):
+        self.num_qubits = num_qubits
+        self.qc = QuantumCircuit(num_qubits)
+    
+    def apply_gate_to_qubit(self, gate: QuantumGate, qubit_index: int):
+        if 0 <= qubit_index < self.num_qubits:
+            gate.apply_to(self.qc, qubit_index)
+    
+    def simulate(self):
+        backend = Aer.get_backend('statevector_simulator')
+        result = execute(self.qc, backend).result()
+        statevector = result.get_statevector()
+        return statevector
+
+class DialogueManager:
+    def __init__(self, dialogue_data):
+        self.dialogue_data = dialogue_data  # JSON/dict mapping dialogue_id to list of lines
+        self.current_line = 0
+        self.dialogue_finished_callbacks = []
+    
+    def start_dialogue(self, dialogue_id):
+        self.dialogue_id = dialogue_id
+        self.current_line = 0
+        self._show_next_line()
+    
+    def _show_next_line(self):
+        lines = self.dialogue_data.get(self.dialogue_id, [])
+        if self.current_line < len(lines):
+            line = lines[self.current_line]
+            # Here update UI with line content, speaker, and choices (if any)
+            print(f"[{line.get('speaker', '')}]: {line.get('text', '')}")
+            if 'choices' in line:
+                for i, choice in enumerate(line['choices']):
+                    print(f"{i+1}: {choice}")
+            else:
+                print("(No choices)")
+        else:
+            self._dialogue_finished(None)
+    
+    def on_choice_made(self, choice_index):
+        lines = self.dialogue_data.get(self.dialogue_id, [])
+        if self.current_line < len(lines):
+            line = lines[self.current_line]
+            if 'choices' in line and 0 <= choice_index < len(line['choices']):
+                choice = line['choices'][choice_index]
+                self._dialogue_finished(choice)
+            else:
+                self._dialogue_finished(None)
+        else:
+            self._dialogue_finished(None)
+    
+    def _dialogue_finished(self, choice):
+        for callback in self.dialogue_finished_callbacks:
+            callback(choice)
+        self.current_line += 1
+        self._show_next_line()
+    
+    def on_dialogue_finished(self, callback):
+        self.dialogue_finished_callbacks.append(callback)
+
+class SceneController:
+    def __init__(self):
+        self.dialogue_manager = None
+
+    def on_task_completed(self):
+        print("Task completed, switching scenes...")
+        self.change_scene("MemoryChamber")
+
+    def change_scene(self, scene_path):
+        print(f"Changing scene to: {scene_path}")
+        # Implement scene switching logic here
+
+# Example data and usage:
+
+dialogue_data = {
+    "memory_unlock": [
+        {"speaker": "Narrator", "text": "You have unlocked a memory."},
+        {"speaker": "Main Character", "text": "What should I do?", "choices": ["Explore", "Leave"]}
+    ]
+}
+
+# Setup
+qc_manager = QuantumCircuitManager(num_qubits=3)
+
+# Apply a bit flip to qubit 0
+bit_flip_gate = QuantumGate(GateType.BIT_FLIP)
+qc_manager.apply_gate_to_qubit(bit_flip_gate, 0)
+
+# Simulate and print the statevector
+statevector = qc_manager.simulate()
+print("Quantum statevector:", statevector)
+
+# Dialogue system
+dialogue_manager = DialogueManager(dialogue_data)
+
+def handle_choice(choice):
+    print(f"Dialogue finished with choice: {choice}")
+
+dialogue_manager.on_dialogue_finished(handle_choice)
+dialogue_manager.start_dialogue("memory_unlock")
+
+# Simulate user choice (choosing option 0 = "Explore")
+dialogue_manager.on_choice_made(0)
+
+# Scene controller example
+scene_controller = SceneController()
+scene_controller.on_task_completed()
+
+# Create quantum circuit
+    qc = QuantumCircuit(n_qubits, n_qubits)
+    
+    # Initialize qubits based on text bits
+    for i in range(n_qubits):
+        if text_bits[i] == 1:
+            qc.x(i)
+    
+    # Apply quantum gates based on echo type
+    if echo_type == "scramble":
+        # Apply Hadamard gates to create superposition
+        for i in range(n_qubits):
+            qc.h(i)
+    elif echo_type == "reverse":
+        # Apply X gates and controlled operations
+        for i in range(n_qubits // 2):
+            qc.cx(i, n_qubits - 1 - i)
+    elif echo_type == "ghost":
+        # Apply rotation gates for subtle changes
+        for i in range(n_qubits):
+            qc.ry(0.5, i)
+    elif echo_type == "quantum_caps":
+        # Mix of Hadamard and Pauli-Z gates
+        for i in range(0, n_qubits, 2):
+            qc.h(i)
+        for i in range(1, n_qubits, 2):
+            qc.z(i)
+    
+    # Measure all qubits
+    qc.measure(range(n_qubits), range(n_qubits))
+    
+    # Execute the circuit
+    backend = AerSimulator()
+    job = backend.run(qc, shots=1)
+    result = job.result()
+    counts = result.get_counts()
+    
+    # Get the measurement result
+    measured_bits = list(counts.keys())[0]
+    
+    # Transform the original text based on quantum measurement
+    transformed_text = transform_text_with_quantum_result(text, measured_bits, echo_type)
+    
+    return transformed_text
+
+remove the 'memory type' or 'speaker'. it's just text. 
+
+  try something more succint. we will have the quantum_word_dictionary in the server with the app.py so we can get those categories. 
+

@@ -9,6 +9,49 @@ import random
 import string
 import math
 
+# Import quantum word dictionary
+try:
+    from quantum_word_dictionary import get_quantum_category_for_word, analyze_text_coverage
+except ImportError:
+    print("Warning: quantum_word_dictionary.py not found. Using fallback categorization.")
+    
+    def get_quantum_category_for_word(word):
+        """Fallback categorization if dictionary not available - MODERATE COVERAGE!"""
+        word_lower = word.lower()
+        
+        # Keep some common words original to reduce overall coverage
+        common_words = ['the', 'and', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'shall', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'to', 'from']
+        if word_lower in common_words:
+            return 'original'
+        
+        # Ghost category - vowel-heavy words and quantum terms
+        if any(char in word_lower for char in 'aeiou') and len(word) > 4:
+            return 'ghost'
+        
+        # Quantum_gates - technical/science words
+        elif word_lower in ['quantum', 'gate', 'circuit', 'pulse', 'energy', 'memory', 'system', 'core', 'data', 'process', 'signal', 'echo', 'pattern', 'resonance', 'frequency', 'analysis', 'protocol', 'control', 'stable', 'surface', 'adjust', 'phase', 'collapse', 'interference']:
+            return 'quantum_gates'
+        
+        # Quantum_entanglement - emotional/story words  
+        elif word_lower in ['belief', 'create', 'miracles', 'flare', 'fades', 'light', 'hope', 'moment', 'time', 'reality', 'truth', 'understanding', 'darkness', 'uncertainty', 'resolve', 'piercing', 'taught', 'beacon']:
+            return 'quantum_entanglement'
+        
+        # Scramble - some short words
+        elif word_lower in ['or', 'through', 'over', 'under', 'next', 'avoid', 'our', 'that', 'just', 'even', 'this']:
+            return 'scramble'
+        
+        # Original - keep some words unchanged for balance
+        elif len(word) <= 3 or word_lower in ['into', 'also', 'more', 'some', 'only', 'very', 'much', 'such', 'each', 'most', 'many']:
+            return 'original'
+        
+        # Reverse - everything else gets reverse treatment
+        else:
+            return 'reverse'
+    
+    def analyze_text_coverage(text):
+        """Fallback analysis"""
+        return {'message': 'Using fallback categorization - install quantum_word_dictionary.py for full coverage'}
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for cross-origin requests from web games
 
@@ -30,28 +73,24 @@ class Qubit:
         qc = QuantumCircuit(1)
         qc.x(0)
         self.state = self.state.evolve(qc)
-        self._update_visuals()
     
     def phase_flip(self):
         # Apply Z gate (phase flip)
         qc = QuantumCircuit(1)
         qc.z(0)
         self.state = self.state.evolve(qc)
-        self._update_visuals()
     
     def rotate_y(self, theta):
         # Apply Ry(theta) gate (rotation around Y axis)
         qc = QuantumCircuit(1)
         qc.ry(theta, 0)
         self.state = self.state.evolve(qc)
-        self._update_visuals()
     
     def hadamard(self):
         """H gate - creates superposition using qiskit."""
         qc = QuantumCircuit(1)
         qc.h(0)
         self.state = self.state.evolve(qc)
-        self._update_visuals()
     
     def measure(self):
         # Simulate measurement probabilistically, collapsing state
@@ -60,24 +99,10 @@ class Qubit:
         rand_val = random.random()
         if rand_val < p0:
             self.state = Statevector([1, 0])  # Collapse to |0>
-            self._update_visuals()
             return 0
         else:
             self.state = Statevector([0, 1])  # Collapse to |1>
-            self._update_visuals()
             return 1
-    
-    def _update_visuals(self):
-        # Placeholder for updating visuals based on state amplitudes
-        alpha, beta = self.state.data
-        superposition_strength = abs(abs(alpha)**2 - abs(beta)**2)
-        # Here you could update a graphical element based on superposition_strength
-        # For example: print or set color intensity
-        print(f"Superposition strength: {superposition_strength:.3f}")
-    
-    def get_amplitudes(self):
-        # Optional method to get alpha and beta amplitudes
-        return self.state.data
     
     def get_superposition_strength(self):
         """Get strength of superposition (0 = classical, 1 = maximum superposition)."""
@@ -111,826 +136,331 @@ class QuantumCircuitManager:
             gate.apply_to(self.qc, qubit_index)
     
     def simulate(self):
-        backend = AerSimulator()
+        # Use statevector simulator to ensure statevector is available
+        backend = AerSimulator(method='statevector')
+        
+        # Add save_statevector instruction to the circuit
+        self.qc.save_statevector()
+        
         # Use transpile and run instead of execute
         transpiled_qc = transpile(self.qc, backend)
         job = backend.run(transpiled_qc, shots=1)
         result = job.result()
+        
+        # Get statevector from the result
         statevector = result.get_statevector()
         return statevector
 
-class DialogueManager:
-    """Manages dialogue and scene integration."""
-    
-    def __init__(self, dialogue_data):
-        self.dialogue_data = dialogue_data  # JSON/dict mapping dialogue_id to list of lines
-        self.current_line = 0
-        self.dialogue_finished_callbacks = []
-    
-    def start_dialogue(self, dialogue_id):
-        self.dialogue_id = dialogue_id
-        self.current_line = 0
-        self._show_next_line()
-    
-    def _show_next_line(self):
-        lines = self.dialogue_data.get(self.dialogue_id, [])
-        if self.current_line < len(lines):
-            line = lines[self.current_line]
-            # Here update UI with line content, speaker, and choices (if any)
-            print(f"[{line.get('speaker', '')}]: {line.get('text', '')}")
-            if 'choices' in line:
-                for i, choice in enumerate(line['choices']):
-                    print(f"{i+1}: {choice}")
-            else:
-                print("(No choices)")
-        else:
-            self._dialogue_finished(None)
-    
-    def on_choice_made(self, choice_index):
-        lines = self.dialogue_data.get(self.dialogue_id, [])
-        if self.current_line < len(lines):
-            line = lines[self.current_line]
-            if 'choices' in line and 0 <= choice_index < len(line['choices']):
-                choice = line['choices'][choice_index]
-                self._dialogue_finished(choice)
-            else:
-                self._dialogue_finished(None)
-        else:
-            self._dialogue_finished(None)
-    
-    def _dialogue_finished(self, choice):
-        for callback in self.dialogue_finished_callbacks:
-            callback(choice)
-        self.current_line += 1
-        self._show_next_line()
-    
-    def on_dialogue_finished(self, callback):
-        self.dialogue_finished_callbacks.append(callback)
-
-class SceneController:
-    """Manages scene transitions."""
-    
-    def __init__(self):
-        self.dialogue_manager = None
-
-    def on_task_completed(self):
-        print("Task completed, switching scenes...")
-        self.change_scene("MemoryChamber")
-
-    def change_scene(self, scene_path):
-        print(f"Changing scene to: {scene_path}")
-        # Implement scene switching logic here
-
-def quantum_gate_transform(text, gate_sequence="H-X-Y"):
-    """
-    Transform text using quantum gate operations on individual character qubits with qiskit.
-    
-    Args:
-        text (str): Input text to transform
-        gate_sequence (str): Sequence of quantum gates to apply (H, X, Y, Z)
-    
-    Returns:
-        dict: Transformed text with quantum state information
-    """
-    if not text:
-        return {"transformed_text": "", "quantum_state": "empty"}
-    
-    # Parse gate sequence
-    gates = gate_sequence.split('-')
-    valid_gates = ['H', 'X', 'Y', 'Z', 'ROT']
-    gates = [g.upper().strip() for g in gates if g.upper().strip() in valid_gates]
-    
-    if not gates:
-        gates = ['H']  # Default to Hadamard
-    
-    transformed_chars = []
-    quantum_states = []
-    
-    for i, char in enumerate(text):
-        # Create a qubit for each character using qiskit
+# Helper functions for quantum transformations (condensed)
+def apply_basic_transformation(text, category):
+    """Apply basic quantum transformations using individual qubits."""
+    result = ""
+    for char in text:
+        if not char.isalpha():
+            result += char
+            continue
+        
         qubit = Qubit()
         
-        # Initialize qubit based on character properties
+        # Initialize based on character
         if char.isupper():
-            qubit.bit_flip()  # Start in |1> for uppercase
+            qubit.bit_flip()
         
-        # Apply quantum gates
-        for gate in gates:
-            if gate == 'H':
-                qubit.hadamard()
-            elif gate == 'X':
-                qubit.bit_flip()
-            elif gate == 'Y':
-                qubit.rotate_y(math.pi/2)
-            elif gate == 'Z':
-                qubit.phase_flip()
-            elif gate == 'ROT':
-                # Rotation angle based on character position
-                angle = (i + 1) * math.pi / len(text)
-                qubit.rotate_y(angle)
-        
-        # Measure the qubit to get classical result
-        measurement = qubit.measure()
-        superposition = qubit.get_superposition_strength()
-        
-        # Transform character based on quantum measurement and superposition
-        transformed_char = transform_character_quantum(char, measurement, superposition)
-        
-        transformed_chars.append(transformed_char)
-        quantum_states.append({
-            'char': char,
-            'measurement': measurement,
-            'superposition': round(superposition, 3)
-        })
-    
-    return {
-        "transformed_text": ''.join(transformed_chars),
-        "quantum_states": quantum_states,
-        "gates_applied": gates,
-        "superposition_average": round(sum(qs['superposition'] for qs in quantum_states) / len(quantum_states), 3)
-    }
-
-def transform_character_quantum(char, measurement, superposition_strength):
-    """Transform a character based on quantum measurement and superposition."""
-    if not char.isalpha():
-        return char
-    
-    # High superposition = more exotic transformations
-    if superposition_strength > 0.7:
-        # Maximum quantum weirdness
-        quantum_chars = {
-            'a': '⟨ᵃ⟩', 'e': '⟨ᵉ⟩', 'i': '⟨ⁱ⟩', 'o': '⟨ᵒ⟩', 'u': '⟨ᵘ⟩',
-            'A': '⟨ᴬ⟩', 'E': '⟨ᴱ⟩', 'I': '⟨ᴵ⟩', 'O': '⟨ᴼ⟩', 'U': '⟨ᵁ⟩',
-            's': '⟨ˢ⟩', 't': '⟨ᵗ⟩', 'n': '⟨ⁿ⟩', 'r': '⟨ʳ⟩', 'l': '⟨ˡ⟩'
-        }
-        return quantum_chars.get(char, f'⟨{char}⟩')
-    
-    elif superposition_strength > 0.4:
-        # Medium quantum effects
-        if measurement == 1:
-            # Quantum diacritics
-            diacritic_chars = {
-                'a': 'ā', 'e': 'ē', 'i': 'ī', 'o': 'ō', 'u': 'ū',
-                'A': 'Ā', 'E': 'Ē', 'I': 'Ī', 'O': 'Ō', 'U': 'Ū',
-                's': 'š', 't': 'ť', 'n': 'ň', 'c': 'č', 'z': 'ž'
-            }
-            return diacritic_chars.get(char, char)
-        else:
-            # Quantum case flip
-            return char.swapcase()
-    
-    else:
-        # Low superposition = subtle changes
-        if measurement == 1:
-            return char.upper()
-        else:
-            return char.lower()
-
-def quantum_circuit_transform(text, circuit_type="entanglement"):
-    """
-    Advanced quantum text transformation using multi-qubit operations with qiskit.
-    
-    Args:
-        text (str): Input text
-        circuit_type (str): Type of quantum circuit ("entanglement", "interference", "teleportation")
-    
-    Returns:
-        dict: Advanced quantum transformation result
-    """
-    if not text or len(text) < 2:
-        return {"transformed_text": text, "circuit_type": circuit_type, "entangled_pairs": []}
-    
-    # Work with pairs of characters for entanglement
-    char_pairs = []
-    for i in range(0, len(text) - 1, 2):
-        char_pairs.append((text[i], text[i + 1] if i + 1 < len(text) else ' '))
-    
-    transformed_pairs = []
-    entangled_info = []
-    
-    for i, (char1, char2) in enumerate(char_pairs):
-        # Use qiskit-based qubits
-        qubit1 = Qubit()
-        qubit2 = Qubit()
-        
-        # Initialize qubits based on characters
-        if char1.isupper():
-            qubit1.bit_flip()
-        if char2.isupper():
-            qubit2.bit_flip()
-        
-        if circuit_type == "entanglement":
-            # Create Bell pair (maximally entangled state)
-            qubit1.hadamard()
-            # Simulate CNOT: if qubit1 is |1>, flip qubit2
-            if qubit1.measure() == 1:
-                qubit2.bit_flip()
-                qubit1.bit_flip()  # Reset for entanglement
-        
-        elif circuit_type == "interference":
-            # Quantum interference pattern
-            qubit1.hadamard()
-            qubit2.hadamard()
-            qubit1.phase_flip()
-            qubit2.rotate_y(math.pi / 4)
-        
-        elif circuit_type == "teleportation":
-            # Quantum teleportation simulation
-            qubit1.hadamard()
-            qubit1.phase_flip()
-            qubit2.rotate_y(math.pi / 3)
+        # Apply category-specific gates
+        if category == 'scramble':
+            qubit.hadamard()
+        elif category == 'reverse':
+            qubit.bit_flip()
+        elif category == 'ghost':
+            qubit.rotate_y(math.pi/3)
+        elif category == 'quantum_caps':
+            qubit.hadamard() if random.random() > 0.5 else qubit.phase_flip()
         
         # Measure and transform
-        m1 = qubit1.measure()
-        m2 = qubit2.measure()
-        
-        s1 = qubit1.get_superposition_strength()
-        s2 = qubit2.get_superposition_strength()
-        
-        # Entangled transformation - characters influence each other
-        if m1 == m2:  # Correlated measurement
-            new_char1 = transform_character_quantum(char1, m1, max(s1, s2))
-            new_char2 = transform_character_quantum(char2, m2, max(s1, s2))
-        else:  # Anti-correlated
-            new_char1 = transform_character_quantum(char1, 1 - m1, s1)
-            new_char2 = transform_character_quantum(char2, 1 - m2, s2)
-        
-        transformed_pairs.append(new_char1 + new_char2)
-        entangled_info.append({
-            'original': char1 + char2,
-            'transformed': new_char1 + new_char2,
-            'measurements': [m1, m2],
-            'correlation': 'correlated' if m1 == m2 else 'anti-correlated'
-        })
-    
-    return {
-        "transformed_text": ''.join(transformed_pairs),
-        "circuit_type": circuit_type,
-        "entangled_pairs": entangled_info,
-        "quantum_correlation": sum(1 for info in entangled_info if info['correlation'] == 'correlated') / len(entangled_info)
-    }
-
-def quantum_echo(text, echo_type="scramble"):
-    """
-    Generate a quantum echo of the input text using Qiskit quantum circuits.
-    
-    Args:
-        text (str): Input dialogue text
-        echo_type (str): Type of echo transformation - "scramble", "reverse", "ghost", "quantum_caps"
-    
-    Returns:
-        str: Quantum-transformed echo of the input text
-    """
-    if not text:
-        return ""
-    
-    # Convert text to binary representation
-    text_bits = []
-    for char in text:
-        # Convert each character to 8-bit binary
-        bits = format(ord(char), '08b')
-        text_bits.extend([int(b) for b in bits])
-    
-    # Limit to reasonable number of qubits (max 20 for performance)
-    n_qubits = min(len(text_bits), 20)
-    if n_qubits == 0:
-        return text
-    
-    # Create quantum circuit
-    qc = QuantumCircuit(n_qubits, n_qubits)
-    
-    # Initialize qubits based on text bits
-    for i in range(n_qubits):
-        if text_bits[i] == 1:
-            qc.x(i)
-    
-    # Apply quantum gates based on echo type
-    if echo_type == "scramble":
-        # Apply Hadamard gates to create superposition
-        for i in range(n_qubits):
-            qc.h(i)
-    elif echo_type == "reverse":
-        # Apply X gates and controlled operations
-        for i in range(n_qubits // 2):
-            qc.cx(i, n_qubits - 1 - i)
-    elif echo_type == "ghost":
-        # Apply rotation gates for subtle changes
-        for i in range(n_qubits):
-            qc.ry(0.5, i)
-    elif echo_type == "quantum_caps":
-        # Mix of Hadamard and Pauli-Z gates
-        for i in range(0, n_qubits, 2):
-            qc.h(i)
-        for i in range(1, n_qubits, 2):
-            qc.z(i)
-    
-    # Measure all qubits
-    qc.measure(range(n_qubits), range(n_qubits))
-    
-    # Execute the circuit
-    backend = AerSimulator()
-    transpiled_qc = transpile(qc, backend)
-    job = backend.run(transpiled_qc, shots=1)
-    result = job.result()
-    counts = result.get_counts()
-    
-    # Get the measurement result
-    measured_bits = list(counts.keys())[0]
-    
-    # Transform the original text based on quantum measurement
-    transformed_text = transform_text_with_quantum_result(text, measured_bits, echo_type)
-    
-    return transformed_text
-
-def transform_text_with_quantum_result(text, quantum_bits, echo_type):
-    """Transform text based on quantum measurement results."""
-    if not text or not quantum_bits:
-        return text
-    
-    result = ""
-    bit_index = 0
-    
-    for i, char in enumerate(text):
-        if bit_index >= len(quantum_bits):
-            bit_index = 0
-        
-        quantum_bit = quantum_bits[bit_index]
-        
-        if echo_type == "scramble":
-            # Randomly scramble characters based on quantum bit
-            if quantum_bit == '1':
-                if char.isalpha():
-                    # Replace with random similar character
-                    similar_chars = {
-                        'a': 'ă', 'e': 'ē', 'i': 'ī', 'o': 'ō', 'u': 'ū',
-                        'A': 'Ā', 'E': 'Ē', 'I': 'Ī', 'O': 'Ō', 'U': 'Ū',
-                        's': 'ş', 't': 'ţ', 'n': 'ñ', 'c': 'ç'
-                    }
-                    result += similar_chars.get(char, char)
-                else:
-                    result += char
-            else:
-                result += char
-        
-        elif echo_type == "reverse":
-            # Reverse segments based on quantum bits
-            if quantum_bit == '1':
-                result += char.upper() if char.islower() else char.lower()
-            else:
-                result += char
-        
-        elif echo_type == "ghost":
-            # Make text appear ghostly/faded
-            if quantum_bit == '1' and char.isalpha():
-                ghost_chars = {
-                    'a': 'ᵃ', 'e': 'ᵉ', 'i': 'ⁱ', 'o': 'ᵒ', 'u': 'ᵘ',
-                    'n': 'ⁿ', 's': 'ˢ', 't': 'ᵗ', 'r': 'ʳ', 'l': 'ˡ'
-                }
-                result += ghost_chars.get(char.lower(), char)
-            else:
-                result += char
-        
-        elif echo_type == "quantum_caps":
-            # Quantum-influenced capitalization
-            if quantum_bit == '1':
-                result += char.upper()
-            else:
-                result += char.lower()
-        
-        bit_index += 1
+        measurement = qubit.measure()
+        superposition = qubit.get_superposition_strength()
+        result += transform_char_basic(char, measurement, superposition)
     
     return result
 
-@app.route('/quantum_echo', methods=['POST'])
-def quantum_echo_endpoint():
-    """Main endpoint for quantum echo transformation."""
-    try:
-        data = request.get_json()
-        
-        if not data or 'text' not in data:
-            return jsonify({'error': 'Missing text parameter'}), 400
-        
-        text = data['text']
-        echo_type = data.get('echo_type', 'scramble')
-        
-        # Validate echo_type
-        valid_types = ['scramble', 'reverse', 'ghost', 'quantum_caps']
-        if echo_type not in valid_types:
-            echo_type = 'scramble'
-        
-        # Generate quantum echo
-        echoed_text = quantum_echo(text, echo_type)
-        
-        return jsonify({
-            'original': text,
-            'echo': echoed_text,
-            'echo_type': echo_type,
-            'quantum_processed': True
-        })
+def apply_advanced_transformation(text, category):
+    """Apply advanced quantum transformations using multi-qubit circuits."""
+    if len(text) < 2:
+        return text
     
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/quantum_gates', methods=['POST'])
-def quantum_gates_endpoint():
-    """Apply quantum gate sequences to text transformation."""
-    try:
-        data = request.get_json()
-        
-        if not data or 'text' not in data:
-            return jsonify({'error': 'Missing text parameter'}), 400
-        
-        text = data['text']
-        gate_sequence = data.get('gate_sequence', 'H-X')
-        
-        # Apply quantum gate transformation
-        result = quantum_gate_transform(text, gate_sequence)
-        
-        return jsonify({
-            'original': text,
-            'transformed': result['transformed_text'],
-            'quantum_states': result['quantum_states'],
-            'gates_applied': result['gates_applied'],
-            'superposition_average': result['superposition_average'],
-            'transformation_type': 'quantum_gates'
-        })
+    num_qubits = min(len(text), 8)
+    qc_manager = QuantumCircuitManager(num_qubits)
     
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/quantum_entanglement', methods=['POST'])
-def quantum_entanglement_endpoint():
-    """Advanced quantum text transformation using entanglement."""
-    try:
-        data = request.get_json()
-        
-        if not data or 'text' not in data:
-            return jsonify({'error': 'Missing text parameter'}), 400
-        
-        text = data['text']
-        circuit_type = data.get('circuit_type', 'entanglement')
-        
-        # Valid circuit types
-        valid_circuits = ['entanglement', 'interference', 'teleportation']
-        if circuit_type not in valid_circuits:
-            circuit_type = 'entanglement'
-        
-        # Apply quantum circuit transformation
-        result = quantum_circuit_transform(text, circuit_type)
-        
-        return jsonify({
-            'original': text,
-            'transformed': result['transformed_text'],
-            'circuit_type': result['circuit_type'],
-            'entangled_pairs': result['entangled_pairs'],
-            'quantum_correlation': result['quantum_correlation'],
-            'transformation_type': 'quantum_circuit'
-        })
+    # Apply gates based on category
+    if category == 'quantum_entanglement':
+        for i in range(0, num_qubits-1, 2):
+            gate = QuantumGate(GateType.BIT_FLIP)
+            qc_manager.apply_gate_to_qubit(gate, i)
+    elif category == 'quantum_gates':
+        for i in range(num_qubits):
+            gate_type = GateType.BIT_FLIP if i % 3 == 0 else GateType.PHASE_FLIP
+            gate = QuantumGate(gate_type, math.pi/4 if gate_type == GateType.ROTATE_Y else 0)
+            qc_manager.apply_gate_to_qubit(gate, i)
     
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Get state and transform
+    statevector = qc_manager.simulate()
+    return transform_text_from_statevector(text, statevector)
 
-@app.route('/quantum_memory', methods=['POST'])
-def quantum_memory_endpoint():
-    """Simulate quantum memory effects for story integration."""
-    try:
-        data = request.get_json()
-        
-        if not data or 'text' not in data:
-            return jsonify({'error': 'Missing text parameter'}), 400
-        
-        text = data['text']
-        memory_type = data.get('memory_type', 'fragmented')
-        intensity = data.get('intensity', 0.5)  # 0.0 to 1.0
-        
-        # Create quantum memory effects
-        if memory_type == 'fragmented':
-            # Fragment memories using quantum interference
-            result = quantum_circuit_transform(text, 'interference')
-            memory_state = 'fragmented'
-        elif memory_type == 'entangled':
-            # Entangled memories - parts influence each other
-            result = quantum_circuit_transform(text, 'entanglement')
-            memory_state = 'quantum_entangled'
-        elif memory_type == 'superposition':
-            # Memory in superposition - multiple states
-            gate_seq = f"H-ROT-Y-Z"
-            result = quantum_gate_transform(text, gate_seq)
-            memory_state = 'superposition'
+def transform_char_basic(char, measurement, superposition):
+    """Basic character transformation based on quantum results - MODERATE EFFECTS!"""
+    rand_val = random.random()
+    
+    # Apply transformation with moderate probability
+    if superposition > 0.3 or rand_val < 0.5:  # 50% chance for exotic effects
+        # Quantum brackets for special emphasis - reduced frequency
+        quantum_chars = {
+            'a': '⟨ᵃ⟩', 'e': '⟨ᵉ⟩', 'i': '⟨ⁱ⟩', 'o': '⟨ᵒ⟩', 'u': '⟨ᵘ⟩',
+            'A': '⟨ᴬ⟩', 'E': '⟨ᴱ⟩', 'I': '⟨ᴵ⟩', 'O': '⟨ᴼ⟩', 'U': '⟨ᵁ⟩',
+            'n': '⟨ⁿ⟩', 's': '⟨ˢ⟩', 't': '⟨ᵗ⟩', 'r': '⟨ʳ⟩', 'l': '⟨ˡ⟩'
+        }
+        if char.lower() in quantum_chars and rand_val < 0.2:  # 20% chance for brackets
+            return quantum_chars[char.lower()]
+    
+    if rand_val < 0.6:  # 60% chance for diacritics
+        # Diacritics and special characters
+        diacritic_chars = {
+            'a': 'ā', 'e': 'ē', 'i': 'ī', 'o': 'ō', 'u': 'ū', 'y': 'ÿ',
+            'A': 'Ā', 'E': 'Ē', 'I': 'Ī', 'O': 'Ō', 'U': 'Ū', 'Y': 'Ÿ',
+            'n': 'ñ', 'N': 'Ñ', 'c': 'ç', 'C': 'Ç',
+            's': 'š', 'S': 'Š', 'z': 'ž', 'Z': 'Ž',
+            'd': 'đ', 'D': 'Đ', 'l': 'ł', 'L': 'Ł',
+            'g': 'ğ', 'G': 'Ğ', 'h': 'ħ', 'H': 'Ħ'
+        }
+        if char in diacritic_chars:
+            return diacritic_chars[char]
+    
+    # If no transformation applied, return original character sometimes
+    if rand_val > 0.4:  # 40% chance to keep original
+        return char
+    
+    # Final fallback - swap case
+    return char.swapcase()
+
+def transform_text_from_statevector(text, statevector):
+    """Transform text based on quantum circuit statevector - MODERATE EFFECTS!"""
+    amplitudes = abs(statevector.data)
+    result = ""
+    
+    # Create moderate transformations based on quantum amplitudes
+    for i, char in enumerate(text):
+        if not char.isalpha():
+            result += char
+            continue
+            
+        if i < len(amplitudes):
+            amplitude = amplitudes[i]
+            
+            # Use amplitude to determine transformation intensity - more selective
+            if amplitude > 0.8:
+                # Very high amplitude - quantum brackets (rare)
+                quantum_map = {'a': '⟨ᵃ⟩', 'e': '⟨ᵉ⟩', 'i': '⟨ⁱ⟩', 'o': '⟨ᵒ⟩', 'u': '⟨ᵘ⟩'}
+                result += quantum_map.get(char.lower(), char.swapcase())
+            elif amplitude > 0.7:
+                # High amplitude - diacritics
+                diacritic_map = {'a': 'ā', 'e': 'ē', 'i': 'ī', 'o': 'ō', 'u': 'ū', 'n': 'ñ', 's': 'š'}
+                result += diacritic_map.get(char.lower(), char.swapcase())
+            elif amplitude > 0.5:
+                # Medium amplitude - case flip
+                result += char.swapcase()
+            else:
+                # Low amplitude - keep original or simple case change
+                result += char if amplitude < 0.3 else (char.upper() if char.islower() else char.lower())
         else:
-            # Default to quantum echo
-            echo_result = quantum_echo(text, 'ghost')
-            result = {
-                'transformed_text': echo_result,
-                'quantum_states': [],
-                'superposition_average': intensity
-            }
-            memory_state = 'quantum_echo'
+            # Default: 50% chance to keep original
+            result += char if random.random() < 0.5 else char.swapcase()
+    
+    return result
+
+def apply_quantum_transformation(text, category):
+    """Main dispatcher for quantum transformations."""
+    if category in ['scramble', 'reverse', 'ghost', 'quantum_caps']:
+        return apply_basic_transformation(text, category)
+    elif category in ['quantum_entanglement', 'quantum_gates', 'quantum_interference']:
+        return apply_advanced_transformation(text, category)
+    else:
+        return text
+
+@app.route('/quantum_gate', methods=['POST'])
+def quantum_gate_endpoint():
+    """
+    Minimal endpoint for quantum gate operations compatible with Godot game logic.
+    Handles bit_flip, phase_flip, and rotation gates.
+    """
+    try:
+        print("=" * 50)
+        print("[Flask] QUANTUM GATE REQUEST RECEIVED")
+        print("=" * 50)
         
-        # Adjust intensity of transformation
-        if intensity < 0.3:
-            # Low intensity - subtle changes
-            transformed_text = text  # Keep some original
-            for i in range(0, len(result['transformed_text']), 3):
-                if i < len(transformed_text):
-                    transformed_text = transformed_text[:i] + result['transformed_text'][i] + transformed_text[i+1:]
+        data = request.get_json()
+        print(f"[Flask] Raw request data: {data}")
+        
+        if not data:
+            print("[Flask] ❌ ERROR: No JSON data received")
+            return jsonify({'error': 'No JSON data provided'}), 400
+            
+        # Handle both 'gate' and 'gate_type' for compatibility
+        gate_type = data.get('gate_type') or data.get('gate')
+        
+        if not gate_type:
+            print("[Flask] ❌ ERROR: Missing gate_type/gate parameter")
+            return jsonify({'error': 'Missing gate_type or gate parameter'}), 400
+            
+        print(f"[Flask] 📡 Gate type received: '{gate_type}'")
+        
+        gate_type = gate_type.lower()
+        rotation_angle = data.get('rotation_angle', math.pi/4)  # Default rotation
+        
+        print(f"[Flask] 🔧 Normalized gate_type: '{gate_type}'")
+        print(f"[Flask] 🔄 Rotation angle: {rotation_angle}")
+        
+        # Create qubit and apply gate
+        print("[Flask] 🎲 Creating new qubit...")
+        qubit = Qubit()
+        
+        # Apply the requested gate
+        print(f"[Flask] ⚛️ Applying {gate_type} gate...")
+        if gate_type == 'bit_flip':
+            qubit.bit_flip()
+            print("[Flask] ✅ Bit-flip gate applied")
+        elif gate_type == 'phase_flip':
+            qubit.phase_flip()
+            print("[Flask] ✅ Phase-flip gate applied")
+        elif gate_type == 'rotation':
+            qubit.rotate_y(rotation_angle)
+            print(f"[Flask] ✅ Rotation gate applied with angle {rotation_angle}")
         else:
-            transformed_text = result['transformed_text']
+            print(f"[Flask] ❌ ERROR: Invalid gate_type: '{gate_type}'")
+            return jsonify({'error': f'Invalid gate_type: {gate_type}. Use: bit_flip, phase_flip, or rotation'}), 400
+        
+        # Measure the result
+        print("[Flask] 📊 Measuring qubit...")
+        measurement = qubit.measure()
+        superposition = qubit.get_superposition_strength()
+        
+        success = measurement == 0  # Success if measurement collapses to |0>
+        
+        result = {
+            'gate_type': gate_type,
+            'measurement': measurement,
+            'superposition_strength': round(superposition, 3),
+            'success': success
+        }
+        
+        print(f"[Flask] 🎯 Measurement result: {measurement}")
+        print(f"[Flask] 🌊 Superposition strength: {round(superposition, 3)}")
+        print(f"[Flask] ✅ Gate operation {'SUCCESS' if success else 'FAILURE'}")
+        print(f"[Flask] 📤 Sending response: {result}")
+        print("=" * 50)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"[Flask] ❌ CRITICAL ERROR in quantum_gate_endpoint: {str(e)}")
+        print(f"[Flask] 📋 Exception type: {type(e).__name__}")
+        import traceback
+        print(f"[Flask] 📍 Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'error': str(e),
+            'debug_info': f'Exception type: {type(e).__name__}'
+        }), 500
+
+@app.route('/quantum_text', methods=['POST'])
+def quantum_text_endpoint():
+    """
+    Single comprehensive endpoint for quantum text processing.
+    Receives a paragraph, categorizes words using quantum_word_dictionary,
+    and applies appropriate quantum transformations.
+    """
+    try:
+        print("=== QUANTUM TEXT REQUEST ===")
+        data = request.get_json()
+        print(f"Received data: {data}")
+        
+        if not data or 'text' not in data:
+            print("ERROR: Missing text parameter")
+            return jsonify({'error': 'Missing text parameter'}), 400
+        
+        text = data['text']
+        print(f"Processing text: {text}")
+        
+        # Process each word with quantum transformations
+        import re
+        words = re.findall(r'\b\w+\b|\W+', text)
+        
+        transformed_words = []
+        stats = {'quantum_words': 0, 'total_words': 0}
+        
+        for word in words:
+            if not word.strip().isalpha():
+                transformed_words.append(word)
+                continue
+                
+            stats['total_words'] += 1
+            print(f"Processing word: '{word}'")
+            
+            category = get_quantum_category_for_word(word)
+            print(f"Word '{word}' categorized as: {category}")
+            
+            if category != 'original':
+                stats['quantum_words'] += 1
+                print(f"Applying quantum transformation to '{word}' with category '{category}'")
+                transformed_word = apply_quantum_transformation(word, category)
+                print(f"Transformed '{word}' -> '{transformed_word}'")
+            else:
+                transformed_word = word
+                print(f"Word '{word}' kept original")
+                
+            transformed_words.append(transformed_word)
+        
+        # Calculate coverage
+        coverage = (stats['quantum_words'] / stats['total_words'] * 100) if stats['total_words'] > 0 else 0
         
         return jsonify({
             'original': text,
-            'memory_echo': transformed_text,
-            'memory_type': memory_type,
-            'memory_state': memory_state,
-            'intensity': intensity,
-            'quantum_coherence': result.get('superposition_average', intensity),
-            'story_context': 'quantum_memory_fragment'
+            'transformed': ''.join(transformed_words),
+            'coverage_percent': round(coverage, 1),
+            'quantum_words': stats['quantum_words'],
+            'total_words': stats['total_words']
         })
-    
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"ERROR in quantum_text_endpoint: {str(e)}")
+        print(f"Exception type: {type(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({'error': str(e), 'debug_info': f'Exception type: {type(e).__name__}'}), 500
 
 @app.route('/quantum_echo_types', methods=['GET'])
 def get_echo_types():
     """Get available quantum transformation types."""
     return jsonify({
         'basic_echo_types': [
-            {
-                'name': 'scramble',
-                'description': 'Quantum scrambling with special characters'
-            },
-            {
-                'name': 'reverse',
-                'description': 'Quantum case reversal'
-            },
-            {
-                'name': 'ghost',
-                'description': 'Ghostly superscript transformation'
-            },
-            {
-                'name': 'quantum_caps',
-                'description': 'Quantum-influenced capitalization'
-            }
+            {'name': 'scramble', 'description': 'Quantum scrambling with special characters'},
+            {'name': 'reverse', 'description': 'Quantum case reversal'},
+            {'name': 'ghost', 'description': 'Ghostly superscript transformation'},
+            {'name': 'quantum_caps', 'description': 'Quantum-influenced capitalization'}
         ],
         'advanced_transformations': [
-            {
-                'name': 'quantum_gates',
-                'description': 'Apply quantum gate sequences (H, X, Y, Z, ROT)',
-                'endpoint': '/quantum_gates',
-                'parameters': ['text', 'gate_sequence']
-            },
-            {
-                'name': 'quantum_entanglement',
-                'description': 'Multi-qubit entanglement transformations',
-                'endpoint': '/quantum_entanglement',
-                'parameters': ['text', 'circuit_type'],
-                'circuit_types': ['entanglement', 'interference', 'teleportation']
-            },
-            {
-                'name': 'quantum_memory',
-                'description': 'Quantum memory effects for story integration',
-                'endpoint': '/quantum_memory',
-                'parameters': ['text', 'memory_type', 'intensity'],
-                'memory_types': ['fragmented', 'entangled', 'superposition']
-            }
+            {'name': 'quantum_gates', 'description': 'Apply quantum gate sequences (H, X, Y, Z, ROT)'},
+            {'name': 'quantum_entanglement', 'description': 'Multi-qubit entanglement transformations'},
+            {'name': 'quantum_memory', 'description': 'Quantum memory effects for story integration'}
         ]
     })
-
-@app.route('/quantum_demo', methods=['POST'])
-def quantum_demo_endpoint():
-    """Demonstrate the qiskit quantum functionality with example usage from colleague."""
-    try:
-        data = request.get_json()
-        
-        if not data or 'text' not in data:
-            # Use default demo text
-            text = "Hello Quantum World"
-        else:
-            text = data['text']
-        
-        # Example 1: Your colleague's single qubit operations
-        # Create a single qubit circuit
-        qc = QuantumCircuit(1)
-        
-        # Apply bit flip (X gate)
-        qc.x(0)
-        
-        # Apply phase flip (Z gate)
-        qc.z(0)
-        
-        # Apply rotation by theta = pi/2
-        qc.ry(math.pi/2, 0)
-        
-        # Get final statevector of the qubit after operations
-        backend = AerSimulator(method='statevector')
-        transpiled_qc = transpile(qc, backend)
-        job = backend.run(transpiled_qc, shots=1)
-        result = job.result()
-        state = result.get_statevector()
-        
-        # Example 2: Using the Qubit class with qiskit
-        qubit = Qubit()
-        qubit.bit_flip()
-        qubit.phase_flip()
-        qubit.rotate_y(np.pi/4)
-        measurement_result = qubit.measure()
-        amplitudes = qubit.get_amplitudes()
-        
-        # Example 3: Multi-qubit circuit with your colleague's quantum echo pattern
-        n_qubits = min(len(text), 8)  # Limit for demo
-        echo_qc = QuantumCircuit(n_qubits, n_qubits)
-        
-        # Initialize qubits based on text (your colleague's pattern)
-        text_bits = []
-        for char in text[:n_qubits]:
-            bits = format(ord(char), '08b')
-            text_bits.extend([int(b) for b in bits[:n_qubits]])
-        
-        for i in range(n_qubits):
-            if i < len(text_bits) and text_bits[i] == 1:
-                echo_qc.x(i)
-        
-        # Apply Hadamard gates to create superposition (scramble effect)
-        for i in range(n_qubits):
-            echo_qc.h(i)
-        
-        # Measure all qubits
-        echo_qc.measure(range(n_qubits), range(n_qubits))
-        
-        # Execute the circuit
-        backend = AerSimulator()
-        transpiled_echo_qc = transpile(echo_qc, backend)
-        job = backend.run(transpiled_echo_qc, shots=1)
-        echo_result = job.result()
-        echo_counts = echo_result.get_counts()
-        measured_bits = list(echo_counts.keys())[0] if echo_counts else "0" * n_qubits
-        
-        # Apply quantum gate transformation to text
-        gate_result = quantum_gate_transform(text, "H-X-Y-Z")
-        
-        return jsonify({
-            'demo_text': text,
-            'colleague_single_qubit_demo': {
-                'statevector': [complex(amp).real for amp in state.data],  # Real parts for JSON
-                'operations_applied': ['X (bit flip)', 'Z (phase flip)', 'Ry(π/2) rotation'],
-                'final_statevector_description': 'After X-Z-Ry(π/2) sequence'
-            },
-            'qubit_class_demo': {
-                'measurement': measurement_result,
-                'amplitudes': [complex(amp).real for amp in amplitudes],  # Real parts for JSON
-                'operations': ['bit_flip', 'phase_flip', 'rotate_y(π/4)']
-            },
-            'quantum_echo_circuit_demo': {
-                'n_qubits': n_qubits,
-                'initial_text_bits': text_bits[:n_qubits],
-                'measured_result': measured_bits,
-                'circuit_description': 'Text → binary → qubits → X gates → Hadamard → measure'
-            },
-            'text_transformation': gate_result,
-            'qiskit_version_info': {
-                'status': 'Successfully integrated and operational',
-                'api_version': 'Modern qiskit 2.1.2 with AerSimulator',
-                'colleague_code_adapted': True,
-                'quantum_classes_available': ['Qubit', 'QuantumGate', 'QuantumCircuitManager', 'DialogueManager', 'SceneController']
-            }
-        })
-    
-    except Exception as e:
-        return jsonify({'error': str(e), 'qiskit_status': 'Error occurred'}), 500
-
-@app.route('/colleague_quantum_demo', methods=['POST'])
-def colleague_quantum_demo():
-    """Demonstrate your colleague's exact quantum operations using qiskit."""
-    try:
-        data = request.get_json()
-        text = data.get('text', 'Quantum') if data else 'Quantum'
-        
-        # Your colleague's Example 1: Single qubit with gate functions
-        def bit_flip(circuit):
-            circuit.x(0)  # Apply X gate to qubit 0
-
-        def phase_flip(circuit):
-            circuit.z(0)  # Apply Z gate to qubit 0
-
-        def rotate(circuit, theta):
-            circuit.ry(theta, 0)  # Rotate qubit 0 by theta radians about Y axis
-
-        # Initialize circuit exactly as your colleague showed
-        qc = QuantumCircuit(1)
-        
-        # Apply bit flip
-        bit_flip(qc)
-        
-        # Apply phase flip
-        phase_flip(qc)
-        
-        # Apply rotation by theta = pi/2
-        rotate(qc, math.pi/2)
-        
-        # Get final statevector using modern qiskit API
-        backend = AerSimulator(method='statevector')
-        transpiled_qc = transpile(qc, backend)
-        job = backend.run(transpiled_qc, shots=1)
-        result = job.result()
-        state = result.get_statevector()
-        
-        # Your colleague's Example 2: Qubit class demo
-        qubit = Qubit()
-        qubit.bit_flip()
-        qubit.phase_flip()
-        qubit.rotate_y(np.pi/4)
-        measurement = qubit.measure()
-        
-        # Your colleague's Example 3: Text-based quantum circuit (their exact pattern)
-        # Convert text to binary representation
-        text_bits = []
-        for char in text:
-            # Convert each character to 8-bit binary
-            bits = format(ord(char), '08b')
-            text_bits.extend([int(b) for b in bits])
-        
-        # Limit to reasonable number of qubits (max 16 for demo)
-        n_qubits = min(len(text_bits), 16)
-        if n_qubits > 0:
-            # Create quantum circuit - your colleague's pattern
-            echo_qc = QuantumCircuit(n_qubits, n_qubits)
-            
-            # Initialize qubits based on text bits - exact colleague code
-            for i in range(n_qubits):
-                if text_bits[i] == 1:
-                    echo_qc.x(i)
-            
-            # Apply quantum gates based on echo type - scramble (colleague's code)
-            echo_type = "scramble"
-            if echo_type == "scramble":
-                # Apply Hadamard gates to create superposition
-                for i in range(n_qubits):
-                    echo_qc.h(i)
-            
-            # Measure all qubits - exact colleague pattern
-            echo_qc.measure(range(n_qubits), range(n_qubits))
-            
-            # Execute the circuit - colleague's approach but with modern API
-            backend = AerSimulator()
-            transpiled_echo = transpile(echo_qc, backend)
-            job = backend.run(transpiled_echo, shots=1)
-            echo_result = job.result()
-            echo_counts = echo_result.get_counts()
-            
-            # Get the measurement result
-            measured_bits = list(echo_counts.keys())[0] if echo_counts else "0" * n_qubits
-            
-            # Transform the original text based on quantum measurement (colleague's function)
-            transformed_text = transform_text_with_quantum_result(text, measured_bits, echo_type)
-        else:
-            transformed_text = text
-            measured_bits = ""
-        
-        return jsonify({
-            'original_text': text,
-            'colleague_demonstration': {
-                'single_qubit_operations': {
-                    'circuit_description': 'Single qubit: X → Z → Ry(π/2)',
-                    'final_statevector': [complex(amp).real for amp in state.data],
-                    'operations': ['bit_flip (X gate)', 'phase_flip (Z gate)', 'rotate_y (Ry gate with π/2)']
-                },
-                'qubit_class_demo': {
-                    'measurement_result': measurement,
-                    'operations_applied': ['bit_flip', 'phase_flip', 'rotate_y(π/4)'],
-                    'description': 'Using the Qubit class with qiskit integration'
-                },
-                'text_quantum_echo': {
-                    'original_text': text,
-                    'binary_representation': text_bits[:n_qubits] if n_qubits > 0 else [],
-                    'quantum_measured_bits': measured_bits,
-                    'transformed_text': transformed_text,
-                    'circuit_operations': 'Text→Binary→Initialize qubits→Hadamard gates→Measure→Transform',
-                    'echo_type': 'scramble'
-                }
-            },
-            'qiskit_integration': {
-                'colleague_code_status': 'Successfully adapted to modern qiskit API',
-                'api_changes': 'execute() → transpile() + run()',
-                'backend_used': 'AerSimulator (modern)',
-                'compatibility': 'Full compatibility with colleague quantum patterns'
-            }
-        })
-    
-    except Exception as e:
-        return jsonify({'error': str(e), 'colleague_demo_status': 'Error occurred'}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
     try:
-        # Test qiskit import and basic functionality
         from qiskit import QuantumCircuit
         from qiskit_aer import AerSimulator
-        from qiskit.quantum_info import Statevector
         
-        # Quick test - create and run a simple circuit
         test_qc = QuantumCircuit(1)
-        test_qc.h(0)  # Hadamard gate
+        test_qc.h(0)
         
         backend = AerSimulator(method='statevector')
         transpiled_test = transpile(test_qc, backend)
@@ -948,8 +478,7 @@ def health_check():
         'service': 'quantum-echo-server',
         'qiskit_available': qiskit_status,
         'qiskit_status': qiskit_version,
-        'quantum_classes': ['Qubit', 'QuantumGate', 'QuantumCircuitManager', 'DialogueManager', 'SceneController'],
-        'colleague_code_integration': 'Successfully adapted to modern qiskit API'
+        'quantum_classes': ['Qubit', 'QuantumGate', 'QuantumCircuitManager']
     })
 
 @app.route('/', methods=['GET'])
@@ -957,41 +486,19 @@ def index():
     """Basic info endpoint."""
     return jsonify({
         'service': 'Quantum Echo Server',
-        'version': '2.2.0',
+        'version': '3.0.0',
         'description': 'Advanced quantum text transformation using real qiskit quantum gates and circuits',
-        'qiskit_version': 'Modern qiskit 2.1.2 with AerSimulator',
-        'colleague_integration': 'Code patterns from colleague successfully adapted',
         'endpoints': {
-            'POST /quantum_echo': 'Basic quantum echo transformation with real qiskit circuits',
-            'POST /quantum_gates': 'Apply quantum gate sequences using qiskit (H, X, Y, Z, ROT)',
-            'POST /quantum_entanglement': 'Multi-qubit quantum circuits (entanglement, interference, teleportation)',
-            'POST /quantum_memory': 'Quantum memory effects for story integration',
-            'POST /quantum_demo': 'Comprehensive qiskit demonstration',
-            'POST /colleague_quantum_demo': 'Demonstration of colleague\'s exact quantum patterns',
+            'POST /quantum_text': 'Comprehensive quantum text processing with word dictionary',
             'GET /quantum_echo_types': 'Get available transformation types',
             'GET /health': 'Health check with qiskit functionality test'
         },
         'quantum_features': [
             'Real qiskit quantum circuits with Statevector simulation',
-            'Colleague\'s quantum gate operations (bit_flip, phase_flip, rotate)',
-            'Authentic quantum gate operations (Hadamard, Pauli-X/Y/Z, Rotations)',
-            'Multi-qubit entanglement using qiskit QuantumCircuit',
-            'True quantum superposition effects with qiskit Statevector',
-            'Story-integrated quantum memory fragments',
-            'Text-to-quantum circuit transformation (colleague\'s pattern)',
-            'Quantum echo with Hadamard scrambling'
-        ],
-        'qiskit_integration': {
-            'backend': 'AerSimulator (modern API)',
-            'quantum_classes': ['Qubit', 'QuantumGate', 'QuantumCircuitManager'],
-            'supported_gates': ['X (bit_flip)', 'Z (phase_flip)', 'Ry (rotate_y)', 'H (hadamard)'],
-            'colleague_patterns': ['Single qubit operations', 'Qubit class with qiskit', 'Text quantum echo'],
-            'api_modernization': 'execute() → transpile() + run()',
-            'dialogue_manager': 'Available for game integration',
-            'scene_controller': 'Available for scene transitions'
-        }
+            'Quantum word dictionary for intelligent categorization',
+            'Condensed transformation functions for efficiency'
+        ]
     })
 
 if __name__ == '__main__':
-    # Development server
     app.run(host='0.0.0.0', port=8000, debug=True)

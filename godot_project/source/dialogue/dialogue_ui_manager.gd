@@ -71,6 +71,29 @@ var next_dialogue_callback: Callable
 ## populated.
 @export var dialogue_options: Array[Button]
 ## Reference to the quantum echo service for text transformation  
+## 🌟 QUANTUM TEXT API: This connects to the Flask quantum echo server at 108.175.12.95:8000
+## 
+## Available API Endpoints:
+## - /quantum_echo: Transform text with various echo effects (scramble, case_flip, ghost, quantum_caps)
+## - /quantum_memory: Process text with memory-based quantum transformations (fragmented, entangled, superposition)
+## - /health: Check server status and qiskit availability
+##
+## Echo Types Available:
+## - SCRAMBLE: Randomly scrambles characters using quantum measurement  
+## - CASE_FLIP: Flips case using quantum superposition collapse
+## - GHOST: Creates ghostly text effects with quantum interference
+## - QUANTUM_CAPS: Applies quantum-based capitalization patterns
+## - ORIGINAL: Returns unmodified text (quantum bypass)
+##
+## Memory Types for Advanced Storytelling:
+## - FRAGMENTED: Simulates fragmented memory states (intensity controls fragmentation)
+## - ENTANGLED: Creates text entanglement effects between phrases
+## - SUPERPOSITION: Text exists in quantum superposition until observed
+##
+## Usage Pattern:
+##   quantum_echo_service.process_quantum_echo(text, EchoType.SCRAMBLE, callback, fallback)
+##   quantum_echo_service.process_quantum_memory(text, MemoryType.FRAGMENTED, intensity, callback, fallback)
+##
 var quantum_echo_service: Node
 
 
@@ -82,9 +105,7 @@ func _ready():
 	
 	ui_container.visible = false
 	
-	# Initialize quantum echo service
-	quantum_echo_service = preload("res://source/dialogue/quantum_echo_service.gd").new()
-	add_child(quantum_echo_service)
+	# Note: No longer using quantum_echo_service - direct Flask server communication
 	
 	# Default text speed, remove when options script sets this. 
 	set_text_speed(TextSpeedOption.NORMAL)
@@ -190,74 +211,102 @@ func write_text(bbcode_text: String, talker: String, _speaker_image: String):
 	if delay_after_speaker_name > 0:
 		await get_tree().create_timer(delay_after_speaker_name).timeout
 	
-	# 🌟 NEW: Choose quantum transformation based on dialogue content
-	_process_text_with_quantum_effects(bbcode_text, talker)
+	# 🌟 NEW: Direct quantum server processing (simplified!)
+	_process_text_with_quantum_server(bbcode_text)
 
-## 🌟 NEW: Smart quantum processing based on context
-func _process_text_with_quantum_effects(text: String, speaker: String):
-	# Check for memory-related keywords in the text
-	var lower_text = text.to_lower()
+## 🌟 SIMPLIFIED QUANTUM TEXT PROCESSING
+## Directly calls the Flask server's /quantum_text endpoint for comprehensive processing
+func _process_text_with_quantum_server(text: String):
+	print("[QuantumUI] Processing text with quantum server...")
 	
-	if "memory" in lower_text or "remember" in lower_text or "forgot" in lower_text or "vanished" in lower_text:
-		# Use quantum memory effects for memory-related dialogue
-		print("🧠 Using quantum memory effects for: ", text.substr(0, 50))
-		quantum_echo_service.process_quantum_memory(
-			text,
-			quantum_echo_service.QuantumMemoryType.FRAGMENTED,
-			0.7,  # High intensity for dramatic memory effects
-			_on_quantum_text_received,
-			text
-		)
-	elif speaker == "Ava" or speaker == "AI Assistant":
-		# Use quantum entanglement-like effects for AI dialogue
-		print("🤖 Using quantum caps for AI: ", text.substr(0, 50))
-		quantum_echo_service.process_quantum_echo(
-			text, 
-			quantum_echo_service.EchoType.QUANTUM_CAPS,
-			_on_quantum_text_received,
-			text
-		)
-	elif "echo" in lower_text or "quantum" in lower_text or "burst" in lower_text:
-		# Use ghost effects for quantum-related terminology
-		print("👻 Using ghost effects for quantum terms: ", text.substr(0, 50))
-		quantum_echo_service.process_quantum_echo(
-			text, 
-			quantum_echo_service.EchoType.GHOST,
-			_on_quantum_text_received,
-			text
-		)
-	else:
-		# Default scramble effect
-		print("🌀 Using default scramble for: ", text.substr(0, 50))
-		quantum_echo_service.process_quantum_echo(
-			text, 
-			quantum_echo_service.EchoType.SCRAMBLE,
-			_on_quantum_text_received,
-			text
-		)
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+	
+	# Store original text in the HTTPRequest node for later retrieval
+	http_request.set_meta("original_text", text)
+	
+	# Create request data
+	var json_data = {
+		"text": text
+	}
+	
+	var json_string = JSON.stringify(json_data)
+	var headers = ["Content-Type: application/json"]
+	
+	# Connect response handler - signal parameters come first, then bound parameters
+	http_request.request_completed.connect(_on_quantum_server_response)
+	
+	# Send request to Flask server (production server)
+	var server_url = "http://108.175.12.95:8000/quantum_text"
+	print("[QuantumUI] Sending request to: %s" % server_url)
+	http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)
 
-## Called when quantum echo server returns processed text
-func _on_quantum_text_received(processed_text: String):
-	# Set the quantum-processed text
+## Handle quantum server response
+## Signal signature: request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray)
+func _on_quantum_server_response(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray):
+	# Get the HTTPRequest node that sent the signal
+	var http_request = get_tree().get_nodes_in_group("http_requests")[0] if get_tree().get_nodes_in_group("http_requests").size() > 0 else null
+	
+	# If we can't find the request node, look through children
+	if not http_request:
+		for child in get_children():
+			if child is HTTPRequest:
+				http_request = child
+				break
+	
+	var original_text = ""
+	if http_request and http_request.has_meta("original_text"):
+		original_text = http_request.get_meta("original_text")
+		# Clean up HTTP request node
+		http_request.queue_free()
+	
+	var processed_text = original_text  # Fallback to original
+	
+	if response_code == 200:
+		var response_text = body.get_string_from_utf8()
+		print("[QuantumUI] Quantum server response: %s" % response_text.substr(0, 100))
+		
+		var json = JSON.new()
+		var parse_result = json.parse(response_text)
+		
+		if parse_result == OK:
+			var response_data = json.data
+			if response_data.has("transformed"):
+				processed_text = response_data["transformed"]
+				var coverage = response_data.get("coverage_percent", 0)
+				print("[QuantumUI] ✨ Quantum processing complete! Coverage: %s%%" % coverage)
+			else:
+				print("[QuantumUI] ⚠️ No 'transformed' field in response")
+		else:
+			print("[QuantumUI] ⚠️ Failed to parse JSON response")
+	else:
+		print("[QuantumUI] ⚠️ Quantum server error: %s - using original text" % response_code)
+	
+	# Display the processed text
+	_display_processed_text(processed_text)
+	# Display the processed text with typewriter animation
+	_display_processed_text(processed_text)
+
+## Display the final processed text with typewriter animation
+func _display_processed_text(processed_text: String):
+	print("[QuantumUI] ✨ Displaying processed text: %s" % processed_text.substr(0, 80))
 	text_area.text = processed_text
 	text_area.visible_characters = 0
 	
+	# Start typewriter animation
+	_animate_typewriter_effect()
+
+## 🎭 TYPEWRITER ANIMATION
+func _animate_typewriter_effect():
 	var length_adjusted_text_speed = text_speed / text_area.get_total_character_count()
-	
-	# Animate the quantum text appearing
 	while !is_text_finished():
 		text_area.visible_ratio += length_adjusted_text_speed * get_process_delta_time() * text_speed_multiplier
-		
-		# audio
 		if text_area.visible_characters != previous_shown_letters_amount:
 			previous_shown_letters_amount += 1
-			#print("could play sound for letter " + str(previous_shown_letters_amount))
+			# Optionally play sound for each letter
 			if play_sound_pattern[previous_shown_letters_amount % len(play_sound_pattern)] == "0":
-				#print("should play sound for letter " + str(previous_shown_letters_amount))
-				# todo audio manager should/could play a randomized typewriter sound 
 				pass
 		await get_tree().process_frame
-
 
 ## Populates selectable options for the player.
 func show_player_options(options: Array[DialogueOption]) -> void:

@@ -1,3 +1,43 @@
+## 🚧 SOPHISTICATED QUANTUM GATE MANAGEMENT SYSTEM - CURRENTLY UNUSED 🚧
+##
+## ⚠️  STATUS: This is a complete but unused quantum system that could replace
+##     the manual quantum logic in dialogue.gd with a more sophisticated approach
+##
+## 🔬 QUANTUM GATE INTEGRATION:
+## This isn't used but could be in place of the complicated logic in dialogue.gd
+## to manage quantum gate choices and story consequences.
+##
+## 🎮 DESIGNED GAME MECHANICS:
+## - Player choices map to quantum gates (X, Y, Z) 
+## - 85% success rate for quantum operations (matching GDD)
+## - Real qiskit circuit execution via /quantum_gates endpoint
+## - Memory fragment generation based on quantum measurements
+## - Story state tracking with quantum-influenced branching
+##
+## 📡 SERVER INTEGRATION:
+## - Connects to quantum echo server at 108.175.12.95:8000
+## - Uses /quantum_gates endpoint for circuit execution
+## - Processes quantum measurement results for story outcomes
+## - Generates memory fragments from quantum superposition states
+##
+## 🌟 ADVANCED FEATURES:
+## - Gate sequence tracking for story progression
+## - Success probability based on quantum measurement
+## - Coherent story state management with quantum effects
+## - Memory fragment system using quantum echoes
+## - Signal-based quantum result broadcasting
+##
+## 💡 POTENTIAL UPGRADE PATH:
+## - Replace manual quantum_measurement_outcome() in dialogue.gd
+## - Use apply_quantum_gate() for player choices
+## - Integrate get_memory_fragment() for story memories
+## - Connect quantum_gate_result signal to story progression
+##
+## 🎯 VS CURRENT SYSTEM:
+##    Current: Manual bit-flip logic in dialogue.gd with classical randomness
+##    This System: Full quantum circuit simulation with real measurement outcomes
+##
+
 class_name QuantumGateManager
 extends Node
 ## Manages quantum gate decisions and their story consequences

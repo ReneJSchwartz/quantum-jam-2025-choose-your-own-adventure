@@ -18,5 +18,5 @@ echo "Installing requirements..."
 pip install -r requirements.txt
 
 # Start the server
-echo "Starting server on http://0.0.0.0:5000"
+echo "Starting server on http://0.0.0.0:8000"
 python app.py

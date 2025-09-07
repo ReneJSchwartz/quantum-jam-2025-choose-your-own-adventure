@@ -43,7 +43,7 @@ pip install flask flask-cors requests
 
 # Test if it works
 python3 deploy/app-minimal.py &
-curl http://localhost:5000/health
+curl http://108.175.12.95:8000/health
 # Press Ctrl+C to stop
 ```
 
@@ -55,7 +55,7 @@ pip install qiskit qiskit-aer numpy
 
 # Test the full version
 python3 deploy/app.py &
-curl http://localhost:5000/health
+curl http://108.175.12.95:8000/health
 # Press Ctrl+C to stop
 ```
 
@@ -112,7 +112,7 @@ sudo systemctl status quantum-echo
 
 ### **Step 6: Set Up Reverse Proxy (Make it Accessible)**
 
-Since your app runs on localhost:5000, you need to make it accessible from the internet.
+Since your app runs on 108.175.12.95:8000, you need to make it accessible from the internet.
 
 #### **Option A: Nginx Reverse Proxy**
 ```bash
@@ -126,7 +126,7 @@ server {
     server_name happy-noyce.108-175-12-95.plesk.page;
     
     location /quantum-api/ {
-        proxy_pass http://127.0.0.1:5000/;
+        proxy_pass http://127.0.0.1:8000/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -216,7 +216,7 @@ sudo tail -f /var/log/nginx/error.log
 ### **Firewall issues:**
 ```bash
 # Allow port through firewall
-sudo ufw allow 5000
+sudo ufw allow 8000
 sudo ufw allow 8000
 ```
 

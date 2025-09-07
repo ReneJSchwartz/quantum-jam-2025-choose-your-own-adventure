@@ -410,8 +410,115 @@ The warning is cut off, the lights flicker back to normal.
 
 And the heavy security doors slide open.""")
 
+	dilemma()
+
+
 func dilemma():
+	add_text("""A woman in a sharp suit walks into the lab flanked by two heavily armed guards.
+
+Rival Leader: “Now that’s better. All that shouting, all those lights. We have a very delicate situation here and we wouldn’t want any accidents to occur, now would we?”""")
+	add_option("Of course not.", dilemma_continue_first)
+	add_option("No, ma’am.", dilemma_continue_first)
+	queue_added_options()
 	
+func dilemma_continue_first():
+	add_text("""The stranger smiles blandly. 
+Rival Leader: “It wasn’t a question.”
+
+She turns and looks at the stable quantum echo with interest.
+Rival Leader: “So this it it, the Quantum Echo Processor?”
+
+Theo: “It is property of NovaCore and you can go back and tell WaveVector that they’re playing with fire.” 
+Theo: “Trespassing, property damage… Theft.”
+Theo: “Don’t tell me you weren’t behind sabotaging the last experiment.”
+Theo: “That collapse was your fault!”
+
+The woman shrugs. “Personally, no. Not my fault.”
+She turns to Kaela.
+Rival Leader:
+“You don’t understand the power you’re playing with. These echoes could rewrite the past, control futures. Do you want that sort of tech being controlled by NovaCore?”""")
+
+	add_option("""“I’m not sure”""", dilemma_continue_second)
+	add_option("""“I don’t trust either of you.”""", dilemma_continue_second)
+	add_option("""“Can’t we work together?”""", dilemma_continue_second)
+	queue_added_options()
 	
-	pass
+func dilemma_continue_second():
+	add_text("""Rival Leader: “It doesn’t matter. Hand over the Echo Processor, or everything you’ve built will vanish — like your precious quantum light.”
+
+Theo: “You’ll destroy everything?! How does that benefit anyone? NovaCore wants to use Echo Tech to create a better world.”
+
+Rival Leader: “NovaCore wants to build a better world? Please, we have evidence NovaCore was planning to use this technology to rewrite quantum memory.”
+
+Theo: “For the better!”
+
+Kaela looks at them both, unsure.
+Kaela: “And what does WaveVector plan to do with it?”
+
+Rival Leader: “WaveVector will make sure no one can have that power. And we will destroy everything here, including you to stop that.”
+
+Kaela: “I hold the cornerstone of tomorrow’s network—secure, encrypted, and resilient beyond classical means.”
+“This is the master key to the quantum internet, an unbreakable vault for global communication and knowledge sharing.”
+
+“You can’t destroy it.”
+
+“The echoes will guide me.”""")
+
+	add_option("Hand over control to avoid conflict.", dilemma_hand_over)
+	add_option("Refuse, risking a quantum cascade failure.", dilemma_refuse)
+	add_option("Attempt to negotiate a peaceful sharing of the technology.", dilemma_negotiate)
+	queue_added_options()
 	
+func dilemma_hand_over():
+	add_text("""Suspicion and urgency weigh heavy.
+But you hand the quantum echo memory over to the rival faction. 
+Their leader nods at you with a guarded smile, eyes gleaming with hungry ambition. 
+The technology you entrust to them carries great promise—but also great risk. You watch as they begin to unlock its secrets, knowing that in their hands, it may fuel conflict or create chaos.
+Dialogue (Rival Leader):
+ "Wise choice, Kaela. 
+To hold it is to hold the future. But with this power comes peril— with this, we will transcend the limits the masses dare not challenge. Power born from the vanished light shall be ours to command. 
+Prepare yourself—what comes next will change everything, for better or worse."
+Kaela (internal monologue):
+ "Have I condemned the future to their control? Or sparked a new era of unimaginable discovery? Only time will tell if I’ve made the right choice…"
+THE END""")
+
+func dilemma_refuse():
+	add_text("""Kaela: "The echoes won’t be silenced today! I will keep them safe!"
+“But only NovaCore can help keep them stable.”
+
+Rival Leader: “Then we will destroy your Echo Processor!”
+
+Kaela: Defiant, you refuse, using the echo processor to shift the system and drive out the rivals.
+
+Gameplay Challenge: Stabilize the quantum system during a sabotage-induced quantum collapse.
+
+Having succeeded you are determined to safeguard the precious echoes.
+You secure the quantum memory deep within NovaCore’s vaults. 
+The lights dim as the complex locks down, shadows stretching across gleaming consoles. 
+Here, progress will be measured, but also driven by unwavering hope. 
+With each pulse of the quantum echoes, the promise of a brighter tomorrow persists—under your watchful eyes.
+Dialogue (Kaela):
+"This knowledge is too fragile, too important to fall into careless hands. 
+NovaCore will be the guardian of this legacy—the light keeper—and I swear to guard it with every breath. 
+Our journey is just beginning, and this time, we will steer the echoes to better ends."
+Theo:
+"Kaela, burdened with hope, burdened with risk. But you carry it nobly. 
+Kalea:
+“Now we build, cautiously, for the world awaits what we will become."
+
+	THE END.""")
+	
+func dilemma_negotiate():
+	add_text("""Kaela: “I don’t trust either of you, but this technology needs to be developed. 
+It is risky… but so is isolation. 
+In an unprecedented move, you open the gates of cooperation, inviting rival factions and allies alike to share the quantum echo memory. 
+Theo: "Together, no shadow can claim dominion over the echoes. This collaboration is our light against the unknown—a pact forged in quantum threads.”
+Rival Leader: “Let us weave a future that honors all our dreams, where memory and science coexist in harmony."
+A tense but hopeful assembly forms, uniting disparate visions into a fragile alliance. 
+As the echoes pulse through shared quantum processors, knowledge multiplies and expands beyond any single mind. The future flickers not with conflict, but with potential synergy.
+
+AI Ava: "Collaborative quantum computing has increased system stability."
+Kaela:
+"United, we stand not just as sentinels of the vanished light, but as architects of the next chapter. May our echoes resonate across all horizons."
+
+	THE END.""")

@@ -12,6 +12,7 @@ var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
 var temp_options: Array[DialogueOption]
 var on_dialogue_end_callback: Callable = func(): pass
+var next_proceed_callback = func(): pass
 ## Delay hiding dialogue by this amount. 
 var hide_dialogue_delay: float = 0
 static var instance: Dialogue
@@ -68,14 +69,17 @@ func start_dialogue():
 ## Called by DialogueUiManager after first step. Either supplies the next step or ends the
 ## dialogue.
 func continue_dialogue():
+	next_proceed_callback.call()
+	next_proceed_callback = func(): pass
+	
 	if len(steps) <= current_dialogue_step:
 		# game basically ended
-		on_dialogue_end_callback.call()
-		on_dialogue_end_callback = func(): pass
-		get_tree().create_timer(hide_dialogue_delay).timeout.connect(
-			DialogueUiManager.instance.hide_dialogue_overlay)
+		#get_tree().create_timer(hide_dialogue_delay).timeout.connect(
+			#DialogueUiManager.instance.hide_dialogue_overlay)
 		dialogue_running = false
 		steps = []
+		on_dialogue_end_callback.call()
+		on_dialogue_end_callback = func(): pass
 		return
 	
 	var step = steps[current_dialogue_step]
@@ -109,10 +113,12 @@ You have been assigned Engineer Theo and AI Assistant Ava to assist.
 Any delay may lead to the technology falling into the wrong hands.
 
 Kaela - you must master quantum echo technology.""")
-	
-	# todo insert scene swap
-	discovery()
-	
+
+	on_dialogue_end_callback = func():
+		discovery()
+		GameGraphics.instance.show_widgets_at_right()
+		GameGraphics.instance.show_ava()
+		
 	start_dialogue()
 
 
@@ -140,6 +146,7 @@ Theo arrives at the lab, tension etched on his face. “We need to do this right
 	add_option("Run a full diagnostic on the Echo Processor first.", func(): discovery_b_diagnostics())
 	add_option("Consult with Theo before proceeding.", func(): discovery_c_consult())
 	queue_added_options()
+	start_dialogue()
 
 func discovery_a_capture():
 	add_text("""Your hands steady, you initiate the capture protocol. The burst pulses—then disappears. Your instruments register a faint echo signal.
@@ -205,17 +212,18 @@ Theo: “... Don’t.”""")
 	
 func processor_bit_flip():
 	add_text("""You apply the bit-flip gate. The echo pulses brighter but wavers unpredictably.
-Kaela: "The echoes react... I hope this reveals more than it conceals."
-Apply gates to stabilize the echo""")
+Kaela: The echoes react... I hope this reveals more than it conceals.""")
 
-	if randi() % 2 == 0:
-		processor_bit_flip_pass()
-	else:
-		processor_bit_flip_fail()
-		
+	add_option("Apply gates to stabilize the echo", func():
+		if randi() % 2 == 0:
+			processor_bit_flip_pass()
+		else:
+			processor_bit_flip_fail())
+	queue_added_options()
+
+
 func processor_bit_flip_pass():
-	add_text("""Bit-flip - Pass
-The flip succeeds and the bit-flip gate is applied.
+	add_text("""The flip succeeds and the bit-flip gate is applied.
 A transparent memory, this very lab, scientists running similar tests.
 	Kaela: A quantum memory, past and present converging.
 
@@ -395,6 +403,8 @@ Dialogue (Mira’s Voice):
  "I… remember the silence that followed the catastrophe. The project was our beacon, our hope. Yet… beneath that light, betrayal festered like a shadow. I was there, Kaela. I saw the sabotage, felt the fracture in our reality. You must finish what was started, untangle the web of lies woven in dark corridors. I sacrificed everything to preserve these memories — you must not let them be lost again."
 (soft echoing) "Trust the echoes, even when they falter. Find the truth… before it fades forever."
 	The light and the memory fade.""")
+	
+	quantum_memory()
 	
 func quantum_memory():
 	add_text("""AI Assistant Ava: 

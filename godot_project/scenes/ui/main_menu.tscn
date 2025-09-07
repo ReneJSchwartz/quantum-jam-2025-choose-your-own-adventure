@@ -7,10 +7,12 @@
 
 [node name="Scripts" type="Node" parent="."]
 
-[node name="MainMenuScreen" type="Node" parent="Scripts" node_paths=PackedStringArray("first_selected_element", "main_menu_container")]
+[node name="MainMenuScreen" type="Node" parent="Scripts" node_paths=PackedStringArray("first_selected_element", "main_menu_container", "read_mail_button", "game_name")]
 script = ExtResource("1_sl1te")
 first_selected_element = NodePath("../../Container/VBoxContainer/NewGame")
 main_menu_container = NodePath("../../Container")
+read_mail_button = NodePath("../../Container/VBoxContainer/NewGame")
+game_name = NodePath("../../Container/GameName")
 
 [node name="Container" type="Control" parent="."]
 layout_mode = 3
@@ -46,8 +48,8 @@ grow_vertical = 2
 
 [node name="NewGame" type="Button" parent="Container/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "New Game"
+theme_override_font_sizes/font_size = 32
+text = "  1 unread mail!  "
 
 [node name="GameName" type="RichTextLabel" parent="Container"]
 layout_mode = 1
@@ -59,8 +61,8 @@ offset_top = 200.0
 offset_right = 48.0
 offset_bottom = 240.0
 grow_horizontal = 2
-theme_override_font_sizes/normal_font_size = 42
-text = "Game Name"
+theme_override_font_sizes/normal_font_size = 72
+text = "Echoes of Light"
 fit_content = true
 autowrap_mode = 0
 horizontal_alignment = 1

@@ -2,10 +2,18 @@ extends Node
 
 @export var first_selected_element: Control
 @export var main_menu_container: Control
+@export var read_mail_button: Button
+@export var game_name: RichTextLabel
 
 func _ready():
-	select_first_element()
+	game_name.visible = false
+	get_tree().create_timer(1).timeout.connect(func():
+		game_name.visible = true)
 	
+	read_mail_button.visible = false
+	get_tree().create_timer(2).timeout.connect(func():
+		read_mail_button.visible = true
+		select_first_element())
 
 func select_first_element() -> void:
 	first_selected_element.grab_focus()

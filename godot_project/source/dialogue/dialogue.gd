@@ -671,7 +671,7 @@ Kaela: Defiant, you refuse, using the echo processor to shift the system and dri
 Gameplay Challenge: Stabilize the quantum system during a sabotage-induced quantum collapse.
 
 Having succeeded you are determined to safeguard the precious echoes.
-You secure the quantum memory deep within NovaCore's vaults. 
+You secure the quantum memory deep within NovaCore’s vaults. 
 The lights dim as the complex locks down, shadows stretching across gleaming consoles. 
 Here, progress will be measured, but also driven by unwavering hope. 
 With each pulse of the quantum echoes, the promise of a brighter tomorrow persists—under your watchful eyes.

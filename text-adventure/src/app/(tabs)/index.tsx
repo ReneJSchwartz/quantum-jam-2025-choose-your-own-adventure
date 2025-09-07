@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { HelloWave } from '@/src/components/HelloWave';
 import ParallaxScrollView from '@/src/components/ParallaxScrollView';
@@ -28,7 +28,7 @@ export default function HomeScreen() {
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.playContainer}>
-        <ThemedText type="subtitle">Play our game here</ThemedText>
+        <ThemedText type="subtitle">Play our game &apos;Echoes of Light&apos; here</ThemedText>
         <Button
           title="Start Playing"
           onPress={() => {
@@ -41,7 +41,16 @@ export default function HomeScreen() {
             }
           }}
         />
-        <ThemedText type="subtitle">hit the back butt</ThemedText>
+        <View style={styles.echoContainer}>
+          <Image
+            source={require('@/assets/images/definition.png')}
+            style={styles.echo}
+          />
+          <Image
+            source={require('@/assets/images/definition.png')}
+            style={styles.echo}
+          />
+        </View>
       </ThemedView>
 
     </ParallaxScrollView>
@@ -75,5 +84,16 @@ const styles = StyleSheet.create({
     // bottom: 0,
     // left: 100,
     position: 'absolute',
+  },
+  echoContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'center',
+    gap: 16,
+  },
+  echo: {
+    height: 400,
+    width: 700,
+    alignSelf: 'center',
+    marginTop: 16,
   },
 });

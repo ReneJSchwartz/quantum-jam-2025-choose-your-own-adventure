@@ -26,7 +26,7 @@ func test_gate(gate_sequence: String, text: String):
 	var headers = ["Content-Type: application/json"]
 	
 	print("🎯 Testing gate sequence: ", gate_sequence, " with text: ", text)
-	http_request.request("https://108.175.12.95:8000/quantum_gates", headers, HTTPClient.METHOD_POST, json_string)
+	http_request.request("http://108.175.12.95:8000/quantum_gates", headers, HTTPClient.METHOD_POST, json_string)
 
 func _on_gate_response(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	if response_code == 200:

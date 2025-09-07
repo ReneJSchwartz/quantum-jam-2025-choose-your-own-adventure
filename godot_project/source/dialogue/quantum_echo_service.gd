@@ -47,7 +47,7 @@ extends Node
 ## The base URL of your quantum echo server
 ## 
 ## Current Setup: VPS deployment at 108.175.12.95:8000
-## Local Development: Change to "https://108.175.12.95:8000" for local testing
+## Local Development: Change to "http://108.175.12.95:8000" for local testing
 ## 
 ## Server Requirements:
 ## - Flask application with qiskit integration
@@ -55,7 +55,7 @@ extends Node
 ## - qiskit==2.1.2, qiskit-aer==0.17.1
 ## - CORS enabled for cross-origin requests
 ## 
-const SERVER_URL = "https://108.175.12.95:8000"
+const SERVER_URL = "http://108.175.12.95:8000"
 
 ## 🎭 QUANTUM ECHO TYPES - Text Transformation Categories
 ## Available echo types from the server - each uses different quantum circuits

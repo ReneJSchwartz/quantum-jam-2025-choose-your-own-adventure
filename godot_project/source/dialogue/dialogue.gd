@@ -79,6 +79,8 @@ func continue_dialogue():
 			DialogueUiManager.instance.hide_dialogue_overlay)
 		dialogue_running = false
 		steps = []
+		on_dialogue_end_callback.call()
+		on_dialogue_end_callback = func(): pass
 		return
 	
 	var step = steps[current_dialogue_step]
@@ -92,7 +94,8 @@ func continue_dialogue():
 
 # Game specific dialogue.
 func beginning():
-	# todo you got mail sound
+	Sounds.instance.play_email_typing()
+	
 	add_text("""NovaCore
 Quantum Gate Operation
 
@@ -114,8 +117,11 @@ Any delay may lead to the technology falling into the wrong hands.
 
 Kaela - you must master quantum echo technology.""")
 	
-	# todo insert scene swap
-	discovery()
+	on_dialogue_end_callback = func():
+		discovery()
+		GameGraphics.instance.show_widgets_at_right()
+		GameGraphics.instance.show_ava()
+		Sounds.instance.stop_email_typing()
 	
 	start_dialogue()
 

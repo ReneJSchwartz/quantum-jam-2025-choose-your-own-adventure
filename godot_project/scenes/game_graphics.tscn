@@ -1,15 +1,31 @@
-[gd_scene load_steps=3 format=3 uid="uid://mgrqkpog4ns6"]
+[gd_scene load_steps=10 format=3 uid="uid://mgrqkpog4ns6"]
 
 [ext_resource type="Texture2D" uid="uid://bbtcibi1n1x4g" path="res://assets/hud_grid_background.png" id="1_n0hyr"]
+[ext_resource type="Script" uid="uid://bcpnd6fnu2y0r" path="res://source/game_graphics.gd" id="1_n7v07"]
 [ext_resource type="Texture2D" uid="uid://bkpcli5hua75a" path="res://assets/hud_novacore_text.png" id="2_ppx3u"]
+[ext_resource type="Texture2D" uid="uid://dclgsq517tgjg" path="res://assets/hud_textbox_without_grid.png" id="3_apgqh"]
+[ext_resource type="Texture2D" uid="uid://cjc3tcjh32l5n" path="res://assets/hud_line_graph.png" id="4_b5sy5"]
+[ext_resource type="Texture2D" uid="uid://utn6hls5agq7" path="res://assets/hud_qubit.png" id="5_gkpvo"]
+[ext_resource type="Texture2D" uid="uid://bhe2rxfjrgpxs" path="res://assets/hud_bar_graph.png" id="6_n7v07"]
+[ext_resource type="Texture2D" uid="uid://c3ug03pnr8q0c" path="res://assets/hud_ava_ai.png" id="8_74xna"]
+[ext_resource type="Texture2D" uid="uid://d2ingoqn13hma" path="res://assets/hud_full_ava_volume.png" id="9_hn1ri"]
 
-[node name="GameGraphics" type="Control"]
+[node name="GameGraphics" type="Control" node_paths=PackedStringArray("grid", "novacore_text", "line_graph", "bar_graph", "qubit", "text_box_bg", "ava", "ava_volume")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_n7v07")
+grid = NodePath("GridBg")
+novacore_text = NodePath("NovaCore")
+line_graph = NodePath("LineGraph")
+bar_graph = NodePath("BarGraph")
+qubit = NodePath("Qubit")
+text_box_bg = NodePath("TextBoxBg")
+ava = NodePath("Ava")
+ava_volume = NodePath("Ava/AvaVolume")
 
 [node name="GridBg" type="TextureRect" parent="."]
 layout_mode = 1
@@ -27,3 +43,62 @@ offset_top = 404.0
 offset_right = 256.0
 offset_bottom = 1011.0
 texture = ExtResource("2_ppx3u")
+
+[node name="TextBoxBg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -562.0
+offset_top = -522.0
+offset_right = 562.0
+offset_bottom = 522.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_apgqh")
+
+[node name="LineGraph" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 1548.0
+offset_top = 415.0
+offset_right = 1875.0
+offset_bottom = 649.0
+texture = ExtResource("4_b5sy5")
+
+[node name="Qubit" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 1549.0
+offset_top = 10.0
+offset_right = 1882.0
+offset_bottom = 366.0
+texture = ExtResource("5_gkpvo")
+
+[node name="BarGraph" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 1543.0
+offset_top = 657.0
+offset_right = 1880.0
+offset_bottom = 1039.0
+texture = ExtResource("6_n7v07")
+
+[node name="Ava" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 280.0
+offset_top = 80.0
+offset_right = 483.0
+offset_bottom = 148.0
+grow_horizontal = 2
+texture = ExtResource("8_74xna")
+
+[node name="AvaVolume" type="TextureRect" parent="Ava"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 57.0
+offset_right = 155.0
+offset_bottom = 120.0
+texture = ExtResource("9_hn1ri")

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://baeb3r511rshg"]
+[gd_scene load_steps=7 format=3 uid="uid://baeb3r511rshg"]
 
 [ext_resource type="PackedScene" uid="uid://bfsn54h70cwa6" path="res://scenes/ui/main_menu.tscn" id="1_4dfya"]
-[ext_resource type="PackedScene" path="res://scenes/game_graphics.tscn" id="1_jcxjo"]
+[ext_resource type="PackedScene" uid="uid://mgrqkpog4ns6" path="res://scenes/game_graphics.tscn" id="1_jcxjo"]
 [ext_resource type="PackedScene" uid="uid://bidtuh27qoll" path="res://scenes/ui/dialogue_ui.tscn" id="2_bi5im"]
 [ext_resource type="Script" uid="uid://bd8yoybcinrd4" path="res://source/input_handler.gd" id="3_qfv05"]
 [ext_resource type="Script" uid="uid://cvgb5aqegojqu" path="res://source/signal_bus.gd" id="4_signal"]
+[ext_resource type="PackedScene" uid="uid://cabyc4hivqysb" path="res://scenes/sounds.tscn" id="6_4f7k6"]
 
 [node name="GameTree" type="Node"]
 
@@ -23,3 +24,5 @@ script = ExtResource("4_signal")
 
 [node name="InputHandler" type="Node" parent="Scripts"]
 script = ExtResource("3_qfv05")
+
+[node name="Sounds" parent="Scripts" instance=ExtResource("6_4f7k6")]

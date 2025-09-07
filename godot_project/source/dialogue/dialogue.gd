@@ -12,6 +12,7 @@ var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
 var temp_options: Array[DialogueOption]
 var on_dialogue_end_callback: Callable = func(): pass
+var dialogue_step_end_callback: Callable = func(): pass
 ## Delay hiding dialogue by this amount. 
 var hide_dialogue_delay: float = 0
 static var instance: Dialogue
@@ -68,6 +69,9 @@ func start_dialogue():
 ## Called by DialogueUiManager after first step. Either supplies the next step or ends the
 ## dialogue.
 func continue_dialogue():
+	dialogue_step_end_callback.call()
+	dialogue_step_end_callback = func(): pass
+	
 	if len(steps) <= current_dialogue_step:
 		on_dialogue_end_callback.call()
 		on_dialogue_end_callback = func(): pass
@@ -80,6 +84,7 @@ func continue_dialogue():
 	var step = steps[current_dialogue_step]
 	if step.isOptions:
 		DialogueUiManager.instance.show_player_options(step.options)
+		dialogue_step_end_callback = func (): Sounds.instance.play_button_ding()
 	else:
 		DialogueUiManager.instance.show_text(step.content)
 	

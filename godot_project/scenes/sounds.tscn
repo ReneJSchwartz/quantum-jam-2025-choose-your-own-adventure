@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://cabyc4hivqysb"]
+
+[ext_resource type="Script" uid="uid://jvq87ik34xe2" path="res://source/sounds.gd" id="1_8b883"]
+[ext_resource type="AudioStream" uid="uid://cal55mp5756wd" path="res://assets/audio/button_ding.wav" id="2_h5l0e"]
+
+[node name="Sounds" type="Node" node_paths=PackedStringArray("button_ding")]
+script = ExtResource("1_8b883")
+button_ding = NodePath("ButtonDing")
+
+[node name="ButtonDing" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_h5l0e")

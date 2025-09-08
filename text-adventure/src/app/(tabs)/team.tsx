@@ -1,13 +1,13 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-import { LegendList } from '@legendapp/list';
+import { StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
 
 import { Collapsible } from '@/src/components/Collapsible';
 import { ExternalLink } from '@/src/components/ExternalLink';
-import ParallaxScrollView from '@/src/components/ParallaxScrollView';
+import TeamParallaxScrollView from '@/src/components/TeamParallaxScrollView';
 import { ThemedText } from '@/src/components/ThemedText';
 import { ThemedView } from '@/src/components/ThemedView';
-import { IconSymbol } from '@/src/components/ui/IconSymbol';
+import { ServerLink } from '@/src/components/ServerLink';
 
 import teamData from '@/assets/data/team.json';
 
@@ -24,8 +24,60 @@ interface TeamMember {
 }
 
 export default function TabTwoScreen() {
-  const renderTeamMember = ({ item }: { item: TeamMember }) => (
-    <Collapsible title={`${item.name}${item.role ? ` - ${item.role}` : ''}`}>
+  // State to manage which collapsibles are open
+  const [openStates, setOpenStates] = useState<{ [key: string]: boolean }>({});
+
+  // Animation sequence to open collapsibles one by one
+  useEffect(() => {
+    const animateCollapsibles = async () => {
+      // Wait 500ms before starting
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // First animate the informational collapsibles (from bottom to top)
+      const infoCollapsibles = [
+        'team-collaboration',
+        'quantum-jam',
+        'platform-support',
+        'technical-infrastructure',
+        'creative-narrative',
+        'game-engine',
+        'quantum-text',
+        'multi-platform',
+        'react-native',
+        'quantum-computing'
+      ];
+
+      for (const key of infoCollapsibles) {
+        setOpenStates(prev => ({ ...prev, [key]: true }));
+        // Wait 500ms between each collapsible
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Then, animate team member collapsibles (from bottom to top)
+      for (let i = teamData.length - 1; i >= 0; i--) {
+        setOpenStates(prev => ({ ...prev, [`team-${teamData[i].id}`]: true }));
+        // Wait 500ms between each team member
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+    };
+
+    animateCollapsibles();
+  }, []);
+
+  const handleToggle = (key: string) => (isOpen: boolean) => {
+    setOpenStates(prev => ({ ...prev, [key]: isOpen }));
+  };
+
+  const renderTeamMember = ({ item }: { item: TeamMember }) => {
+    return (
+      <ThemedView key={item.id}>
+        <Collapsible 
+          title={`${item.name}${item.role ? ` - ${item.role}` : ''}`}
+          isOpen={openStates[`team-${item.id}`] || false}
+          onToggle={handleToggle(`team-${item.id}`)}
+          animatedOpen={true}
+        >
       <ThemedText>
         <ThemedText type="defaultSemiBold">Discord:</ThemedText> {item.discordName}
       </ThemedText>
@@ -55,51 +107,46 @@ export default function TabTwoScreen() {
         </ExternalLink>
       )}
     </Collapsible>
+  </ThemedView>
   );
+};
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#a1cedc2f', dark: '#e8eaea3b' }}
-      headerImage={
-        <>
-                  <Image
-                    source={require('@/assets/images/HUD_Qubit.png')}
-                    style={styles.qubit}
-                  />
-                  <Image
-                    source={require('@/assets/images/echo.png')}
-                    style={styles.novacore}
-                  />
-                </>
-      }>
+    <TeamParallaxScrollView headerBackgroundColor={{ light: '#a1cedc2f', dark: '#e8eaea3b' }}>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Team</ThemedText>
       </ThemedView>
       <ThemedView style={{ flex: 1, minHeight: 100 }}>
-        <LegendList
-          data={teamData}
-          renderItem={renderTeamMember}
-          keyExtractor={(item: TeamMember) => item.id.toString()}
-        />
+        {teamData.map((item) => renderTeamMember({ item }))}
       </ThemedView>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">How it works</ThemedText>
       </ThemedView>
-      <Collapsible title="Quantum Computing Integration">
+      <Collapsible 
+        title="Quantum Computing Integration"
+        isOpen={openStates['quantum-computing'] || false}
+        onToggle={handleToggle('quantum-computing')}
+        animatedOpen={true}
+      >
         <ThemedText>
           This game features <ThemedText type="defaultSemiBold">real quantum computing</ThemedText> powered by IBM&apos;s Qiskit library running on a custom VPS server.{' '}
           The story branches based on actual quantum gate operations - bit-flip, phase-flip, and rotation gates applied to qubits in superposition.
         </ThemedText>
         <ThemedText>
           When players make choices, the game sends HTTP requests to our quantum server at{' '}
-          <ThemedText type="defaultSemiBold">108.175.12.95:8000</ThemedText>, which creates quantum circuits,{' '}
+          <ServerLink />, which creates quantum circuits,{' '}
           applies gates, and measures the results to determine success or failure. True quantum randomness drives the narrative!
         </ThemedText>
         <ExternalLink href="https://github.com/ReneJSchwartz/quantum-jam-2025-choose-your-own-adventure">
           <ThemedText type="link">View the source code on GitHub</ThemedText>
         </ExternalLink>
       </Collapsible>
-      <Collapsible title="Quantum-Enhanced React Native">
+      <Collapsible 
+        title="Quantum-Enhanced React Native"
+        isOpen={openStates['react-native'] || false}
+        onToggle={handleToggle('react-native')}
+        animatedOpen={true}
+      >
         <ThemedText>
           This project demonstrates the <ThemedText type="defaultSemiBold">first known integration</ThemedText> of real quantum computing{' '}
           within an Expo React Native application. Using HTTP requests from React Native components,{' '}
@@ -117,7 +164,12 @@ export default function TabTwoScreen() {
           can enhance traditional React Native development with authentic quantum randomness and quantum state visualization.
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Multi-Platform Architecture">
+      <Collapsible 
+        title="Multi-Platform Architecture"
+        isOpen={openStates['multi-platform'] || false}
+        onToggle={handleToggle('multi-platform')}
+        animatedOpen={true}
+      >
         <ThemedText>
           Built with <ThemedText type="defaultSemiBold">Godot 4.x</ThemedText> for the main game engine, exported to web and embedded in a{' '}
           <ThemedText type="defaultSemiBold">React Native/Expo</ThemedText> wrapper for cross-platform deployment.
@@ -127,7 +179,12 @@ export default function TabTwoScreen() {
           The React Native wrapper provides native mobile features while preserving the Godot game experience.
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Quantum Text Processing">
+      <Collapsible 
+        title="Quantum Text Processing"
+        isOpen={openStates['quantum-text'] || false}
+        onToggle={handleToggle('quantum-text')}
+        animatedOpen={true}
+      >
         <ThemedText>
           Beyond quantum gates, the game includes <ThemedText type="defaultSemiBold">quantum text transformation</ThemedText> that{' '}
           categorizes words using a quantum dictionary and applies different quantum effects:
@@ -139,7 +196,12 @@ export default function TabTwoScreen() {
           • <ThemedText type="defaultSemiBold">Scramble</ThemedText>: Action words get quantum interference effects
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Game Engine & Dialogue System">
+      <Collapsible 
+        title="Game Engine & Dialogue System"
+        isOpen={openStates['game-engine'] || false}
+        onToggle={handleToggle('game-engine')}
+        animatedOpen={true}
+      >
         <ThemedText>
           Custom dialogue manager built in <ThemedText type="defaultSemiBold">GDScript</ThemedText> with dynamic branching,{' '}
           quantum gate integration, and fallback systems. The game maintains story state while{' '}
@@ -150,7 +212,12 @@ export default function TabTwoScreen() {
           and multiple endings determined by quantum measurement outcomes.
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Creative & Narrative Design">
+      <Collapsible 
+        title="Creative & Narrative Design"
+        isOpen={openStates['creative-narrative'] || false}
+        onToggle={handleToggle('creative-narrative')}
+        animatedOpen={true}
+      >
         <ThemedText>
           The story explores <ThemedText type="defaultSemiBold">quantum echoes</ThemedText> - a phenomenon where{' '}
           lost quantum information can be recovered from the past. Players navigate corporate intrigue,{' '}
@@ -161,7 +228,12 @@ export default function TabTwoScreen() {
           that makes quantum physics accessible through interactive storytelling.
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Technical Infrastructure">
+      <Collapsible 
+        title="Technical Infrastructure"
+        isOpen={openStates['technical-infrastructure'] || false}
+        onToggle={handleToggle('technical-infrastructure')}
+        animatedOpen={true}
+      >
         <ThemedText>
           <ThemedText type="defaultSemiBold">Backend:</ThemedText> Flask server with Qiskit quantum circuits, CORS-enabled API endpoints{'\n'}
           <ThemedText type="defaultSemiBold">Frontend:</ThemedText> Godot game engine with HTTP request handling and quantum response processing{'\n'}
@@ -169,24 +241,38 @@ export default function TabTwoScreen() {
           <ThemedText type="defaultSemiBold">Quantum:</ThemedText> Real qubits, superposition states, measurement collapse, and fallback randomization
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
+      <Collapsible 
+        title="Android, iOS, and web support"
+        isOpen={openStates['platform-support'] || false}
+        onToggle={handleToggle('platform-support')}
+        animatedOpen={true}
+      >
         <ThemedText>
           This game is live on the web. It will be on Google Play soon and then iOS after that!
         </ThemedText>
       </Collapsible>
-      <Collapsible title="Quantum Jam 2025">
+      <Collapsible 
+        title="Quantum Jam 2025"
+        isOpen={openStates['quantum-jam'] || false}
+        onToggle={handleToggle('quantum-jam')}
+        animatedOpen={true}
+      >
         <ThemedText>
           This was part of the Quantum Game Jam 2025, a game development event focused on creating games
           that explore quantum computing concepts. This year the theme was{' '}
           <ThemedText type="subtitle">quantum echo</ThemedText> -{' '}
           <ThemedText type="defaultSemiBold">a phenomenon where an initially lost or dephased quantum signal can be made to reappear at a later time.</ThemedText>
         </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
         <ExternalLink href="https://www.quantumgamejam.org/">
           <ThemedText type="link">Learn more</ThemedText>
         </ExternalLink>
       </Collapsible>
-      <Collapsible title="Team collaboration">
+      <Collapsible 
+        title="Team collaboration"
+        isOpen={openStates['team-collaboration'] || false}
+        onToggle={handleToggle('team-collaboration')}
+        animatedOpen={true}
+      >
         <ThemedText>
           We used several techniques to stay connected and share ideas quickly:{' '}
           <ThemedText style={{ fontFamily: 'SpaceMono' }}>
@@ -226,7 +312,7 @@ export default function TabTwoScreen() {
           ),
         })}
       </Collapsible> */}
-    </ParallaxScrollView>
+    </TeamParallaxScrollView>
   );
 }
 
@@ -240,23 +326,5 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
-  },
-  qubit: {
-    height: 290,
-    width: 290,
-    top: 25,
-    bottom: 0,
-    left: 400,
-  },
-  novacore: {
-    height: '100%',
-    width: '100%',
-    zIndex: -1,
-    // height: 290,
-    // width: 290,
-    // top: 25,
-    // bottom: 0,
-    // left: 100,
-    position: 'absolute',
   },
 });

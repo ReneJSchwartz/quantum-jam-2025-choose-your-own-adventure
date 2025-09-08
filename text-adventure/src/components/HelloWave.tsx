@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedText } from '@/src/components/ThemedText';
+import { ServerLink } from '@/src/components/ServerLink';
 
 export function HelloWave() {
   const rotationAnimation = useSharedValue(0);
@@ -199,7 +200,8 @@ export function HelloWave() {
         <ThemedText style={styles.details}>{quantumDetails}</ThemedText>
         {isAnimating && (
           <ThemedText style={styles.statusIndicator}>
-            🔄 30-second quantum sequence active...
+            🔄 Running a 30-second quantum sequence active based on the quantum Qiskit code in the python server:{' '}
+          <ServerLink />
           </ThemedText>
         )}
       </View>
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   text: {
-    fontSize: 32,
+    fontSize: 40,
     lineHeight: 36,
     marginTop: -6,
   },
@@ -223,13 +225,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   details: {
-    fontSize: 12,
+    fontSize: 16,
     textAlign: 'center',
     opacity: 0.8,
     lineHeight: 16,
   },
   statusIndicator: {
-    fontSize: 10,
+    fontSize: 16,
     textAlign: 'center',
     opacity: 0.6,
     marginTop: 4,

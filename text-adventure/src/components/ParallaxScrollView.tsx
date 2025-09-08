@@ -65,6 +65,9 @@ export default function ParallaxScrollView({
   );
 }
 
+// Export scroll offset context for child components to use
+export { useScrollViewOffset };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

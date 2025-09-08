@@ -12,6 +12,7 @@ var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
 var temp_options: Array[DialogueOption]
 var on_dialogue_end_callback: Callable = func(): pass
+var dialogue_step_end_callback: Callable = func(): pass
 ## Delay hiding dialogue by this amount. 
 var hide_dialogue_delay: float = 0
 static var instance: Dialogue
@@ -68,6 +69,9 @@ func start_dialogue():
 ## Called by DialogueUiManager after first step. Either supplies the next step or ends the
 ## dialogue.
 func continue_dialogue():
+	dialogue_step_end_callback.call()
+	dialogue_step_end_callback = func(): pass
+	
 	if len(steps) <= current_dialogue_step:
 		on_dialogue_end_callback.call()
 		on_dialogue_end_callback = func(): pass
@@ -75,11 +79,14 @@ func continue_dialogue():
 			DialogueUiManager.instance.hide_dialogue_overlay)
 		dialogue_running = false
 		steps = []
+		on_dialogue_end_callback.call()
+		on_dialogue_end_callback = func(): pass
 		return
 	
 	var step = steps[current_dialogue_step]
 	if step.isOptions:
 		DialogueUiManager.instance.show_player_options(step.options)
+		dialogue_step_end_callback = func (): Sounds.instance.play_button_ding()
 	else:
 		DialogueUiManager.instance.show_text(step.content)
 	
@@ -87,7 +94,8 @@ func continue_dialogue():
 
 # Game specific dialogue.
 func beginning():
-	# todo you got mail sound
+	Sounds.instance.play_email_typing()
+	
 	add_text("""NovaCore
 Quantum Gate Operation
 
@@ -109,8 +117,11 @@ Any delay may lead to the technology falling into the wrong hands.
 
 Kaela - you must master quantum echo technology.""")
 	
-	# todo insert scene swap
-	discovery()
+	on_dialogue_end_callback = func():
+		discovery()
+		GameGraphics.instance.show_widgets_at_right()
+		GameGraphics.instance.show_ava()
+		Sounds.instance.stop_email_typing()
 	
 	start_dialogue()
 

@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
   interpolate,
@@ -14,7 +14,7 @@ import { ThemedText } from '@/src/components/ThemedText';
 import { useBottomTabOverflow } from '@/src/components/ui/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-const HEADER_HEIGHT = 200;
+const HEADER_HEIGHT = 250;
 
 type Props = PropsWithChildren<{
   headerBackgroundColor: { dark: string; light: string };
@@ -139,131 +139,92 @@ export default function MultiLayerParallaxScrollView({
     };
   });
 
+  // THIS IS KEY: Wrap in View with flex:1 to constrain ScrollView
   return (
-    <ThemedView style={styles.container}>
+    <View style={{ flex: 1 }}>
       <Animated.ScrollView
         ref={scrollRef}
+        style={{ flex: 1 }} 
         scrollEventThrottle={16}
         scrollIndicatorInsets={{ bottom }}
-        contentContainerStyle={{ paddingBottom: bottom }}>
+        contentContainerStyle={{ paddingBottom: bottom }}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={true} // Force enable scrolling
+      >
         <View
-          style={[
-            styles.header,
-            { backgroundColor: headerBackgroundColor[colorScheme] },
-          ]}>
-          
+          style={{
+            height: HEADER_HEIGHT, 
+            backgroundColor: headerBackgroundColor[colorScheme],
+            overflow: 'hidden',
+            position: 'relative'
+          }}
+        >
           {/* Layer 1: Background grid (slowest parallax) */}
-          <Animated.Image
-            source={require('@/assets/images/HUD_GridBackground.png')}
-            style={[styles.gridBackground, gridBackgroundAnimatedStyle]}
-          />
+          <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <Animated.Image
+              source={require('@/assets/images/HUD_GridBackground.png')}
+              style={[
+                { height: '120%', width: '120%', position: 'absolute', top: -50, left: -50, opacity: 0.4 },
+                gridBackgroundAnimatedStyle
+              ]}
+            />
+          </View>
           
           {/* Layer 2: Game title (medium parallax) */}
-          <Animated.View style={[styles.gameTitleContainer, gameTitleAnimatedStyle]}>
-            <Image
-              source={require('@/assets/images/HUD_Qubit.png')}
-              style={styles.titleQubit}
-            />
-            <ThemedText type="title" style={styles.gameTitle}>
-              Echoes of Light
-            </ThemedText>
-          </Animated.View>
+          <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <Animated.View 
+              style={[
+                { position: 'absolute', top: '35%', left: '5%', right: '5%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+                gameTitleAnimatedStyle
+              ]}
+            >
+              <Image
+                source={require('@/assets/images/HUD_Qubit.png')}
+                style={{ height: 40, width: 40, marginRight: 12 }}
+              />
+              <ThemedText 
+                type="title" 
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  textShadowColor: 'rgba(0, 0, 0, 0.7)',
+                  textShadowOffset: { width: 2, height: 2 },
+                  textShadowRadius: 4,
+                  color: '#fff',
+                }}
+              >
+                Echoes of Light
+              </ThemedText>
+            </Animated.View>
+          </View>
           
           {/* Layer 3: Floating particles (fast parallax) */}
-          <Animated.View style={[styles.particleField, particleFieldAnimatedStyle]}>
-            {[...Array(6)].map((_, i) => (
-              <View key={i} style={[styles.particle, { 
-                left: `${15 + i * 12}%`, 
-                top: `${20 + (i % 3) * 25}%`,
-                animationDelay: `${i * 0.5}s`
-              }]}>
-                <ThemedText style={styles.particleText}>
-                  {['⚛️', '🌌', '⭐', '✨', '💫', '🌊'][i]}
-                </ThemedText>
-              </View>
-            ))}
-          </Animated.View>
+          <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, particleFieldAnimatedStyle]}>
+              {[...Array(6)].map((_, i) => (
+                <View key={i} style={{ position: 'absolute', left: `${15 + i * 12}%`, top: `${20 + (i % 3) * 25}%` }}>
+                  <ThemedText style={{ fontSize: 16, opacity: 0.7 }}>
+                    {['⚛️', '🌌', '⭐', '✨', '💫', '🌊'][i]}
+                  </ThemedText>
+                </View>
+              ))}
+            </Animated.View>
+          </View>
           
           {/* Layer 4: Main qubit (fastest parallax) */}
-          <Animated.Image
-            source={require('@/assets/images/HUD_Qubit.png')}
-            style={[styles.qubit, qubitAnimatedStyle]}
-          />
+          <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <Animated.Image
+              source={require('@/assets/images/HUD_Qubit.png')}
+              style={[{ height: 200, width: 200, position: 'absolute', top: 20, right: 20 }, qubitAnimatedStyle]}
+            />
+          </View>
         </View>
-        <ThemedView style={styles.content}>{children}</ThemedView>
+        
+        {/* Content area - kept simple */}
+        <View style={{ padding: 32, gap: 16 }}>
+          {children}
+        </View>
       </Animated.ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    height: HEADER_HEIGHT,
-    overflow: 'hidden',
-  },
-  content: {
-    flex: 1,
-    padding: 32,
-    gap: 16,
-    overflow: 'hidden',
-  },
-  // Parallax layer styles
-  gridBackground: {
-    height: '120%',
-    width: '120%',
-    position: 'absolute',
-    top: -50,
-    left: -50,
-    zIndex: 1,
-    opacity: 0.4,
-  },
-  gameTitleContainer: {
-    position: 'absolute',
-    top: '35%',
-    left: '5%',
-    right: '5%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 3,
-  },
-  titleQubit: {
-    height: 40,
-    width: 40,
-    marginRight: 12,
-  },
-  gameTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.7)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
-    color: '#fff',
-  },
-  particleField: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 2,
-  },
-  particle: {
-    position: 'absolute',
-  },
-  particleText: {
-    fontSize: 16,
-    opacity: 0.7,
-  },
-  qubit: {
-    height: 200,
-    width: 200,
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    zIndex: 4,
-  },
-});

@@ -8,7 +8,7 @@
     "linkedInProfile": "https://LinkedIn.com/in/davidjgrimsley",
     "artstationProfile": "https://www.artstation.com/davidgrimsley5",
     "instagramProfile": "",
-    "contribution": "Hosted the game on a temporary domain on my vps. I used expo with React Native to give the possibility of moving the game to mobile in the future with little trouble."
+    "contribution": "Set up a Python backend and hosted it and this website on my VPS. The Python backend powers the game and handles all quantum logic using code that MajaQ and I put together. Built this Expo React Native web application to host the game and our info separate from itch.io. This give the possibility of moving the game to mobile in the future with little trouble."
   },
   {
     "id": 2,

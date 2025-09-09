@@ -1,5 +1,5 @@
 import { useState, type PropsWithChildren } from 'react';
-import { StyleSheet, View, Dimensions} from 'react-native';
+import { View, Dimensions} from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
   interpolate,
@@ -83,8 +83,8 @@ export default function TeamParallaxScrollView({
   // Layer 4: Main qubit (fastest) - Moves from top-right to bottom-left
   const qubitAnimatedStyle = useAnimatedStyle(() => {
     // Define the scroll range - adjust these values to control when animation starts/ends
-    const qubitHeight = 150; // from styles.qubit
-    const qubitWidth = 150;  // from styles.qubit
+    const qubitHeight = 120; // Adjusted to match actual size
+    const qubitWidth = 120;  // Adjusted to match actual size
 
     // Start when header is visible, end when qubit would reach bottom of content
     const scrollStart = 0;
@@ -98,7 +98,7 @@ export default function TeamParallaxScrollView({
       Extrapolation.CLAMP
     );
     
-    // Horizontal movement: starts at right edge and Fmoves to left edge
+    // Horizontal movement: starts at right edge and moves to left edge
     const horizontalMovement = interpolate(
       scrollOffset.value,
       [scrollStart, scrollEnd],
@@ -136,52 +136,75 @@ export default function TeamParallaxScrollView({
 
   const devIcons = ['💻', '⚛️', 'TS', '🔧', '📱', '🌐', '⚡', '🎮'];
 
+  // THIS IS KEY: Wrap in View with flex:1 to constrain ScrollView
   return (
-    <ThemedView style={styles.container}>
+    <View style={{ flex: 1 }}>
       {/* Layer 4: Main qubit (positioned to float above content) */}
       <Animated.Image
         source={require('@/assets/images/HUD_Qubit.png')}
-        style={[styles.qubit, qubitAnimatedStyle]}
+        style={[
+          { 
+            height: 120, 
+            width: 120, 
+            position: 'absolute', 
+            top: 0, // Controlled via translateY
+            left: 0, // Controlled via translateX
+            zIndex: 100, // Above everything
+            opacity: 0.7, 
+          }, 
+          qubitAnimatedStyle
+        ]}
       />
       
       <Animated.ScrollView
         ref={scrollRef}
+        style={{ flex: 1 }}
         scrollEventThrottle={16}
         scrollIndicatorInsets={{ bottom }}
-        contentContainerStyle={{ paddingBottom: bottom }}
+        contentContainerStyle={{ paddingBottom: bottom}}
         onContentSizeChange={(w, h) => setContentHeight(h)}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={true} // Force enable scrolling
       >
         <View
           style={[
-            styles.header,
-            { backgroundColor: headerBackgroundColor[colorScheme] },
+            { 
+              height: HEADER_HEIGHT, 
+              overflow: 'hidden',
+              backgroundColor: headerBackgroundColor[colorScheme] 
+            },
           ]}>
           
           {/* Layer 1: Echo background (slowest parallax) */}
           <Animated.Image
             source={require('@/assets/images/echo.png')}
-            style={[styles.echoBackground, echoBackgroundAnimatedStyle]}
+            style={[
+              { height: '100%', width: '100%', zIndex: 1, opacity: 0.4 },
+              echoBackgroundAnimatedStyle
+            ]}
           />
           
-          {/* Layer 2: Team title (medium parallax)
-          <Animated.View style={[styles.teamTitleContainer, teamTitleAnimatedStyle]}>
-            <Image
-              source={require('@/assets/images/HUD_Qubit.png')}
-              style={styles.titleQubit}
-            />
-            <ThemedText type="title" style={styles.teamTitle}>
-              Development Team
-            </ThemedText>
-          </Animated.View> */}
-          
           {/* Layer 3: Floating dev icons (fast parallax) */}
-          <Animated.View style={[styles.devIconField, devIconFieldAnimatedStyle]}>
+          <Animated.View 
+            style={[
+              { 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                right: 0, 
+                bottom: 0, 
+                zIndex: 2 
+              }, 
+              devIconFieldAnimatedStyle
+            ]}
+          >
             {devIcons.map((icon, i) => (
-              <View key={i} style={[styles.devIcon, { 
+              <View key={i} style={{ 
+                position: 'absolute',
                 left: `${10 + i * 11}%`, 
                 top: `${15 + (i % 4) * 20}%`,
-              }]}>
-                <ThemedText style={styles.devIconText}>
+              }}>
+                <ThemedText style={{ fontSize: 20, opacity: 0.6 }}>
                   {icon}
                 </ThemedText>
               </View>
@@ -189,80 +212,10 @@ export default function TeamParallaxScrollView({
           </Animated.View>
         </View>
         
-        <ThemedView style={styles.content}>{children}</ThemedView>
+        <ThemedView className="flex-1 p-8 space-y-4">
+          {children}
+        </ThemedView>
       </Animated.ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    height: HEADER_HEIGHT,
-    overflow: 'hidden',
-  },
-  content: {
-    flex: 1,
-    padding: 32,
-    gap: 16,
-    overflow: 'hidden',
-    position: 'relative',
-    zIndex: 1, // Above the floating qubit
-  },
-  // Parallax layer styles
-  echoBackground: {
-    height: '100%',
-    width: '100%',
-    zIndex: 1,
-    opacity: 0.4,
-  },
-  teamTitleContainer: {
-    position: 'absolute',
-    top: '30%',
-    left: '5%',
-    right: '5%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 3,
-  },
-  titleQubit: {
-    height: 50,
-    width: 50,
-    marginRight: 12,
-  },
-  teamTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.7)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
-    color: '#fff',
-  },
-  devIconField: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 2,
-  },
-  devIcon: {
-    position: 'absolute',
-  },
-  devIconText: {
-    fontSize: 20,
-    opacity: 0.6,
-  },
-  qubit: {
-    height: 120,
-    width: 120,
-    position: 'absolute',
-    top: 0, // We'll control position via translateY
-    left: 0, // We'll control position via translateX
-    zIndex: 1, // Behind the text but above background
-    opacity: 0.7, // Semi-transparent for background effect
-  },
-});

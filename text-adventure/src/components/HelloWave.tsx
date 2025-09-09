@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -192,14 +192,14 @@ export function HelloWave() {
   }));
 
   return (
-    <View style={styles.container}>
+    <View style={{ alignItems: 'center', marginVertical: 8 }}>
       <Animated.View style={[animatedStyle, containerStyle]}>
-        <ThemedText style={styles.text}>{quantumIcon}</ThemedText>
+        <ThemedText style={{ fontSize: 40, lineHeight: 36, marginTop: -6 }}>{quantumIcon}</ThemedText>
       </Animated.View>
-      <View style={styles.detailsContainer}>
-        <ThemedText style={styles.details}>{quantumDetails}</ThemedText>
+      <View style={{ marginTop: 12, paddingHorizontal: 16, alignItems: 'center' }}>
+        <ThemedText style={{ fontSize: 16, textAlign: 'center', opacity: 0.8, lineHeight: 16 }}>{quantumDetails}</ThemedText>
         {isAnimating && (
-          <ThemedText style={styles.statusIndicator}>
+          <ThemedText style={{ fontSize: 16, textAlign: 'center', opacity: 0.6, marginTop: 4, fontStyle: 'italic' }}>
             🔄 Running a 30-second quantum sequence active based on the quantum Qiskit code in the python server:{' '}
           <ServerLink />
           </ThemedText>
@@ -209,32 +209,4 @@ export function HelloWave() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  text: {
-    fontSize: 40,
-    lineHeight: 36,
-    marginTop: -6,
-  },
-  detailsContainer: {
-    marginTop: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  details: {
-    fontSize: 16,
-    textAlign: 'center',
-    opacity: 0.8,
-    lineHeight: 16,
-  },
-  statusIndicator: {
-    fontSize: 16,
-    textAlign: 'center',
-    opacity: 0.6,
-    marginTop: 4,
-    fontStyle: 'italic',
-  },
-});
+// Remove StyleSheet - replaced with NativeWind classes

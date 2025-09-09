@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps, Pressable, PressableProps, View, ViewStyle } from 'react-native';
+import { Text, TouchableOpacity, TouchableOpacityProps, Pressable, PressableProps, View, ViewStyle } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ButtonProps = {
@@ -25,21 +25,22 @@ export const Button = forwardRef<View, ButtonProps>(({
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'tint');
   const textColor = useThemeColor({ light: textLightColor, dark: textDarkColor }, 'background');
 
-  const buttonStyle = [styles.button, { backgroundColor }];
-  const textStyle = [styles.buttonText, { color: textColor }];
-
   if (variant === 'press') {
     return (
       <Pressable 
         ref={ref} 
         {...touchableProps as PressableProps} 
-        style={({ pressed }) => [
-          ...buttonStyle,
-          pressed && styles.pressed,
-          typeof style === 'function' ? (style as (state: { pressed: boolean }) => ViewStyle | ViewStyle[])({ pressed }) : style
+        className="items-center rounded-lg flex-row justify-center px-4 py-3 shadow-lg"
+        style={[
+          { backgroundColor },
+          typeof style === 'function' ? undefined : style
         ]}
       >
-        <Text style={textStyle}>{title}</Text>
+        {({ pressed }) => (
+          <Text className={`text-base font-semibold text-center ${pressed ? 'opacity-80' : ''}`} style={{ color: textColor }}>
+            {title}
+          </Text>
+        )}
       </Pressable>
     );
   }
@@ -48,41 +49,17 @@ export const Button = forwardRef<View, ButtonProps>(({
     <TouchableOpacity 
       ref={ref} 
       {...touchableProps as TouchableOpacityProps} 
+      className="items-center rounded-lg flex-row justify-center px-4 py-3 shadow-lg"
       style={[
-        ...buttonStyle,
+        { backgroundColor },
         typeof style === 'function' ? undefined : style
       ]}
     >
-      <Text style={textStyle}>{title}</Text>
+      <Text className="text-base font-semibold text-center" style={{ color: textColor }}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 });
 
 Button.displayName = 'Button';
-
-const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-});

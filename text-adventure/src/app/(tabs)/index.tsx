@@ -1,15 +1,19 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 
 import { HelloWave } from '@/src/components/HelloWave';
 import MultiLayerParallaxScrollView from '@/src/components/MultiLayerParallaxScrollView';
 import { ThemedView } from '@/src/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function HomeScreen() {
   const [allowScroll, setAllowScroll] = useState(true); // Start with scroll enabled
   const hoverTimeoutRef = useRef<number | null>(null);
   const unhoverTimeoutRef = useRef<number | null>(null);
+  const colorScheme = useColorScheme() ?? 'light';
+
 
   useEffect(() => {
     // ESC key listener
@@ -95,15 +99,16 @@ export default function HomeScreen() {
   return (
     <MultiLayerParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}>
-      <ThemedView style={styles.titleContainer}>
+      <ThemedView className="flex-row items-center justify-center gap-2 mb-4 p-4 rounded-xl">
         <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.playContainer}>
+      <ThemedView className="flex-col items-center gap-3 py-5 px-4 rounded-2xl">
         <div
           onMouseEnter={handleIframeMouseEnter}
           onMouseLeave={handleIframeMouseLeave}
           onClick={handleIframeClick}
           style={{ position: 'relative', width: '100%', cursor: allowScroll ? 'pointer' : 'default' }}
+          className="rounded-2xl overflow-hidden shadow-lg mb-4"
         >
           <iframe
             title="Echoes of Light Game"
@@ -111,9 +116,9 @@ export default function HomeScreen() {
             style={{
               width: '100%',
               height: 600,
-              borderRadius: 12,
-              overflow: 'auto',
-              backgroundColor: '#000',
+              borderRadius: 16,
+              border: 'none',
+              overflow: 'hidden',
               pointerEvents: allowScroll ? 'none' : 'auto',
               transition: 'opacity 0.2s ease',
               opacity: allowScroll ? 0.8 : 1,
@@ -124,15 +129,16 @@ export default function HomeScreen() {
           {allowScroll && (
             <div style={{
               position: 'absolute',
-              top: 10,
-              left: 10,
-              background: 'rgba(0, 0, 0, 0.8)',
+              top: 12,
+              left: 12,
+              background: Colors[colorScheme].background,
               color: 'white',
-              padding: '8px 12px',
-              borderRadius: '6px',
-              fontSize: '12px',
+              padding: '6px 10px',
+              borderRadius: '8px',
+              fontSize: '11px',
               pointerEvents: 'none',
               zIndex: 10,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             }}>
               🖱️ Click game to play • Hover for 1s • Press ESC to scroll
             </div>
@@ -140,15 +146,16 @@ export default function HomeScreen() {
           {!allowScroll && (
             <div style={{
               position: 'absolute',
-              top: 10,
-              right: 10,
-              background: 'rgba(0, 128, 0, 0.8)',
-              color: 'white',
-              padding: '8px 12px',
-              borderRadius: '6px',
-              fontSize: '12px',
+              top: 12,
+              right: 12,
+              background: Colors[colorScheme].kaela,
+              color: Colors[colorScheme].text,
+              padding: '6px 10px',
+              borderRadius: '8px',
+              fontSize: '11px',
               pointerEvents: 'none',
               zIndex: 10,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             }}>
               🎮 Game active • Press ESC to scroll page
             </div>
@@ -161,110 +168,37 @@ export default function HomeScreen() {
               iframe.requestFullscreen();
             }
           }}
-          style={{
-            margin: '8px auto',
-            display: 'block',
-            padding: '8px 16px',
-            fontSize: '16px',
-            borderRadius: '6px',
-            background: '#222',
-            color: '#fff',
-            border: 'none',
+          className="mx-auto block px-6 py-3 text-base rounded-xl shadow-md transition-all hover:shadow-lg"
+          style={{ 
+            margin: '12px auto', 
+            display: 'block', 
+            padding: '10px 20px', 
+            fontSize: '16px', 
+            borderRadius: '12px', 
+            background: Colors[colorScheme].rival, 
+            color: Colors[colorScheme].background, 
+            border: 'none', 
             cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
           }}
         >
           🖥️ Fullscreen Game
         </button>
-        {/* <View style={{ height: 600, width: '100%', borderRadius: 12, overflow: 'hidden', marginVertical: 12 }}>
-          <WebView
-              source={{ uri: '/godot_web/index.html' }}
-              style={{ flex: 1, backgroundColor: '#000' }}
-              originWhitelist={['*']}
-              allowsFullscreenVideo
-              javaScriptEnabled
-              domStorageEnabled
+        <View className="flex-row justify-center items-center gap-4 px-4 flex-wrap">
+          <View className="rounded-2xl overflow-hidden shadow-lg bg-opacity-10 p-2">
+            <Image
+              source={require('@/assets/images/definition.png')}
+              style={{ height: 400, width: 800, maxWidth: '100%', borderRadius: 12 }}
             />
-        </View> */}
-        <View style={styles.echoContainer}>
-          <Image
-            source={require('@/assets/images/definition.png')}
-            style={styles.echo}
-          />
-          <Image
-            source={require('@/assets/images/extra.png')}
-            style={styles.echo}
-          />
+          </View>
+          <View className="rounded-2xl overflow-hidden shadow-lg bg-opacity-10 p-2">
+            <Image
+              source={require('@/assets/images/extra.png')}
+              style={{ height: 400, width: 800, maxWidth: '100%', borderRadius: 12 }}
+            />
+          </View>
         </View>
       </ThemedView>
     </MultiLayerParallaxScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  playContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 20,
-  },
-  playButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  playButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  iframeContainer: {
-    height: 400,
-    width: '100%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginVertical: 12,
-    position: 'relative',
-  },
-  gameIframe: {
-    flex: 1,
-    backgroundColor: '#000',
-    borderRadius: 12,
-  },
-  gameOverlay: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    padding: 8,
-    borderRadius: 6,
-    zIndex: 10,
-  },
-  overlayText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  echoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-    paddingHorizontal: 16,
-    flexWrap: 'wrap',
-  },
-  echo: {
-    height: 400,
-    width: 800, // Actually make them significantly wider
-    maxWidth: '90%', // Ensure they don't overflow on small screens
-    borderRadius: 8,
-    marginTop: 16,
-  },
-});

@@ -1,5 +1,5 @@
 import { PropsWithChildren, useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { TouchableOpacity, Animated, Easing } from 'react-native';
 
 import { ThemedText } from '@/src/components/ThemedText';
 import { ThemedView } from '@/src/components/ThemedView';
@@ -179,7 +179,7 @@ export function Collapsible({ children, title, isOpen: externalIsOpen, onToggle,
   return (
     <ThemedView>
       <TouchableOpacity
-        style={styles.heading}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
         onPress={handlePress}
         activeOpacity={0.8}>
         <Animated.View
@@ -199,12 +199,12 @@ export function Collapsible({ children, title, isOpen: externalIsOpen, onToggle,
           />
         </Animated.View>
 
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
+        <ThemedText type="subtitle">{title}</ThemedText>
       </TouchableOpacity>
       {isOpen && (
         <Animated.View 
           style={[
-            styles.content,
+            { marginTop: 6, marginLeft: 24, overflow: 'hidden' },
             animatedOpen && isControlledExternally ? {
               opacity: opacityAnim,
               transform: [
@@ -220,16 +220,3 @@ export function Collapsible({ children, title, isOpen: externalIsOpen, onToggle,
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  content: {
-    marginTop: 6,
-    marginLeft: 24,
-    overflow: 'hidden',
-  },
-});

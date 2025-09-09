@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { StyleSheet } from 'react-native';
 import { useEffect, useState } from 'react';
 
 import { Collapsible } from '@/src/components/Collapsible';
@@ -10,6 +9,7 @@ import { ThemedView } from '@/src/components/ThemedView';
 import { ServerLink } from '@/src/components/ServerLink';
 
 import teamData from '@/assets/data/team.json';
+import { Colors } from '@/constants/Colors';
 
 interface TeamMember {
   id: number;
@@ -78,34 +78,44 @@ export default function TabTwoScreen() {
           onToggle={handleToggle(`team-${item.id}`)}
           animatedOpen={true}
         >
-      <ThemedText>
-        <ThemedText type="defaultSemiBold">Discord:</ThemedText> {item.discordName}
+      <ThemedText className="mb-3">
+        <ThemedText type="defaultSemiBold" className="text-base font-semibold">Discord:</ThemedText> 
+        <ThemedText className="text-base ml-2">{item.discordName}</ThemedText>
       </ThemedText>
       {item.contribution && (
-        <ThemedText>
-          <ThemedText type="defaultSemiBold">Contribution:</ThemedText> {item.contribution}
+        <ThemedText className="mb-3">
+          <ThemedText type="defaultSemiBold" className="text-base font-semibold">Contribution:</ThemedText> 
+          <ThemedText 
+            lightColor={Colors.light.uiAccent} 
+            darkColor={Colors.dark.uiAccent} 
+            className="text-lg ml-2"
+          >
+            {item.contribution}
+          </ThemedText>
         </ThemedText>
       )}
+      <ThemedView className="flex-row flex-wrap gap-3 mt-2">
       {item.portfolioLink && (
         <ExternalLink href={item.portfolioLink as any}>
-          <ThemedText type="link">Portfolio</ThemedText>
+          <ThemedText type="link" className="text-blue-400 text-base underline">Portfolio</ThemedText>
         </ExternalLink>
       )}
       {item.linkedInProfile && (
         <ExternalLink href={item.linkedInProfile as any}>
-          <ThemedText type="link">LinkedIn</ThemedText>
+          <ThemedText type="link" className="text-blue-400 text-base underline">LinkedIn</ThemedText>
         </ExternalLink>
       )}
       {item.artstationProfile && (
         <ExternalLink href={item.artstationProfile as any}>
-          <ThemedText type="link">ArtStation</ThemedText>
+          <ThemedText type="link" className="text-blue-400 text-base underline">ArtStation</ThemedText>
         </ExternalLink>
       )}
       {item.instagramProfile && (
         <ExternalLink href={item.instagramProfile as any}>
-          <ThemedText type="link">Instagram</ThemedText>
+          <ThemedText type="link" className="text-blue-400 text-base underline">Instagram</ThemedText>
         </ExternalLink>
       )}
+      </ThemedView>
     </Collapsible>
   </ThemedView>
   );
@@ -113,14 +123,14 @@ export default function TabTwoScreen() {
 
   return (
     <TeamParallaxScrollView headerBackgroundColor={{ light: '#a1cedc2f', dark: '#e8eaea3b' }}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Team</ThemedText>
+      <ThemedView className="mb-6">
+        <ThemedText type="title" className="text-4xl font-bold mb-4">Team</ThemedText>
       </ThemedView>
-      <ThemedView style={{ flex: 1, minHeight: 100 }}>
+      <ThemedView className="mb-8 space-y-3">
         {teamData.map((item) => renderTeamMember({ item }))}
       </ThemedView>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">How it works</ThemedText>
+      <ThemedView className="mb-6 mt-8">
+        <ThemedText type="title" className="text-4xl font-bold mb-4">How it works</ThemedText>
       </ThemedView>
       <Collapsible 
         title="Quantum Computing Integration"
@@ -128,17 +138,17 @@ export default function TabTwoScreen() {
         onToggle={handleToggle('quantum-computing')}
         animatedOpen={true}
       >
-        <ThemedText>
-          This game features <ThemedText type="defaultSemiBold">real quantum computing</ThemedText> powered by IBM&apos;s Qiskit library running on a custom VPS server.{' '}
+        <ThemedText className="mb-4 text-lg leading-relaxed">
+          This game features <ThemedText type="defaultSemiBold" className="font-bold">real quantum computing</ThemedText> powered by IBM&apos;s Qiskit library running on a custom VPS server.{' '}
           The story branches based on actual quantum gate operations - bit-flip, phase-flip, and rotation gates applied to qubits in superposition.
         </ThemedText>
-        <ThemedText>
+        <ThemedText className="mb-4 text-lg leading-relaxed">
           When players make choices, the game sends HTTP requests to our quantum server at{' '}
           <ServerLink />, which creates quantum circuits,{' '}
           applies gates, and measures the results to determine success or failure. True quantum randomness drives the narrative!
         </ThemedText>
         <ExternalLink href="https://github.com/ReneJSchwartz/quantum-jam-2025-choose-your-own-adventure">
-          <ThemedText type="link">View the source code on GitHub</ThemedText>
+          <ThemedText type="link" className="text-blue-400 underline text-lg">View the source code on GitHub</ThemedText>
         </ExternalLink>
       </Collapsible>
       <Collapsible 
@@ -147,20 +157,20 @@ export default function TabTwoScreen() {
         onToggle={handleToggle('react-native')}
         animatedOpen={true}
       >
-        <ThemedText>
-          This project demonstrates the <ThemedText type="defaultSemiBold">first known integration</ThemedText> of real quantum computing{' '}
+        <ThemedText className="mb-4 text-lg leading-relaxed">
+          This project demonstrates the <ThemedText type="defaultSemiBold" className="font-bold">first known integration</ThemedText> of real quantum computing{' '}
           within an Expo React Native application. Using HTTP requests from React Native components,{' '}
           we connect directly to quantum circuits running IBM Qiskit on our VPS.
         </ThemedText>
-        <ThemedText>
-          The <ThemedText type="defaultSemiBold">HelloWave component</ThemedText> itself is quantum-controlled - its animation timing,{' '}
+        <ThemedText className="mb-4 text-lg leading-relaxed">
+          The <ThemedText type="defaultSemiBold" className="font-bold">HelloWave component</ThemedText> itself is quantum-controlled - its animation timing,{' '}
           icon selection (⚛️⭐🌌), and rotation intensity are determined by real quantum measurements.{' '}
           Each app launch triggers a quantum circuit with random rotation angles, creating genuinely unpredictable user experiences{' '}
           powered by quantum superposition and measurement collapse.
         </ThemedText>
-        <ThemedText>
-          This bridges the gap between <ThemedText type="defaultSemiBold">quantum computing research</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">consumer mobile applications</ThemedText>, showing how quantum APIs{' '}
+        <ThemedText className="mb-0 text-lg leading-relaxed">
+          This bridges the gap between <ThemedText type="defaultSemiBold" className="font-bold">quantum computing research</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold" className="font-bold">consumer mobile applications</ThemedText>, showing how quantum APIs{' '}
           can enhance traditional React Native development with authentic quantum randomness and quantum state visualization.
         </ThemedText>
       </Collapsible>
@@ -170,11 +180,11 @@ export default function TabTwoScreen() {
         onToggle={handleToggle('multi-platform')}
         animatedOpen={true}
       >
-        <ThemedText>
-          Built with <ThemedText type="defaultSemiBold">Godot 4.x</ThemedText> for the main game engine, exported to web and embedded in a{' '}
-          <ThemedText type="defaultSemiBold">React Native/Expo</ThemedText> wrapper for cross-platform deployment.
+        <ThemedText className="mb-4 text-lg leading-relaxed">
+          Built with <ThemedText type="defaultSemiBold" className="font-bold">Godot 4.x</ThemedText> for the main game engine, exported to web and embedded in a{' '}
+          <ThemedText type="defaultSemiBold" className="font-bold">React Native/Expo</ThemedText> wrapper for cross-platform deployment.
         </ThemedText>
-        <ThemedText>
+        <ThemedText className="mb-0 text-lg leading-relaxed">
           The game is hosted on a custom VPS and can be deployed to web, Android, and iOS from the same codebase.{' '}
           The React Native wrapper provides native mobile features while preserving the Godot game experience.
         </ThemedText>
@@ -185,15 +195,15 @@ export default function TabTwoScreen() {
         onToggle={handleToggle('quantum-text')}
         animatedOpen={true}
       >
-        <ThemedText>
-          Beyond quantum gates, the game includes <ThemedText type="defaultSemiBold">quantum text transformation</ThemedText> that{' '}
+        <ThemedText className="mb-4 text-lg leading-relaxed">
+          Beyond quantum gates, the game includes <ThemedText type="defaultSemiBold" className="font-bold">quantum text transformation</ThemedText> that{' '}
           categorizes words using a quantum dictionary and applies different quantum effects:
         </ThemedText>
-        <ThemedText>
-          • <ThemedText type="defaultSemiBold">Quantum Gates</ThemedText>: Technical words get circuit transformations{'\n'}
-          • <ThemedText type="defaultSemiBold">Quantum Entanglement</ThemedText>: Emotional words get multi-qubit processing{'\n'}
-          • <ThemedText type="defaultSemiBold">Ghost Echo</ThemedText>: Narrative words become ethereal with special characters{'\n'}
-          • <ThemedText type="defaultSemiBold">Scramble</ThemedText>: Action words get quantum interference effects
+        <ThemedText className="mb-0 text-lg leading-relaxed font-mono">
+          • <ThemedText type="defaultSemiBold" className="font-bold">Quantum Gates</ThemedText>: Technical words get circuit transformations{'\n'}
+          • <ThemedText type="defaultSemiBold" className="font-bold">Quantum Entanglement</ThemedText>: Emotional words get multi-qubit processing{'\n'}
+          • <ThemedText type="defaultSemiBold" className="font-bold">Ghost Echo</ThemedText>: Narrative words become ethereal with special characters{'\n'}
+          • <ThemedText type="defaultSemiBold" className="font-bold">Scramble</ThemedText>: Action words get quantum interference effects
         </ThemedText>
       </Collapsible>
       <Collapsible 
@@ -315,16 +325,3 @@ export default function TabTwoScreen() {
     </TeamParallaxScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});

@@ -117,11 +117,12 @@ Any delay may lead to the technology falling into the wrong hands.
 
 Kaela - you must master quantum echo technology.""")
 	
-	on_dialogue_end_callback = func():
+	add_option("Close email", func(): 
 		discovery()
 		GameGraphics.instance.show_widgets_at_right()
 		GameGraphics.instance.show_ava()
-		Sounds.instance.stop_email_typing()
+		Sounds.instance.stop_email_typing())
+	queue_added_options()
 	
 	start_dialogue()
 

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# SSL Certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Logs
+*.log
+server-full.log
+server.log
+
+# Local development
+.env
+.venv

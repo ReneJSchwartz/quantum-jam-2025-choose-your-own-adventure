@@ -8,7 +8,7 @@ signal quantum_echo_received(original_text: String, echo_text: String, echo_type
 signal quantum_echo_error(error_message: String)
 
 var http_request: HTTPRequest
-var server_url: String = "http://108.175.12.95:8000"  # Change this to your VPS URL
+var server_url: String = "https://108.175.12.95:8000"  # Change this to your VPS URL
 
 # Available echo types
 enum EchoType {

@@ -263,7 +263,7 @@ func quantum_gate_request(gate_type: String):
 	# Configure request - FIXED: Don't bind parameters, use metadata instead
 	http_request.request_completed.connect(_on_quantum_gate_response)
 	
-	var server_url = "http://108.175.12.95:8000/quantum_gate"
+	var server_url = "https://108.175.12.95:8000/quantum_gate"
 	print("[Quantum] Sending request to: ", server_url)
 	
 	var error = http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)

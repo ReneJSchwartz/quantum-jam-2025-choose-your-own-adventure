@@ -237,7 +237,7 @@ func _process_text_with_quantum_server(text: String):
 	http_request.request_completed.connect(_on_quantum_server_response)
 	
 	# Send request to Flask server (production server)
-	var server_url = "http://108.175.12.95:8000/quantum_text"
+	var server_url = "https://108.175.12.95:8000/quantum_text"
 	print("[QuantumUI] Sending request to: %s" % server_url)
 	http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)
 

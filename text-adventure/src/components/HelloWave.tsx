@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { View, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,22 +9,75 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedText } from '@/src/components/ThemedText';
-import { ServerLink } from '@/src/components/ServerLink';
+import { ExternalLink } from '@/src/components/ExternalLink';
+import { useThemeColor } from '@/src/hooks/useThemeColor';
+
 
 export function HelloWave() {
+  const quantumBaseUrl = __DEV__ ? 'https://localhost:8000' : 'https://108.175.12.95:8000';
+  const quantumEndpoint = `${quantumBaseUrl}/quantum_gate`;
   const rotationAnimation = useSharedValue(0);
   const scaleAnimation = useSharedValue(1);
   const [quantumIcon, setQuantumIcon] = useState('⚛️');
   const [quantumDetails, setQuantumDetails] = useState('Initializing quantum circuit...');
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const [technicalDetails, setTechnicalDetails] = useState<{
+    gate: string;
+    angle: number;
+    state: string;
+    backend: string;
+  } | null>(null);
+
+  const startClassicalFallback = (reason: string) => {
+    console.log('🌊 [QuantumWave] 🎲 Falling back to classical physics animation:', reason);
+
+    setQuantumIcon('⚗️');
+    setQuantumDetails('⚠️ Quantum server offline - Classical animation mode | 🎲 Random timing | 🧪 Chemistry fallback');
+    setTechnicalDetails({
+      gate: 'Classical Fallback',
+      angle: 0,
+      state: 'Deterministic',
+      backend: 'Local JavaScript'
+    });
+
+    rotationAnimation.value = withRepeat(
+      withSequence(
+        withTiming(25, { duration: 150 }),
+        withTiming(-25, { duration: 150 }),
+        withTiming(0, { duration: 100 })
+      ),
+      20
+    );
+
+    scaleAnimation.value = withRepeat(
+      withSequence(
+        withTiming(1.15, { duration: 200 }),
+        withTiming(1, { duration: 200 })
+      ),
+      10
+    );
+
+    setTimeout(() => {
+      setIsAnimating(false);
+      setIsComplete(true);
+      setQuantumDetails('🧪 Classical animation complete - Try refreshing for quantum mode');
+    }, 8000);
+  };
 
   const fetchQuantumTiming = async () => {
     console.log('🌊 [QuantumWave] Starting dramatic quantum-controlled animation...');
-    setQuantumDetails('🔄 Contacting quantum server...');
+    setQuantumDetails(`🔄 Contacting quantum server at ${quantumBaseUrl}...`);
     setIsAnimating(true);
+    setIsComplete(false);
 
     try {
-      console.log('🌊 [QuantumWave] Sending request to quantum server: http://108.175.12.95:8000/quantum_gate');
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, 5000);
+
+      console.log(`🌊 [QuantumWave] Sending request to quantum server: ${quantumEndpoint}`);
 
       // Generate truly random quantum rotation angle for variety!
       const quantumAngles = [
@@ -39,7 +92,7 @@ export function HelloWave() {
       const randomAngle = quantumAngles[Math.floor(Math.random() * quantumAngles.length)];
       console.log(`🌊 [QuantumWave] Using random quantum angle: ${randomAngle.toFixed(4)} radians (${(randomAngle * 180 / Math.PI).toFixed(1)}°)`);
 
-      const response = await fetch('http://108.175.12.95:8000/quantum_gate', {
+      const response = await fetch(quantumEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +101,10 @@ export function HelloWave() {
           gate_type: 'rotation',
           rotation_angle: randomAngle,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       console.log('🌊 [QuantumWave] Response status:', response.status);
 
@@ -58,6 +114,14 @@ export function HelloWave() {
 
       const result = await response.json();
       console.log('🌊 [QuantumWave] Quantum server response:', JSON.stringify(result, null, 2));
+
+      // Store technical details for display
+      setTechnicalDetails({
+        gate: 'RY (Rotation around Y-axis)',
+        angle: randomAngle,
+        state: `|ψ⟩ = cos(${(randomAngle/2).toFixed(3)})|0⟩ + sin(${(randomAngle/2).toFixed(3)})|1⟩`,
+        backend: 'Qiskit Aer Simulator'
+      });
 
       // Icon based on superposition strength (0.0 - 1.0)
       let icon = '⚛️'; // Default atom
@@ -137,6 +201,7 @@ export function HelloWave() {
       // Reset animation state after 30 seconds
       setTimeout(() => {
         setIsAnimating(false);
+        setIsComplete(true);
         setQuantumDetails('✨ Quantum animation sequence complete');
       }, 30000);
 
@@ -145,33 +210,7 @@ export function HelloWave() {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       console.log('🌊 [QuantumWave] ❌ Quantum server error:', errorMsg);
-      console.log('🌊 [QuantumWave] 🎲 Falling back to classical physics animation');
-
-      setQuantumIcon('⚗️');
-      setQuantumDetails('⚠️ Quantum server offline - Classical animation mode | 🎲 Random timing | 🧪 Chemistry fallback');
-      
-      // Classical fallback - still dramatic but shorter
-      rotationAnimation.value = withRepeat(
-        withSequence(
-          withTiming(25, { duration: 150 }),
-          withTiming(-25, { duration: 150 }),
-          withTiming(0, { duration: 100 })
-        ),
-        20 // 8 seconds of classical animation
-      );
-      
-      scaleAnimation.value = withRepeat(
-        withSequence(
-          withTiming(1.15, { duration: 200 }),
-          withTiming(1, { duration: 200 })
-        ),
-        10
-      );
-
-      setTimeout(() => {
-        setIsAnimating(false);
-        setQuantumDetails('🧪 Classical animation complete - Try refreshing for quantum mode');
-      }, 8000);
+      startClassicalFallback(errorMsg);
     }
   };
 
@@ -191,21 +230,86 @@ export function HelloWave() {
     opacity: isAnimating ? 1 : 0.8,
   }));
 
+  const themedBg = useThemeColor({}, 'background');
+  const themedText = useThemeColor({}, 'text');
+
+  const handleRestart = () => {
+    fetchQuantumTiming();
+  };
+
   return (
-    <View style={{ alignItems: 'center', marginVertical: 8 }}>
-      <Animated.View style={[animatedStyle, containerStyle]}>
-        <ThemedText style={{ fontSize: 40, lineHeight: 36, marginTop: -6 }}>{quantumIcon}</ThemedText>
-      </Animated.View>
+    <View style={{ backgroundColor: themedBg, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, alignItems: 'center', marginVertical: 8 }}>
+      {isComplete ? (
+        <Pressable 
+          onPress={handleRestart}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.6 : 1,
+            padding: 12,
+            borderRadius: 8,
+            backgroundColor: 'rgba(100, 150, 255, 0.2)',
+            borderWidth: 2,
+            borderColor: 'rgba(100, 150, 255, 0.5)',
+          })}
+        >
+          <ThemedText style={{ fontSize: 32, textAlign: 'center' }}>🔄</ThemedText>
+          <ThemedText style={{ fontSize: 14, fontWeight: 'bold', marginTop: 4, textAlign: 'center' }}>
+            Run Again
+          </ThemedText>
+        </Pressable>
+      ) : (
+        <Animated.View style={[animatedStyle, containerStyle]}>
+          <ThemedText style={{ fontSize: 40, lineHeight: 36, marginTop: -6 }}>{quantumIcon}</ThemedText>
+        </Animated.View>
+      )}
       <View style={{ marginTop: 12, paddingHorizontal: 16, alignItems: 'center' }}>
         <ThemedText style={{ fontSize: 16, textAlign: 'center', opacity: 0.8, lineHeight: 16 }}>{quantumDetails}</ThemedText>
         {isAnimating && (
           <ThemedText style={{ fontSize: 16, textAlign: 'center', opacity: 0.6, marginTop: 4, fontStyle: 'italic' }}>
             🔄 Running a 30-second quantum sequence active based on the quantum Qiskit code in the python server:{' '}
-          <ServerLink />
+          <ServerLink url={quantumBaseUrl} />
           </ThemedText>
+        )}
+        
+        {technicalDetails && (
+          <View style={{ marginTop: 16, width: '100%', paddingHorizontal: 8 }}>
+            <ThemedText style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }}>
+              🔬 Technical Details
+            </ThemedText>
+            <View style={{ gap: 6 }}>
+              <ThemedText style={{ fontSize: 13, opacity: 0.9 }}>
+                <ThemedText style={{ fontWeight: 'bold' }}>Quantum Gate:</ThemedText> {technicalDetails.gate}
+              </ThemedText>
+              <ThemedText style={{ fontSize: 13, opacity: 0.9 }}>
+                <ThemedText style={{ fontWeight: 'bold' }}>Rotation Angle:</ThemedText> {technicalDetails.angle.toFixed(4)} rad ({(technicalDetails.angle * 180 / Math.PI).toFixed(1)}°)
+              </ThemedText>
+              <ThemedText style={{ fontSize: 13, opacity: 0.9 }}>
+                <ThemedText style={{ fontWeight: 'bold' }}>Quantum State:</ThemedText> {technicalDetails.state}
+              </ThemedText>
+              <ThemedText style={{ fontSize: 13, opacity: 0.9 }}>
+                <ThemedText style={{ fontWeight: 'bold' }}>Backend:</ThemedText> {technicalDetails.backend}
+              </ThemedText>
+            </View>
+            <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(128, 128, 128, 0.3)' }}>
+              <ThemedText style={{ fontSize: 12, opacity: 0.7, textAlign: 'center', fontStyle: 'italic' }}>
+                💡 This animation is different every time you load it due to quantum randomness! It makes a live API call 
+                to a Python server hosted on my VPS, which runs Qiskit quantum circuit calculations in a simulated environment. 
+                The RY gate creates a superposition state, and when measured, the quantum wavefunction collapses to produce 
+                truly random results that drive the animation's behavior, intensity, and duration.
+              </ThemedText>
+            </View>
+          </View>
         )}
       </View>
     </View>
+  );
+}
+
+// Simple link component that respects native + web navigation
+function ServerLink({ url }: { url: string }) {
+  return (
+    <ExternalLink href={url} style={{ textDecorationLine: 'underline' }}>
+      {url}
+    </ExternalLink>
   );
 }
 

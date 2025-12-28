@@ -113,7 +113,9 @@ class Qubit:
         # Simulate measurement probabilistically, collapsing state
         probabilities = self.state.probabilities_dict()
         p0 = probabilities.get('0', 0)
-        rand_val = random.random()
+        # Use numpy's random for better randomness
+        rand_val = np.random.random()
+        print(f"[Qubit.measure] P(0)={p0:.3f}, P(1)={1-p0:.3f}, random={rand_val:.3f}")
         if rand_val < p0:
             self.state = Statevector([1, 0])  # Collapse to |0>
             return 0

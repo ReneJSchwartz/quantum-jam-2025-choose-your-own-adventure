@@ -83,36 +83,52 @@ paths:
     post:
       tags:
         - Quantum Operations
-      summary: Apply a quantum gate operation
-      description: Apply quantum gate operations (bit_flip, phase_flip, rotation) to a qubit
+      summary: Apply quantum gate operation
+      description: |
+        Execute a quantum gate operation on a single qubit to demonstrate quantum mechanics.
+        
+        **Gate Types:**
+        - **rotation**: Applies an RY (rotation-Y) gate with a custom angle. Creates quantum superposition - the qubit exists in a probabilistic state between |0⟩ and |1⟟. The measurement result varies randomly based on the superposition strength. Used in the game to create quantum-influenced text transformations.
+        - **bit_flip**: Applies a Pauli-X gate (quantum NOT gate). Deterministically flips |0⟩→|1⟩. Always produces measurement=1.
+        - **phase_flip**: Applies a Pauli-Z gate. Flips the phase of |1⟩ while leaving |0⟩ unchanged. Always produces measurement=0 when starting from |0⟩.
+        
+        **Response Fields:**
+        - `superposition_strength`: Amplitude of the |1⟩ state (0=no superposition, 1=maximum). Only non-zero for rotation gates.
+        - `measurement`: The collapsed quantum state (0 or 1). For rotation gates, this varies probabilistically based on superposition_strength. For bit_flip/phase_flip, this is deterministic.
+        - `success`: Whether measurement collapsed to 0 (true) or 1 (false).
+        
+        **Use Cases:**
+        - Demonstrate quantum superposition and measurement collapse
+        - Generate truly random outcomes based on quantum probability
+        - Create quantum-influenced game mechanics or procedural generation
+        
+        The qubit starts in |0⟩ state, the gate is applied, then measured to collapse the wavefunction.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - gate
               properties:
                 gate:
                   type: string
-                  description: "Gate type: bit_flip, phase_flip, or rotation"
-                  enum: [bit_flip, phase_flip, rotation]
+                  enum: [rotation, bit_flip, phase_flip]
+                  description: Type of quantum gate to apply
+                  example: "rotation"
                 rotation_angle:
                   type: number
-                  description: "Rotation angle in radians (required for rotation gate)"
-      responses:
-        '200':
-          description: Gate application result
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  gate_type:
-                    type: string
-                  measurement:
-                    type: integer
-                  success:
-                    type: boolean
+                  minimum: 0
+                  maximum: 180
+                  description: |
+                    Angle in degrees for RY rotation gate (0 to 180). Required only when gate="rotation". 
+                    - 0°: No rotation (stays in |0⟩, always measures 0)
+                    - 45°: Creates balanced superposition (~50% chance of measuring 0 or 1)
+                    - 90°: Maximum superposition (equal amplitude between |0⟩ and |1⟩)
+                    - 180°: Full rotation to |1⟩ (always measures 1)
+                    Higher angles create stronger superposition until 90°, then decrease.
+                  example: 45
   /quantum_echo_types:
     get:
       tags:

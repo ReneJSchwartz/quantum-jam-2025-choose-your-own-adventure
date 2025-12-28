@@ -21,8 +21,8 @@ location ~ ^/api/quantum/(quantum_text|quantum_gate|quantum_echo_types|health)$ 
     }
 }
 
-# Proxy Swagger UI to Flask app
-location /api/quantum/docs {
+# Proxy Swagger UI to Flask app (exact match for priority)
+location = /api/quantum/docs {
     proxy_pass http://127.0.0.1:8000/api/quantum/docs;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -30,8 +30,8 @@ location /api/quantum/docs {
     proxy_set_header X-Forwarded-Proto $scheme;
 }
 
-# Proxy OpenAPI spec to Flask app
-location /api/quantum/openapi.yaml {
+# Proxy OpenAPI spec to Flask app (exact match for priority)
+location = /api/quantum/openapi.yaml {
     proxy_pass http://127.0.0.1:8000/api/quantum/openapi.yaml;
     proxy_set_header Host $host;
     add_header Content-Type application/x-yaml;

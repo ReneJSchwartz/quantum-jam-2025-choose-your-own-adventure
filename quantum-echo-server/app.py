@@ -509,6 +509,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'service': 'quantum-echo-server',
+        'version': API_VERSION,
         'qiskit_available': qiskit_status,
         'qiskit_status': qiskit_version,
         'quantum_classes': ['Qubit', 'QuantumGate', 'QuantumCircuitManager']

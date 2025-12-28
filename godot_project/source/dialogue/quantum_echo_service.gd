@@ -19,7 +19,7 @@ extends Node
 ## - Default content gets scramble transformation
 ##
 ## 📡 SERVER ARCHITECTURE:
-## - Flask server running at 108.175.12.95:8000 (configured for VPS deployment)
+## - Flask server running at DavidJGrimsley.com/api/quantum (production)
 ## - Async HTTP requests with fallback to original text on errors
 ## - JSON API with comprehensive error handling and logging
 ## - Health check endpoint for server status monitoring

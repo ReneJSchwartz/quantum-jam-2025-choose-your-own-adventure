@@ -1,0 +1,245 @@
+How can we help you today?
+ David Grimsley
+Select Language​▼
+Plesk Requests
+How would you rate the support you received?
+Good, I'm satisfied Bad, I'm unsatisfied
+Request #95893973
+
+Best Practice for Running Public Python Flask API with SSL on Plesk VPS
+Avatar
+David Grimsley
+December 23, 2025
+Hi Plesk Support,
+
+I'm running a public Python Flask API with Gunicorn on my Plesk VPS (108.175.12.95, port 8000) and need guidance on the best Plesk-integrated approach.
+
+Current Setup:
+
+Using pm2 process manager to run: gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 --certfile=/path/to/cert.pem --keyfile=/path/to/key.pem app:app
+Currently using self-signed SSL certificate (works but triggers browser warnings)
+Had to manually add iptables rule: sudo iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+Running outside of Plesk's web hosting structure (in /home/deployer/quantum-jam-2025-choose-your-own-adventure/quantum-echo-server)
+pm2 configured with pm2 startup for auto-start on reboot
+Use Case:
+This is a public API that needs to be accessible from any website/application (CORS enabled). I use it from my godot game, and a website at https://happy-noyce.108-175-12-95.plesk.page/, davidjgrimsley.com and potentially other sites in the future.
+
+Questions:
+
+Python App Management: Is pm2 + Gunicorn the recommended approach for Python apps on Plesk, or should I use Plesk's Python/WSGI features instead? (I'm new to server management - are there built-in Python app features I should be using?)
+
+SSL Certificate: What's the best way to get a proper SSL certificate for my API endpoint?
+
+Can I use Let's Encrypt for a custom subdomain (e.g., api.davidjgrimsley.com) pointing to port 8000?
+Or is there a way to use my existing domain's Let's Encrypt certificate for this API?
+Currently using self-signed certs which cause browser warnings
+Firewall/Port Management: What's the proper way to open custom ports (8000) through Plesk's firewall so the rule persists after reboots? My manual iptables rule works but may not survive updates.
+
+Architecture: For a public API like this, is my current approach (pm2 + Gunicorn on custom port) correct, or would you recommend a different setup through Plesk (reverse proxy, subdomain, etc.)?
+
+Goal:
+A reliable, production-ready setup that:
+
+Uses proper SSL certificates (no browser warnings)
+Persists through reboots and updates
+Follows Plesk best practices
+Allows public access from any HTTPS site
+I'd appreciate any guidance on the most Plesk-integrated, maintainable solution for this use case.
+
+Thanks!
+
+Screenshot 2025-12-23 105142.png
+(30 KB)
+Avatar
+Vincent Lauton
+December 23, 2025
+Hi David,
+ 
+Thank you for contacting Plesk Technical Support.
+ 
+At this time, Plesk does not yet support running applications on custom ports. Additionally, if opening port 8000, the application will be accessed directly and therefore cannot be secured with Plesk since requests would not be served by nginx. Securing it with a certificate would then be an administrative task to be performed on your end.
+ 
+Instead, you should add the domain api.davidjgrimsley.com to Plesk and apply the following steps from this article:
+Log into Plesk
+Uncheck PHP Support option at Domain > api.davidjgrimsley.com > Dashboard > PHP
+Uncheck Proxy mode option at Domain > api.davidjgrimsley.com > Hosting & DNS > Apache and Nginx Settings
+mceclip1.png
+Add the following to Domains > example.com > Apache & Nginx Settings > Additional nginx directives
+
+
+        
+        
+location / {
+proxy_set_header X-Forwarded-For $remote_addr;
+proxy_set_header Host $http_host;
+proxy_pass http://127.0.0.1:8000;
+}
+Click Apply 
+ 
+Following this, you application should be available on api.davidjgrimsley.com on port 443 (standard HTTPS) and you may secure the domain like you would any other domain.
+ 
+Let me know should you have any further questions.
+Best regards,
+
+Vincent Lauton
+Technical Support Engineer
+Plesk
+
+Avatar
+David Grimsley
+December 25, 2025
+Can I make it so quantum-api.davidjgrimsley.com is an actual webpage/html that explains how to use the quantum api including all of the endpoints and such? Would that require leaving php support on?
+
+Avatar
+Vincent Lauton
+December 25, 2025
+Hello David,
+ 
+To make it an explanatory web page, you should either:
+use the following configuration to ensure index.html is fetched locally (no need to re-enable PHP support):
+
+        
+        
+location / { 
+proxy_set_header X-Forwarded-For $remote_addr; 
+proxy_set_header Host $http_host; 
+proxy_pass http://127.0.0.1:8000; 
+}
+    
+# Serve /index.html directly 
+location = /index.html { 
+root /var/www/vhosts/davidjgrimsley.com/quantum-api.davidjgrimsley.com; 
+}
+ 
+set the location of the application to some other path (such as /api for example). In that case, you would not need to disable PHP support or Proxy Mode, as those are only disabled to avoid conflicts with the root location. You can then place an HTML or PHP page in the root to be displayed on access. This could also be applied to put the API on davidjgrimsley.com/api instead if desired
+ 
+Let me know should you have any further questions.
+ 
+ 
+Best regards,
+
+Vincent Lauton
+Technical Support Engineer
+Plesk
+
+Avatar
+David Grimsley
+December 26, 2025
+Could not issue an SSL/TLS certificate for quantum-api.davidjgrimsley.com
+Details
+
+Could not issue a Let's Encrypt SSL/TLS certificate for quantum-api.davidjgrimsley.com. Authorization for the domain failed.
+Details
+
+Invalid response from https://acme-v02.api.letsencrypt.org/acme/authz/2117789615/633369551476
+Details:
+Type: urn:ietf:params:acme:error:dns
+Status: 400
+Detail: DNS problem: NXDOMAIN looking up A for quantum-api.davidjgrimsley.com - check that a DNS record exists for this domain; DNS problem: NXDOMAIN looking up AAAA for quantum-api.davidjgrimsley.com - check that a DNS record exists for this domain
+
+
+I'm not able to add a let's Encrypt certificate. Can you help? I saw somewhere else it said domain not resolved. idk what that means.
+
+Avatar
+David Grimsley
+December 26, 2025
+I have added the A record to the dns for the domain. I think that will clear up the dns issue and then let me get the certificate.
+
+this line confuses me: “set the location of the application to some other path (such as /api for example).”
+
+Do you mean inside quantum-ap.davidjgrimsley.com? Please don't assume I know what you're talking about. This is very confusing. Theres no way to set an application root unless it's a node.js app. So what are you telling me to do? 
+
+Idk why it's so hard and confusing to upload anything to plesk.
+
+ 
+
+THis part of your original message… "Click Apply 
+
+ 
+Following this, you application should be available on api.davidjgrimsley.com on port 443 (standard HTTPS) and you may secure the domain like you would any other domain." 
+
+Doesn't explain where to actually put the api files.. Am I missing something? Please don't leave anything out.
+
+Should i leave them in home/deployer/quantum-jam-2025-choose-your-own-adventure/quantum-echo-server? Thats where I used VS code ssh to clone the git repo and start the python server before. but then they won't be under the certificate. I am still learning so all of this is just so confusing. please help as much as you can.
+
+Screenshot 2025-12-26 095733.png
+(70 KB)
+Avatar
+Vincent Lauton
+December 26, 2025
+Hello David,
+ 
+Yes, adding the A record should allow you to generate the certificate.
+ 
+Regarding the application, you do not need to move it anywhere, you should run it as you initially planned, and as long as it uses port 8000 the proxy will send requests to it.
+Best regards,
+
+Vincent Lauton
+Technical Support Engineer
+Plesk
+
+Avatar
+David Grimsley
+December 27, 2025
+ok so can you tell me why I'm getting bad gateway when trying to access the index.html page?
+
+Network:
+Request URL
+
+https://quantum-api.davidjgrimsley.com/
+
+Request Method
+
+GET
+
+Status Code
+
+502 Bad Gateway
+
+Remote Address
+
+108.175.12.95:443
+
+Referrer Policy
+
+strict-origin-when-cross-origin
+
+ 
+
+ 
+
+Also now when I try to edit the nginx directives I get an error.
+Invalid nginx configuration: nginx: [emerg] duplicate location "/" in /var/www/vhosts/system/quantum-api.davidjgrimsley.com/conf/vhost_nginx.conf:5 nginx: configuration file /etc/nginx/nginx.conf test failedUnable to use the current nginx configuration file and to rollback to the previous version of the file because they both contain invalid configuration.
+
+I may have done something wrong? 
+
+Avatar
+Vincent Lauton
+December 27, 2025
+Hello David,
+ 
+When checking in the server, I found that the 502 error occurs because your application, despite being correctly listening on port 8000, is not responding to requests:
+
+        
+        
+root@romantic-gauss:~# ss -tlpn | grep 8000
+LISTEN 0      2048                        0.0.0.0:8000       0.0.0.0:*    users:(("gunicorn",pid=2191541,fd=6),("gunicorn",pid=2191540,fd=6),("gunicorn",pid=2191344,fd=6),("gunicorn",pid=2191343,fd=6),("gunicorn",pid=2169935,fd=6))         
+root@romantic-gauss:~# curl http://127.0.0.1:8000
+curl: (56) Recv failure: Connection reset by peer
+ 
+As a result, nginx returns a 502 error indicating that the application it is trying to communicate with does not work.
+ 
+To correct this you should contact the application developer to troubleshoot it, as this is an issue that should be treated on their end.
+ 
+As for the error:
+
+        
+        
+Invalid nginx configuration: nginx: [emerg] duplicate location "/" in /var/www/vhosts/system/quantum-api.davidjgrimsley.com/conf/vhost_nginx.conf:5 nginx: configuration file /etc/nginx/nginx.conf test failedUnable to use the current nginx configuration file and to rollback to the previous version of the file because they both contain invalid configuration.
+ 
+This occurs because PHP Support and/or Proxy Mode are enabled on the domain. You should either disable these before adding the directives, or modify the directives to use a different location than the root path.
+Best regards,
+
+Vincent Lauton
+Technical Support Engineer
+Plesk

@@ -1,0 +1,45 @@
+# COPY THIS INTO PLESK "Additional nginx directives" FIELD
+# For domain: DavidJGrimsley.com
+# Location: Domains → DavidJGrimsley.com → Apache & nginx Settings → Additional nginx directives
+
+# Proxy API endpoints to the quantum-api backend server
+location ~ ^/api/quantum/(quantum_text|quantum_gate|quantum_echo_types|health)$ {
+    proxy_pass https://quantum-api.davidjgrimsley.com;
+    proxy_set_header Host quantum-api.davidjgrimsley.com;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Port $server_port;
+    add_header Access-Control-Allow-Origin * always;
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+    add_header Access-Control-Allow-Headers "Content-Type, Authorization" always;
+    if ($request_method = 'OPTIONS') {
+        return 204;
+    }
+}
+
+location ~ ^/api/quantum/?$ {
+    proxy_pass https://quantum-api.davidjgrimsley.com;
+    proxy_set_header Host quantum-api.davidjgrimsley.com;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Port $server_port;
+}
+
+location /api/quantum/docs {
+    proxy_pass https://quantum-api.davidjgrimsley.com/swagger.html;
+    proxy_set_header Host quantum-api.davidjgrimsley.com;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    sub_filter 'https://quantum-api.davidjgrimsley.com' 'https://DavidJGrimsley.com';
+    sub_filter_once off;
+    sub_filter_types text/html text/css application/javascript;
+}
+
+location /api/quantum/openapi.yaml {
+    proxy_pass https://quantum-api.davidjgrimsley.com/openapi.yaml;
+    proxy_set_header Host quantum-api.davidjgrimsley.com;
+    add_header Content-Type application/x-yaml;
+}

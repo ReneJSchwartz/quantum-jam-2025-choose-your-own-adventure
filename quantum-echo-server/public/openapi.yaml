@@ -1,30 +1,66 @@
 openapi: 3.0.3
 info:
   title: Quantum API
-  version: "1.0.0"
+  version: "2.0.0"
   description: |
     Quantum API — general-purpose quantum services for games and applications:
     simulations, text transformations, gate operations, and more.
-    This API is evolving and will gain more endpoints over time.
-    See https://quantum-api.davidjgrimsley.com for docs and interactive exploration.
+    
+    **Version 2.0.0** - Major update with new URL structure.
+    All endpoints are under `/api/quantum/` path.
+    
+    Access the API at: https://DavidJGrimsley.com/api/quantum/
+    Interactive docs: https://DavidJGrimsley.com/api/quantum/docs
 servers:
-  - url: https://quantum-api.davidjgrimsley.com
+  - url: https://DavidJGrimsley.com/api/quantum
+    description: Production API
+  - url: https://quantum-api.davidjgrimsley.com/api/quantum
+    description: Direct API server
 paths:
   /:
     get:
       summary: Service info
+      description: Get API metadata, version, and available endpoints
       responses:
         '200':
           description: Service metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  version:
+                    type: string
+                  api_version:
+                    type: string
+                  description:
+                    type: string
+                  base_url:
+                    type: string
+                  endpoints:
+                    type: object
   /health:
     get:
       summary: Health check
+      description: Returns service and qiskit status
       responses:
         '200':
           description: Health OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  qiskit_available:
+                    type: boolean
   /quantum_text:
     post:
-      summary: Transform text
+      summary: Transform text using quantum echo
+      description: Apply quantum transformations to text using word dictionary categorization
       requestBody:
         required: true
         content:
@@ -34,12 +70,31 @@ paths:
               properties:
                 text:
                   type: string
+                  description: The text to transform
+              required:
+                - text
       responses:
         '200':
           description: Transformation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  original:
+                    type: string
+                  transformed:
+                    type: string
+                  coverage_percent:
+                    type: number
+                  quantum_words:
+                    type: integer
+                  total_words:
+                    type: integer
   /quantum_gate:
     post:
       summary: Apply a quantum gate operation
+      description: Apply quantum gate operations (bit_flip, phase_flip, rotation) to a qubit
       requestBody:
         required: true
         content:
@@ -49,16 +104,54 @@ paths:
               properties:
                 gate:
                   type: string
+                  description: "Gate type: bit_flip, phase_flip, or rotation"
+                  enum: [bit_flip, phase_flip, rotation]
                 rotation_angle:
                   type: number
+                  description: "Rotation angle in radians (required for rotation gate)"
       responses:
         '200':
           description: Gate application result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gate_type:
+                    type: string
+                  measurement:
+                    type: integer
+                  success:
+                    type: boolean
   /quantum_echo_types:
     get:
       summary: List available transformation types
+      description: Get all available quantum transformation types and their descriptions
       responses:
         '200':
           description: List of types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  basic_echo_types:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                  advanced_transformations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
 components:
   schemas: {}

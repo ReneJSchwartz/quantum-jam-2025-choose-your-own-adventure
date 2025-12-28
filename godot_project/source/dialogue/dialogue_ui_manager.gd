@@ -71,7 +71,7 @@ var next_dialogue_callback: Callable
 ## populated.
 @export var dialogue_options: Array[Button]
 ## Reference to the quantum echo service for text transformation  
-## 🌟 QUANTUM TEXT API: This connects to the Flask quantum echo server at 108.175.12.95:8000
+## 🌟 QUANTUM TEXT API: This connects to the Flask quantum echo server at DavidJGrimsley.com/api/quantum
 ## 
 ## Available API Endpoints:
 ## - /quantum_echo: Transform text with various echo effects (scramble, case_flip, ghost, quantum_caps)
@@ -237,7 +237,7 @@ func _process_text_with_quantum_server(text: String):
 	http_request.request_completed.connect(_on_quantum_server_response)
 	
 	# Send request to Flask server (production server)
-	var server_url = "https://108.175.12.95:8000/quantum_text"
+	var server_url = "https://DavidJGrimsley.com/api/quantum/quantum_text"
 	print("[QuantumUI] Sending request to: %s" % server_url)
 	http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)
 

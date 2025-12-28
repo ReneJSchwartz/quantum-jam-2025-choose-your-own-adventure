@@ -67,6 +67,10 @@ CORS(app)  # Enable CORS for cross-origin requests from web games
 # Trust X-Forwarded-* headers set by the reverse proxy (nginx on Plesk)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
+# API versioning (version info available in responses, not in URLs)
+API_VERSION = "2.0.0"
+API_PREFIX = "/api/quantum"
+
 # Quantum gate types
 class GateType(Enum):
     BIT_FLIP = 1
@@ -297,7 +301,7 @@ def apply_quantum_transformation(text, category):
     else:
         return text
 
-@app.route('/quantum_gate', methods=['POST'])
+@app.route(f'{API_PREFIX}/quantum_gate', methods=['POST'])
 def quantum_gate_endpoint():
     """
     Minimal endpoint for quantum gate operations compatible with Godot game logic.
@@ -390,7 +394,7 @@ def quantum_gate_endpoint():
             'debug_info': f'Exception type: {type(e).__name__}'
         }), 500
 
-@app.route('/quantum_text', methods=['POST'])
+@app.route(f'{API_PREFIX}/quantum_text', methods=['POST'])
 def quantum_text_endpoint():
     """
     Single comprehensive endpoint for quantum text processing.
@@ -462,7 +466,7 @@ def quantum_text_endpoint():
         print(f"Traceback: {traceback.format_exc()}")
         return jsonify({'error': str(e), 'debug_info': f'Exception type: {type(e).__name__}'}), 500
 
-@app.route('/quantum_echo_types', methods=['GET'])
+@app.route(f'{API_PREFIX}/quantum_echo_types', methods=['GET'])
 def get_echo_types():
     """Get available quantum transformation types."""
     return jsonify({
@@ -479,7 +483,7 @@ def get_echo_types():
         ]
     })
 
-@app.route('/health', methods=['GET'])
+@app.route(f'{API_PREFIX}/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
     if QISKIT_AVAILABLE:
@@ -510,22 +514,26 @@ def health_check():
     })
 
 @app.route('/', methods=['GET'])
+@app.route(f'{API_PREFIX}/', methods=['GET'])
 def index():
     """Basic info endpoint."""
     return jsonify({
         'service': 'Quantum Echo Server',
-        'version': '3.0.0',
+        'version': API_VERSION,
         'description': 'Advanced quantum text transformation using real qiskit quantum gates and circuits',
+        'base_url': API_PREFIX,
         'endpoints': {
-            'POST /quantum_text': 'Comprehensive quantum text processing with word dictionary',
-            'GET /quantum_echo_types': 'Get available transformation types',
-            'GET /health': 'Health check with qiskit functionality test'
+            f'POST {API_PREFIX}/quantum_text': 'Comprehensive quantum text processing with word dictionary',
+            f'POST {API_PREFIX}/quantum_gate': 'Apply quantum gate operations',
+            f'GET {API_PREFIX}/quantum_echo_types': 'Get available transformation types',
+            f'GET {API_PREFIX}/health': 'Health check with qiskit functionality test'
         },
         'quantum_features': [
             'Real qiskit quantum circuits with Statevector simulation',
             'Quantum word dictionary for intelligent categorization',
             'Condensed transformation functions for efficiency'
-        ]
+        ],
+        'documentation': '/api/quantum/docs'
     })
 
 if __name__ == '__main__':

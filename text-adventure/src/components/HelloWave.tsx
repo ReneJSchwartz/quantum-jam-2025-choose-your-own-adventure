@@ -24,7 +24,7 @@ export function HelloWave() {
     setIsAnimating(true);
 
     try {
-      console.log('🌊 [QuantumWave] Sending request to quantum server: http://108.175.12.95:8000/quantum_gate');
+      console.log('🌊 [QuantumWave] Sending request to quantum server: https://DavidJGrimsley.com/api/quantum/quantum_gate');
 
       // Generate truly random quantum rotation angle for variety!
       const quantumAngles = [
@@ -39,7 +39,7 @@ export function HelloWave() {
       const randomAngle = quantumAngles[Math.floor(Math.random() * quantumAngles.length)];
       console.log(`🌊 [QuantumWave] Using random quantum angle: ${randomAngle.toFixed(4)} radians (${(randomAngle * 180 / Math.PI).toFixed(1)}°)`);
 
-      const response = await fetch('http://108.175.12.95:8000/quantum_gate', {
+      const response = await fetch('https://DavidJGrimsley.com/api/quantum/quantum_gate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

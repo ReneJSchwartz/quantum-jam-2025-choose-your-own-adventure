@@ -1,14 +1,37 @@
 # Quantum Echo Server
 
+**Version 2.0.0** - Advanced quantum text transformation API
+
 A Flask-based quantum computing server that uses Qiskit to create "quantum echoes" of dialogue text. This server can transform text using real quantum circuits, creating interesting effects for games and interactive applications.
+
+## 🌐 Access the API
+
+- **Production API**: `https://DavidJGrimsley.com/api/quantum/`
+- **Documentation**: `https://DavidJGrimsley.com/api/quantum/docs`
+- **Interactive Page**: `https://DavidJGrimsley.com/api/quantum`
+- **Direct Backend**: `https://quantum-api.davidjgrimsley.com/api/quantum/`
+
+> **Note**: Version 2.0.0 introduces a new URL structure. See [V2-MIGRATION-GUIDE.md](V2-MIGRATION-GUIDE.md) for migration details.
 
 ## Features
 
-- **Quantum Text Transformation**: Uses Qiskit quantum circuits to transform dialogue
-- **Multiple Echo Types**: Different quantum transformations (scramble, reverse, ghost, quantum_caps)
+- **Quantum Text Transformation**: Uses Qiskit quantum circuits with word dictionary categorization
+- **Multiple Echo Types**: Different quantum transformations (scramble, reverse, ghost, quantum gates, entanglement)
+- **Quantum Gate Operations**: Apply real quantum gates (bit_flip, phase_flip, rotation)
+- **Version Info**: Version available in API response for display
 - **CORS Enabled**: Works with web-based games and applications
 - **RESTful API**: Simple JSON-based API endpoints
-- **Health Monitoring**: Built-in health check endpoint
+- **Health Monitoring**: Built-in health check with qiskit status
+
+## API Endpoints
+
+All endpoints use the `/api/quantum/` prefix:
+
+- `GET /api/quantum/` - Service information including version
+- `GET /api/quantum/health` - Health check with qiskit status
+- `POST /api/quantum/quantum_text` - Transform text using quantum echoes
+- `POST /api/quantum/quantum_gate` - Apply quantum gate operations
+- `GET /api/quantum/quantum_echo_types` - List available transformation types
 
 ## Echo Types
 

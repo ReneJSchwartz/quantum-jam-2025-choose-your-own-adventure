@@ -9,42 +9,28 @@ info:
     **Version 2.0.0** - Major update with new URL structure.
     All endpoints are under `/api/quantum/` path.
     
+    **Note:** The base URL `https://DavidJGrimsley.com/api/quantum/` serves an 
+    interactive info page (HTML). For JSON service metadata, use `/health` endpoint.
+    
     Access the API at: https://DavidJGrimsley.com/api/quantum/
     Interactive docs: https://DavidJGrimsley.com/api/quantum/docs
 servers:
   - url: https://DavidJGrimsley.com/api/quantum
     description: Production API
-  - url: https://quantum-api.davidjgrimsley.com/api/quantum
-    description: Direct API server
+tags:
+  - name: Service Info
+    description: Health checks and service metadata
+  - name: Text Manipulation
+    description: Quantum text transformation operations
+  - name: Quantum Operations
+    description: Quantum gate operations and simulations
 paths:
-  /:
-    get:
-      summary: Service info
-      description: Get API metadata, version, and available endpoints
-      responses:
-        '200':
-          description: Service metadata
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service:
-                    type: string
-                  version:
-                    type: string
-                  api_version:
-                    type: string
-                  description:
-                    type: string
-                  base_url:
-                    type: string
-                  endpoints:
-                    type: object
   /health:
     get:
       summary: Health check
-      description: Returns service and qiskit status
+      description: Returns service status, version, and qiskit availability
+      tags:
+        - Service Info
       responses:
         '200':
           description: Health OK
@@ -61,6 +47,8 @@ paths:
     post:
       summary: Transform text using quantum echo
       description: Apply quantum transformations to text using word dictionary categorization
+      tags:
+        - Text Manipulation
       requestBody:
         required: true
         content:
@@ -93,6 +81,8 @@ paths:
                     type: integer
   /quantum_gate:
     post:
+      tags:
+        - Quantum Operations
       summary: Apply a quantum gate operation
       description: Apply quantum gate operations (bit_flip, phase_flip, rotation) to a qubit
       requestBody:
@@ -125,8 +115,10 @@ paths:
                     type: boolean
   /quantum_echo_types:
     get:
+      tags:
+        - Text Manipulation
       summary: List available transformation types
-      description: Get all available quantum transformation types and their descriptions
+      description: Get all available quantum text transformation types and their descriptions
       responses:
         '200':
           description: List of types

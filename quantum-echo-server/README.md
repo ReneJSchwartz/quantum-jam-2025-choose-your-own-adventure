@@ -9,9 +9,8 @@ A Flask-based quantum computing server that uses Qiskit to create "quantum echoe
 - **Production API**: `https://DavidJGrimsley.com/api/quantum/`
 - **Documentation**: `https://DavidJGrimsley.com/api/quantum/docs`
 - **Interactive Page**: `https://DavidJGrimsley.com/api/quantum`
-- **Direct Backend**: `https://quantum-api.davidjgrimsley.com/api/quantum/`
 
-> **Note**: Version 2.0.0 introduces a new URL structure. See [V2-MIGRATION-GUIDE.md](V2-MIGRATION-GUIDE.md) for migration details.
+> **Note**: Version 2.0.0 introduces a new URL structure. The API runs locally and is proxied through nginx.
 
 ## Features
 

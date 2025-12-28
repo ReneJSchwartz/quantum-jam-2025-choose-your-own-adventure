@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
+import os
 try:
     from qiskit import QuantumCircuit, transpile
     from qiskit.quantum_info import Statevector
@@ -513,6 +514,16 @@ def health_check():
         'quantum_classes': ['Qubit', 'QuantumGate', 'QuantumCircuitManager']
     })
 
+@app.route(f'{API_PREFIX}/docs', methods=['GET'])
+def swagger_ui():
+    """Serve Swagger UI documentation."""
+    return send_from_directory('public', 'swagger.html')
+
+@app.route(f'{API_PREFIX}/openapi.yaml', methods=['GET'])
+def openapi_spec():
+    """Serve OpenAPI specification."""
+    return send_from_directory('public', 'openapi.yaml')
+
 @app.route('/', methods=['GET'])
 @app.route(f'{API_PREFIX}/', methods=['GET'])
 def index():
@@ -533,7 +544,7 @@ def index():
             'Quantum word dictionary for intelligent categorization',
             'Condensed transformation functions for efficiency'
         ],
-        'documentation': '/api/quantum/docs'
+        'documentation': f'{API_PREFIX}/docs'
     })
 
 if __name__ == '__main__':

@@ -1,8 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from qiskit import QuantumCircuit, transpile
-from qiskit.quantum_info import Statevector
-from qiskit_aer import AerSimulator
+from werkzeug.middleware.proxy_fix import ProxyFix
+try:
+    from qiskit import QuantumCircuit, transpile
+    from qiskit.quantum_info import Statevector
+    from qiskit_aer import AerSimulator
+    QISKIT_AVAILABLE = True
+    QISKIT_IMPORT_ERROR = None
+except Exception as e:
+    # qiskit (or qiskit-aer) isn't available in this environment.
+    # Do not provide runtime stubs; instead set a flag and record the error so
+    # endpoints can return a helpful HTTP 503 response explaining what's missing.
+    QISKIT_AVAILABLE = False
+    QISKIT_IMPORT_ERROR = str(e)
 from enum import Enum
 import numpy as np
 import random
@@ -54,6 +64,8 @@ except ImportError:
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for cross-origin requests from web games
+# Trust X-Forwarded-* headers set by the reverse proxy (nginx on Plesk)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 # Quantum gate types
 class GateType(Enum):
@@ -291,6 +303,12 @@ def quantum_gate_endpoint():
     Minimal endpoint for quantum gate operations compatible with Godot game logic.
     Handles bit_flip, phase_flip, and rotation gates.
     """
+    if not QISKIT_AVAILABLE:
+        return jsonify({
+            'error': 'qiskit_unavailable',
+            'message': 'This endpoint requires qiskit and qiskit-aer to be installed on the server. Install with `pip install qiskit qiskit-aer` or deploy using the provided Dockerfile. Import error: ' + (QISKIT_IMPORT_ERROR or '')
+        }), 503
+
     try:
         print("=" * 50)
         print("[Flask] QUANTUM GATE REQUEST RECEIVED")
@@ -379,6 +397,12 @@ def quantum_text_endpoint():
     Receives a paragraph, categorizes words using quantum_word_dictionary,
     and applies appropriate quantum transformations.
     """
+    if not QISKIT_AVAILABLE:
+        return jsonify({
+            'error': 'qiskit_unavailable',
+            'message': 'This endpoint requires qiskit/qiskit-aer. Install with `pip install qiskit qiskit-aer` or use the provided Dockerfile. Import error: ' + (QISKIT_IMPORT_ERROR or '')
+        }), 503
+
     try:
         print("=== QUANTUM TEXT REQUEST ===")
         data = request.get_json()
@@ -458,23 +482,24 @@ def get_echo_types():
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
-    try:
-        from qiskit import QuantumCircuit
-        from qiskit_aer import AerSimulator
-        
-        test_qc = QuantumCircuit(1)
-        test_qc.h(0)
-        
-        backend = AerSimulator(method='statevector')
-        transpiled_test = transpile(test_qc, backend)
-        job = backend.run(transpiled_test, shots=1)
-        result = job.result()
-        
-        qiskit_status = True
-        qiskit_version = "qiskit 2.1.2, qiskit-aer 0.17.1 - Fully operational"
-    except Exception as e:
+    if QISKIT_AVAILABLE:
+        try:
+            test_qc = QuantumCircuit(1)
+            test_qc.h(0)
+            
+            backend = AerSimulator(method='statevector')
+            transpiled_test = transpile(test_qc, backend)
+            job = backend.run(transpiled_test, shots=1)
+            result = job.result()
+            
+            qiskit_status = True
+            qiskit_version = "qiskit available"
+        except Exception as e:
+            qiskit_status = False
+            qiskit_version = f"Error running qiskit: {str(e)}"
+    else:
         qiskit_status = False
-        qiskit_version = f"Error: {str(e)}"
+        qiskit_version = "qiskit not installed in this environment"
     
     return jsonify({
         'status': 'healthy',

@@ -1,0 +1,21 @@
+[Unit]
+Description=Quantum Echo Gunicorn service
+After=network.target
+
+[Service]
+User=deployer
+Group=deployer
+WorkingDirectory=/home/deployer/quantum-jam-2025-choose-your-own-adventure/quantum-echo-server
+Environment="PATH=/home/deployer/quantum-jam-2025-choose-your-own-adventure/quantum-echo-server/venv/bin"
+ExecStart=/home/deployer/quantum-jam-2025-choose-your-own-adventure/quantum-echo-server/venv/bin/gunicorn --workers 4 --bind 127.0.0.1:8000 --timeout 120 app:app
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+
+# Usage:
+# Copy this file to /etc/systemd/system/quantum-echo.service
+# sudo systemctl daemon-reload
+# sudo systemctl enable --now quantum-echo.service
+# Check logs: sudo journalctl -u quantum-echo.service -f

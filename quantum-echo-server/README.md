@@ -179,6 +179,8 @@ To serve on port 80/443 with SSL:
 
 ## API Endpoints
 
+**Docs & interactive API explorer:** https://quantum-api.davidjgrimsley.com — open `swagger.html` to try endpoints interactively.
+
 ### POST /quantum_echo
 Transform text using quantum circuits.
 

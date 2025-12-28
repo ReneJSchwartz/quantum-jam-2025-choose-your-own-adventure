@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { View, Pressable } from 'react-native';
-import {
+import Animated, {
   useSharedValue,
   withRepeat,
   withSequence,
@@ -9,18 +9,16 @@ import {
 import LottieView from 'lottie-react-native';
 
 import { ThemedText } from '@/src/components/ThemedText';
-import { useThemeColor } from '@/hooks/useThemeColor';
 import { Colors } from '@/constants/Colors';
 
 
 export function HelloWave() {
-  const quantumBaseUrl = 'https://108.175.12.95:8000';
+  const quantumBaseUrl = 'https://davidjgrimsley.com/api/quantum';
   const quantumEndpoint = `${quantumBaseUrl}/quantum_gate`;
   const rotationAnimation = useSharedValue(0);
   const scaleAnimation = useSharedValue(1);
   const [robotMessage, setRobotMessage] = useState('🤖 Initializing quantum circuit...');
   const [isRobotLooping, setIsRobotLooping] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [quantumLevel, setQuantumLevel] = useState<'low' | 'medium' | 'high'>('medium');
@@ -29,12 +27,84 @@ export function HelloWave() {
   const [isRestartPlaying, setIsRestartPlaying] = useState(false);
   const loadingStartTime = useRef(Date.now());
   const lottieRef = useRef<LottieView>(null);
+  const robotSpeakTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  // Animated opacity values for each technical detail line
+  const backendOpacity = useSharedValue(0);
+  const gateOpacity = useSharedValue(0);
+  const angleOpacity = useSharedValue(0);
+  const stateOpacity = useSharedValue(0);
+  const strengthOpacity = useSharedValue(0);
+  const measurementOpacity = useSharedValue(0);
+  const intensityOpacity = useSharedValue(0);
+  
   const [technicalDetails, setTechnicalDetails] = useState<{
     gate: string;
     angle: number;
     state: string;
     backend: string;
-  } | null>(null);
+    superposition: number;
+    measurement: number;
+    intensity: string;
+  }>({ gate: '', angle: 0, state: '', backend: '', superposition: 0, measurement: 0, intensity: '' });
+
+  /**
+   * Fades in a technical detail line
+   */
+  const fadeInDetail = (opacityValue: Animated.SharedValue<number>) => {
+    opacityValue.value = withTiming(1, { duration: 800 });
+  };
+
+  /**
+   * Resets all technical detail opacities to 0
+   */
+  const resetDetailOpacities = () => {
+    backendOpacity.value = 0;
+    gateOpacity.value = 0;
+    angleOpacity.value = 0;
+    stateOpacity.value = 0;
+    strengthOpacity.value = 0;
+    measurementOpacity.value = 0;
+    intensityOpacity.value = 0;
+  };
+
+  /**
+   * Makes the robot "speak" by displaying a message and animating for a specific duration.
+   * @param message - The message to display in the speech bubble
+   * @param talkTime - How long the robot should animate (in milliseconds). If 0, message is set without animation.
+   * @param keepMessage - If true, message stays visible after animation stops (default: true)
+   */
+  const makeRobotSpeak = (message: string, talkTime: number, keepMessage: boolean = true) => {
+    // Clear any existing timeout
+    if (robotSpeakTimeoutRef.current) {
+      clearTimeout(robotSpeakTimeoutRef.current);
+      robotSpeakTimeoutRef.current = null;
+    }
+
+    // Set message
+    setRobotMessage(message);
+    
+    // If talkTime is 0, just set message without animating
+    if (talkTime === 0) {
+      setIsRobotLooping(false);
+      console.log(`🤖 [Robot] Message set: "${message}" | Loop: false | No animation`);
+      return;
+    }
+
+    // Start animating
+    setIsRobotLooping(true);
+    console.log(`🤖 [Robot] Speaking: "${message}" | Loop: true | Duration: ${talkTime}ms`);
+
+    // Stop animating after talkTime, but keep message visible
+    robotSpeakTimeoutRef.current = setTimeout(() => {
+      setIsRobotLooping(false);
+      console.log(`🤖 [Robot] Stopped animating | Loop: false | Message kept: ${keepMessage}`);
+      if (!keepMessage) {
+        setRobotMessage('');
+      }
+      robotSpeakTimeoutRef.current = null;
+    }, talkTime);
+  };
 
   const startClassicalFallback = (reason: string) => {
     console.log('🌊 [QuantumWave] 🎲 Falling back to classical physics animation:', reason);
@@ -44,8 +114,12 @@ export function HelloWave() {
       gate: 'Classical Fallback',
       angle: 0,
       state: 'Deterministic',
-      backend: 'Local JavaScript'
+      backend: 'Local JavaScript',
+      superposition: 0,
+      measurement: 0,
+      intensity: 'N/A'
     });
+    fadeInDetail(backendOpacity);
 
     // Classical fallback animation
     rotationAnimation.value = withRepeat(
@@ -66,25 +140,30 @@ export function HelloWave() {
     );
 
     setTimeout(() => {
-      setIsAnimating(false);
       setIsComplete(true);
       setIsLoading(false);
-      setRobotMessage('✅ Classical animation complete!');
+      setRobotMessage('Classical animation complete!');
     }, 8000);
   };
 
   const fetchQuantumTiming = async () => {
     console.log('🌊 [QuantumWave] Starting dramatic quantum-controlled animation...');
-    setIsRobotLooping(true);
-    setRobotMessage('🤖 Connecting to quantum server...');
-    setIsAnimating(true);
     setIsComplete(false);
     setIsLoading(true);
     loadingStartTime.current = Date.now();
+    
+    // Reset technical details and opacities
+    setTechnicalDetails({ gate: '', angle: 0, state: '', backend: '', superposition: 0, measurement: 0, intensity: '' });
+    resetDetailOpacities();
 
-    // Robot speaks through the process
-    setTimeout(() => setRobotMessage('🔬 Measuring qubit state...'), 1500);
-    setTimeout(() => setRobotMessage('⚛️ Calculating superposition...'), 3000);
+    // Robot narrates the quantum process
+    makeRobotSpeak('Connecting to quantum server...', 1500);
+    setTechnicalDetails(prev => ({ ...prev, backend: 'Qiskit Aer Simulator' }));
+    fadeInDetail(backendOpacity);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    makeRobotSpeak('Initializing qubit in |0⟩ state...', 1500);
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     try {
       const controller = new AbortController();
@@ -139,40 +218,52 @@ export function HelloWave() {
         await new Promise(resolve => setTimeout(resolve, remainingTime));
       }
 
-      // Store technical details for display
-      setTechnicalDetails({
-        gate: 'RY (Rotation around Y-axis)',
-        angle: randomAngle,
-        state: `|ψ⟩ = cos(${(randomAngle/2).toFixed(3)})|0⟩ + sin(${(randomAngle/2).toFixed(3)})|1⟩`,
-        backend: 'Qiskit Aer Simulator'
-      });
+      // Store gate and angle details
+      makeRobotSpeak(`Applied RY(${randomAngle.toFixed(3)}) gate to qubit...`, 1500);
+      setTechnicalDetails(prev => ({ ...prev, gate: 'RY (Rotation around Y-axis)', angle: randomAngle }));
+      fadeInDetail(gateOpacity);
+      fadeInDetail(angleOpacity);
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Icon based on superposition strength (0.0 - 1.0)
-      let level: 'low' | 'medium' | 'high' = 'medium';
+      makeRobotSpeak('Calculating superposition strength from amplitudes...', 1500);
+      setTechnicalDetails(prev => ({ ...prev, state: `|ψ⟩ = cos(${(randomAngle/2).toFixed(3)})|0⟩ + sin(${(randomAngle/2).toFixed(3)})|1⟩` }));
+      fadeInDetail(stateOpacity);
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (result.superposition_strength > 0.7) {
+      // Determine level based on superposition strength
+      let level: 'low' | 'medium' | 'high' = 'medium';
+      const strength = result.superposition_strength;
+      
+      if (strength > 0.7) {
         level = 'high';
-      } else if (result.superposition_strength > 0.3) {
+      } else if (strength > 0.3) {
         level = 'medium';
       } else {
         level = 'low';
       }
-
       setQuantumLevel(level);
+      
+      // Add superposition strength to technical details
+      setTechnicalDetails(prev => ({ ...prev, superposition: strength }));
+      fadeInDetail(strengthOpacity);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      makeRobotSpeak('Measuring qubit state...', 1500);
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Looping based on measurement: 0 = no loop (false), 1 = loop (true)
       const looping = result.measurement === 1;
       setLottieLoop(looping);
-      setRobotMessage(
-        `🎯 Measurement collapsed to ${result.measurement}! Setting looping to ${looping ? 'true' : 'false'}.`
+      setTechnicalDetails(prev => ({ ...prev, measurement: result.measurement }));
+      fadeInDetail(measurementOpacity);
+      makeRobotSpeak(
+        `Wavefunction collapsed to |${result.measurement}⟩! Setting looping to ${looping}.`,
+        1500
       );
-
-      // Brief pause to show measurement result
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Speed mapped within level range: very slow (0.3) to very fast (3.0)
       let speed = 1;
-      const strength = result.superposition_strength;
       
       if (level === 'low') {
         // Map 0.0-0.3 to 0.3-1.2 (very slow to medium)
@@ -186,43 +277,46 @@ export function HelloWave() {
       }
       
       setLottieSpeed(speed);
-      setRobotMessage(
-        `💫 Superposition strength: ${(strength * 100).toFixed(1)}% (${level} intensity) - Setting speed to ${speed.toFixed(2)}x`
-      );
+      makeRobotSpeak(`Setting animation speed to ${speed.toFixed(2)}x...`, 1500);
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Brief pause to show speed configuration
+      makeRobotSpeak(
+        `Choosing Lottie file: quantum_${level}.json (${(strength * 100).toFixed(1)}% strength)`,
+        1500
+      );
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Robot announces the quantum results
-      const quantumType = result.superposition_strength > 0.5 ? 'Superposition' : 'Collapsed';
-      const animationStyle = result.measurement === 0 ? 'Orbital' : 'Oscillation';
-      const intensity = result.superposition_strength > 0.7 ? 'High' : 
-                       result.superposition_strength > 0.3 ? 'Medium' : 'Low';
+      // Add intensity to technical details
+      const intensity = strength > 0.7 ? 'High' : strength > 0.3 ? 'Medium' : 'Low';
+      setTechnicalDetails(prev => ({ ...prev, intensity }));
+      fadeInDetail(intensityOpacity);
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      setRobotMessage(
-        `⚛️ Quantum State: ${quantumType} | 📏 Strength: ${(result.superposition_strength * 100).toFixed(1)}% | ` +
-        `🎯 Measurement: ${result.measurement} | 🎭 Style: ${animationStyle} | 💫 Intensity: ${intensity}`
-      );
+      // Simple final message
+      makeRobotSpeak('Playing quantum animation', 0);
 
       console.log(`🌊 [QuantumWave] Result - Measurement: ${result.measurement}, Superposition: ${result.superposition_strength}, Level: ${level}`);
 
-      // Wait 2 seconds to show final state, then start quantum animation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setRobotMessage('🎬 Starting quantum animation...');
-      
-      // Brief pause to let robot "say" the starting message, then stop talking and start quantum animation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Start quantum animation
       setIsLoading(false);
-      setIsRobotLooping(false);
 
-      // Reset animation state after 10 seconds
-      setTimeout(() => {
-        setIsAnimating(false);
-        setIsComplete(true);
-        setRobotMessage('✨ Animation complete! Tap the restart button to run again.');
-      }, 10000);
-
-      console.log('🌊 [QuantumWave] ✅ 10-second quantum animation initiated!');
+      // Animation duration: 10 seconds if looping, or just let it play once if not looping
+      if (looping) {
+        setTimeout(() => {
+          setIsComplete(true);
+          setRobotMessage('Animation complete! Tap the restart button to run again.');
+        }, 10000);
+        console.log('🌊 [QuantumWave] ✅ 10-second looping quantum animation initiated!');
+      } else {
+        // For non-looping animations, we need to estimate duration based on the lottie file
+        // Assume each lottie is ~3-5 seconds at normal speed, adjust for actual speed
+        const estimatedDuration = 4000 / speed; // Base 4 seconds adjusted by speed
+        setTimeout(() => {
+          setIsComplete(true);
+          setRobotMessage('Animation complete! Tap the restart button to run again.');
+        }, estimatedDuration);
+        console.log(`🌊 [QuantumWave] ✅ Single-play quantum animation initiated (${estimatedDuration}ms estimated)!`);
+      }
       
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -236,14 +330,11 @@ export function HelloWave() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const themedBg = useThemeColor({}, 'icon');
-
   const handleRestartClick = () => {
     // Only allow click if restart is not currently playing
     if (!isRestartPlaying) {
       setIsRestartPlaying(true);
-      setIsRobotLooping(true);
-      setRobotMessage('🔄 Restarting quantum simulation...');
+      makeRobotSpeak('Restarting...', 2000); // Robot talks during restart animation
       lottieRef.current?.play();
     }
   };
@@ -255,43 +346,109 @@ export function HelloWave() {
   };
 
   return (
-    <View style={{ backgroundColor: themedBg, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, marginVertical: 8, maxWidth: '100%', width: '100%' }}>
-      {/* Top status text */}
-      
-
-      {/* Three column layout */}
+    <View style={{ flexDirection: 'column', gap: 12, width: '100%' }}>
+      {/* Two column layout */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        {/* Left: Robot always looping */}
-        <View style={{ flex: 1, minWidth: 150, alignItems: 'center' }}>
-          <LottieView
-            source={require('@/assets/lottie/loading_robot.json')}
-            autoPlay
-            loop={isRobotLooping}
-            style={{ width: 150, height: 150 }}
-          />
-          {/* Speech bubble below robot */}
-          <View style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-            borderColor: Colors.dark.tint, 
-            borderWidth: 2, 
-            borderRadius: 12, 
-            padding: 12, 
-            marginTop: 8,
-            maxWidth: 200
-          }}>
-            <ThemedText style={{ 
-              color: '#000', 
-              fontSize: 12, 
-              fontWeight: 'bold', 
-              textAlign: 'center' 
-            }}>
-              {robotMessage}
+        {/* Left column (1/3): Robot and Technical details stacked */}
+        <View style={{ flex: 1, minWidth: 180, maxWidth: '33%', gap: 16 }}>
+          {/* Robot with overlapping speech bubble */}
+          <View style={{ alignItems: 'center', position: 'relative' }}>
+            <View style={{ width: 180, height: 180, position: 'relative' }}>
+              <LottieView
+                key={`robot-${isRobotLooping ? 'looping' : 'stopped'}`}
+                source={require('@/assets/lottie/loading_robot.json')}
+                autoPlay={isRobotLooping}
+                loop={isRobotLooping}
+                style={{ width: 180, height: 180 }}
+              />
+              {/* Speech bubble overlapping bottom 40% of robot - fixed height */}
+              <View style={{ 
+                position: 'absolute',
+                bottom: 0,
+                left: -15,
+                right: -15,
+                height: 72, // Fixed at 40% of 180px
+                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                borderColor: Colors.dark.tint, 
+                borderWidth: 2, 
+                borderRadius: 12, 
+                padding: 8,
+                justifyContent: 'center'
+              }}>
+                <ThemedText style={{ 
+                  color: '#000', 
+                  fontSize: 11, 
+                  fontWeight: 'bold', 
+                  textAlign: 'center',
+                  lineHeight: 14
+                }}>
+                  {robotMessage}
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+
+          {/* Technical details */}
+          <View>
+            <ThemedText style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'left', marginBottom: 8 }}>
+              🔬 Technical Details
             </ThemedText>
+            <View style={{ gap: 6 }}>
+              {technicalDetails.backend && (
+                <Animated.View style={{ opacity: backendOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Backend:</ThemedText> {technicalDetails.backend}
+                  </ThemedText>
+                </Animated.View>
+              )}
+              {technicalDetails.gate && (
+                <Animated.View style={{ opacity: gateOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Quantum Gate:</ThemedText> {technicalDetails.gate}
+                  </ThemedText>
+                </Animated.View>
+              )}
+              {technicalDetails.angle > 0 && (
+                <Animated.View style={{ opacity: angleOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Rotation Angle:</ThemedText> {technicalDetails.angle.toFixed(4)} rad ({(technicalDetails.angle * 180 / Math.PI).toFixed(1)}°)
+                  </ThemedText>
+                </Animated.View>
+              )}
+              {technicalDetails.state && (
+                <Animated.View style={{ opacity: stateOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Quantum State:</ThemedText> {technicalDetails.state}
+                  </ThemedText>
+                </Animated.View>
+              )}
+              {technicalDetails.superposition > 0 && (
+                <Animated.View style={{ opacity: strengthOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Superposition:</ThemedText> {(technicalDetails.superposition * 100).toFixed(1)}%
+                  </ThemedText>
+                </Animated.View>
+              )}
+              {technicalDetails.measurement !== undefined && technicalDetails.measurement >= 0 && (
+                <Animated.View style={{ opacity: measurementOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Measurement:</ThemedText> |{technicalDetails.measurement}⟩
+                  </ThemedText>
+                </Animated.View>
+              )}
+              {technicalDetails.intensity && (
+                <Animated.View style={{ opacity: intensityOpacity }}>
+                  <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
+                    <ThemedText style={{ fontWeight: 'bold' }}>Intensity:</ThemedText> {technicalDetails.intensity}
+                  </ThemedText>
+                </Animated.View>
+              )}
+            </View>
           </View>
         </View>
 
-        {/* Middle: Restart lottie (loading animation or button) */}
-        <View style={{ flex: 1, minWidth: 150, alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
+        {/* Right column (2/3): Quantum animation or restart button */}
+        <View style={{ flex: 2, minWidth: 200, alignItems: 'center', justifyContent: 'center', alignSelf: 'stretch' }}>
           {isComplete ? (
             <Pressable 
               onPress={handleRestartClick}
@@ -304,17 +461,10 @@ export function HelloWave() {
                 autoPlay={false}
                 loop={false}
                 onAnimationFinish={handleRestartComplete}
-                style={{ width: 120, height: 120 }}
+                style={{ width: 150, height: 150 }}
               />
             </Pressable>
-          ) : isLoading ? (
-            <LottieView
-              source={require('@/assets/lottie/restart.json')}
-              autoPlay
-              loop
-              style={{ width: 150, height: 150 }}
-            />
-          ) : (
+          ) : !isLoading ? (
             <LottieView
               source={
                 quantumLevel === 'high' ? require('@/assets/lottie/quantum_high.json') :
@@ -324,41 +474,17 @@ export function HelloWave() {
               autoPlay
               loop={lottieLoop}
               speed={lottieSpeed}
-              style={{ width: 200, height: 200 }}
+              resizeMode="contain"
+              style={{ width: '100%', height: '100%' }}
             />
-          )}
-        </View>
-
-        {/* Right: Technical details */}
-        <View style={{ flex: 1, minWidth: 200 }}>
-          {technicalDetails && (
-            <View>
-              <ThemedText style={{ fontSize: 14, fontWeight: 'bold', textAlign: 'left', marginBottom: 8 }}>
-                🔬 Technical Details
-              </ThemedText>
-              <View style={{ gap: 6 }}>
-                <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
-                  <ThemedText style={{ fontWeight: 'bold' }}>Quantum Gate:</ThemedText> {technicalDetails.gate}
-                </ThemedText>
-                <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
-                  <ThemedText style={{ fontWeight: 'bold' }}>Rotation Angle:</ThemedText> {technicalDetails.angle.toFixed(4)} rad ({(technicalDetails.angle * 180 / Math.PI).toFixed(1)}°)
-                </ThemedText>
-                <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
-                  <ThemedText style={{ fontWeight: 'bold' }}>Quantum State:</ThemedText> {technicalDetails.state}
-                </ThemedText>
-                <ThemedText style={{ fontSize: 13, opacity: 0.9, flexWrap: 'wrap' }}>
-                  <ThemedText style={{ fontWeight: 'bold' }}>Backend:</ThemedText> {technicalDetails.backend}
-                </ThemedText>
-              </View>
-            </View>
-          )}
+          ) : null}
         </View>
       </View>
 
       {/* Explanation */}
       <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(128, 128, 128, 0.3)' }}>
         <ThemedText style={{ fontSize: 12, opacity: 0.7, textAlign: 'left', fontStyle: 'italic', flexWrap: 'wrap' }}>
-          💡 This animation is different every time you load it due to quantum randomness! It makes a live API call 
+          💡 This animation is slightly or very different every time you load it due to quantum randomness! It makes a live API call 
           to a Python server hosted on my VPS, which runs Qiskit quantum circuit calculations in a simulated environment. 
           The RY gate creates a superposition state, and when measured, the quantum wavefunction collapses to produce 
           truly random results that drive the animation&apos;s behavior, intensity, and duration.

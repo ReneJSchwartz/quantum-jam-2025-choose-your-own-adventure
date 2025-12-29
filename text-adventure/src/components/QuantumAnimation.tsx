@@ -181,14 +181,20 @@ export function HelloWave() {
 
       console.log(`🌊 [QuantumWave] Sending request to quantum server: ${quantumEndpoint}`);
 
-      // Generate truly random quantum rotation angle for variety!
+      // Generate truly random quantum rotation angle with balanced distribution!
       const quantumAngles = [
-        Math.PI / 8,    // 22.5° → ~38% superposition
-        Math.PI / 6,    // 30°   → ~50% superposition  
-        Math.PI / 4,    // 45°   → ~71% superposition
-        Math.PI / 3,    // 60°   → ~87% superposition
-        Math.PI / 2.5,  // 72°   → ~95% superposition
-        Math.PI / 2,    // 90°   → ~100% superposition
+        // LOW superposition (0-30%): 3 angles
+        0.196,          // 11.25° → ~10% superposition
+        0.262,          // 15°    → ~17% superposition
+        0.314,          // 18°    → ~25% superposition
+        // MEDIUM superposition (30-70%): 3 angles
+        0.449,          // 25.7°  → ~43% superposition
+        0.628,          // 36°    → ~59% superposition
+        0.698,          // 40°    → ~64% superposition
+        // HIGH superposition (70%+): 3 angles
+        1.047,          // 60°    → ~87% superposition
+        1.257,          // 72°    → ~95% superposition
+        Math.PI / 2,    // 90°    → ~100% superposition
       ];
       
       const randomAngle = quantumAngles[Math.floor(Math.random() * quantumAngles.length)];

@@ -543,7 +543,7 @@ export function HelloWave() {
           💡 This animation is slightly or very different every time you load it due to quantum randomness! It makes a live API call 
           to a Python server hosted at <ExternalLink 
             href="https://davidjgrimsley.com/api/quantum"
-            style={{ textDecorationLine: 'underline', color: Colors.light.text, fontSize: 12, opacity: 0.7 }}
+            style={{ textDecorationLine: 'underline', color: Colors.light.tint, fontSize: 12, opacity: 0.7 }}
           >DavidJGrimsley.com/api/quantum</ExternalLink>, which runs Qiskit quantum circuit calculations in a simulated environment. 
           The RY gate creates a superposition state, and when measured, the quantum wavefunction collapses to produce 
           truly random results that drive the animation&apos;s behavior, intensity, and duration.

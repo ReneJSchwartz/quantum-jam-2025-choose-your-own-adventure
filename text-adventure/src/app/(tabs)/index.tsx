@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { Platform, View } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 
-import { HelloWave } from '@/src/components/HelloWave';
+import { HelloWave } from '@/src/components/QuantumAnimation';
 import MultiLayerParallaxScrollView from '@/src/components/MultiLayerParallaxScrollView';
 import { ThemedView } from '@/src/components/ThemedView';
 import { Colors } from '@/constants/Colors';

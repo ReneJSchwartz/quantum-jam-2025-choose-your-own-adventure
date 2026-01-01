@@ -527,6 +527,173 @@ def openapi_spec():
     """Serve OpenAPI specification."""
     return send_from_directory('public', 'openapi.yaml')
 
+@app.route('/portfolio/apis.json', methods=['GET'])
+def portfolio_apis():
+    """Portfolio metadata endpoint - list of all APIs."""
+    # Define the detail endpoints that will be in quantum.json
+    detail_endpoints = [
+        {"method": "POST", "path": "/quantum_gate"},
+        {"method": "POST", "path": "/quantum_text"},
+        {"method": "GET", "path": "/quantum_echo_types"},
+        {"method": "GET", "path": "/health"}
+    ]
+    
+    response = jsonify({
+        "apis": [
+            {
+                "id": "quantum",
+                "name": "Quantum API",
+                "version": API_VERSION,
+                "icon": "⚛️",
+                "description": "General-purpose quantum services for games and applications: simulations, text transformations, gate operations, and more.",
+                "baseUrl": "https://davidjgrimsley.com/api/quantum",
+                "status": "active",
+                "featured": True,
+                "tags": ["quantum", "simulation", "gaming", "text-processing"],
+                "endpoints": len(detail_endpoints),
+                "uptime": "99.5%"
+            }
+        ]
+    })
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+@app.route('/portfolio/quantum.json', methods=['GET'])
+def portfolio_quantum_detail():
+    """Portfolio metadata endpoint - detailed Quantum API documentation."""
+    response = jsonify({
+        "api": {
+            "id": "quantum",
+            "name": "Quantum API",
+            "version": API_VERSION,
+            "baseUrl": "https://davidjgrimsley.com/api/quantum",
+            "docsUrl": "https://davidjgrimsley.com/api/quantum/docs",
+            "healthUrl": "https://davidjgrimsley.com/api/quantum/health",
+            "status": "active"
+        },
+        "endpoints": [
+            {
+                "method": "POST",
+                "path": "/quantum_gate",
+                "summary": "Apply quantum gate operation",
+                "description": "Execute a quantum gate operation on a single qubit.",
+                "parameters": [
+                    {
+                        "name": "gate",
+                        "type": "string",
+                        "required": True,
+                        "description": "Type of quantum gate to apply",
+                        "example": "rotation",
+                        "enum": ["rotation", "bit_flip", "phase_flip"]
+                    },
+                    {
+                        "name": "rotation_angle",
+                        "type": "number",
+                        "required": False,
+                        "description": "Angle in degrees for RY rotation gate (0 to 180). Required only when gate=\"rotation\".",
+                        "example": 50,
+                        "dependsOn": "rotation"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Quantum gate configuration. Include rotation_angle only for rotation gate.",
+                    "example": {
+                        "gate": "rotation",
+                        "rotation_angle": 50
+                    }
+                },
+                "responses": [
+                    {
+                        "code": "200",
+                        "description": "Quantum gate result",
+                        "example": {
+                            "gate_type": "rotation",
+                            "measurement": 0,
+                            "success": True,
+                            "superposition_strength": 0.866
+                        }
+                    },
+                    {
+                        "code": "400",
+                        "description": "Invalid gate parameters"
+                    },
+                    {
+                        "code": "500",
+                        "description": "Quantum simulation error"
+                    }
+                ]
+            },
+            {
+                "method": "POST",
+                "path": "/quantum_text",
+                "summary": "Transform text using quantum effects",
+                "description": "Apply quantum-inspired transformations to text strings. Uses quantum randomness to determine transformation strength and type.",
+                "parameters": [
+                    {
+                        "name": "text",
+                        "type": "string",
+                        "required": True,
+                        "description": "The text string to transform",
+                        "example": "Hello Quantum World"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Text transformation request",
+                    "example": {
+                        "text": "Hello Quantum World"
+                    }
+                },
+                "responses": [
+                    {
+                        "code": "200",
+                        "description": "Transformed text result",
+                        "example": {
+                            "coverage_percent": 50,
+                            "original": "Hello Quantum World",
+                            "quantum_words": 2,
+                            "total_words": 3,
+                            "transformed": "ⓗⓔⓛⓛⓞ ⓆⓊⒶⓃⓉⓊⓂ World"
+                        }
+                    }
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/quantum_echo_types",
+                "summary": "List available transformation types",
+                "description": "Get a list of all available quantum text transformation types and their descriptions.",
+                "responses": [
+                    {
+                        "code": "200",
+                        "description": "List of transformation types",
+                        "example": {
+                            "types": ["circled", "squared", "inverted", "script", "bold"]
+                        }
+                    }
+                ]
+            },
+            {
+                "method": "GET",
+                "path": "/health",
+                "summary": "Health check endpoint",
+                "description": "Check if the quantum server is running and responsive. Returns server status and version.",
+                "responses": [
+                    {
+                        "code": "200",
+                        "description": "Server is healthy",
+                        "example": {
+                            "status": "healthy",
+                            "service": "Quantum API",
+                            "version": API_VERSION
+                        }
+                    }
+                ]
+            }
+        ]
+    })
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
 @app.route('/', methods=['GET'])
 @app.route(f'{API_PREFIX}/', methods=['GET'])
 def index():

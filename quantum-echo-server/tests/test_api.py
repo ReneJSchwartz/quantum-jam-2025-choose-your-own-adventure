@@ -32,4 +32,5 @@ def test_portfolio_metadata():
         data = rv.get_json()
         assert 'api' in data
         assert 'endpoints' in data
+        assert any(e.get('path') == '/portfolio.json' and e.get('method') == 'GET' for e in data['endpoints'])
         assert rv.headers.get('Access-Control-Allow-Origin') == '*'

@@ -69,7 +69,7 @@ CORS(app)  # Enable CORS for cross-origin requests from web games
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 # API versioning (version info available in responses, not in URLs)
-API_VERSION = "2.1.0"
+API_VERSION = "2.1.1"
 API_PREFIX = "/api/quantum"
 
 # Quantum gate types
@@ -662,6 +662,29 @@ def portfolio_metadata():
                         }
                     }
                 ]
+            },
+            {
+                "method": "GET",
+                "path": "/portfolio.json",
+                "summary": "Info that powers this page. Pretty meta, huh?",
+                "description": "Returns API metadata and endpoint documentation for portfolio clients.",
+                "responses": [
+                    {
+                        "code": "200",
+                        "description": "Portfolio metadata payload",
+                        "example": {
+                            "api": {
+                                "id": "quantum",
+                                "name": "Quantum API",
+                                "version": API_VERSION,
+                                "baseUrl": "https://davidjgrimsley.com/api/quantum",
+                                "docsUrl": "https://davidjgrimsley.com/api/quantum/docs",
+                                "healthUrl": "https://davidjgrimsley.com/api/quantum/health",
+                                "status": "active"
+                            }
+                        }
+                    }
+                ]
             }
         ]
     })
@@ -681,7 +704,8 @@ def index():
             f'POST {API_PREFIX}/quantum_text': 'Comprehensive quantum text processing with word dictionary',
             f'POST {API_PREFIX}/quantum_gate': 'Apply quantum gate operations',
             f'GET {API_PREFIX}/quantum_echo_types': 'Get available transformation types',
-            f'GET {API_PREFIX}/health': 'Health check with qiskit functionality test'
+            f'GET {API_PREFIX}/health': 'Health check with qiskit functionality test',
+            f'GET {API_PREFIX}/portfolio.json': 'Portfolio metadata (for portfolio site)'
         },
         'quantum_features': [
             'Real qiskit quantum circuits with Statevector simulation',

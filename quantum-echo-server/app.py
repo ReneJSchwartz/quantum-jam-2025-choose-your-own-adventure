@@ -69,7 +69,7 @@ CORS(app)  # Enable CORS for cross-origin requests from web games
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 # API versioning (version info available in responses, not in URLs)
-API_VERSION = "2.0.0"
+API_VERSION = "2.1.0"
 API_PREFIX = "/api/quantum"
 
 # Quantum gate types
@@ -527,49 +527,23 @@ def openapi_spec():
     """Serve OpenAPI specification."""
     return send_from_directory('public', 'openapi.yaml')
 
-@app.route('/portfolio/apis.json', methods=['GET'])
-def portfolio_apis():
-    """Portfolio metadata endpoint - list of all APIs."""
-    # Define the detail endpoints that will be in quantum.json
-    detail_endpoints = [
-        {"method": "POST", "path": "/quantum_gate"},
-        {"method": "POST", "path": "/quantum_text"},
-        {"method": "GET", "path": "/quantum_echo_types"},
-        {"method": "GET", "path": "/health"}
-    ]
-    
-    response = jsonify({
-        "apis": [
-            {
-                "id": "quantum",
-                "name": "Quantum API",
-                "version": API_VERSION,
-                "icon": "⚛️",
-                "description": "General-purpose quantum services for games and applications: simulations, text transformations, gate operations, and more.",
-                "baseUrl": "https://davidjgrimsley.com/api/quantum",
-                "status": "active",
-                "featured": True,
-                "tags": ["quantum", "simulation", "gaming", "text-processing"],
-                "endpoints": len(detail_endpoints),
-                "uptime": "99.5%"
-            }
-        ]
-    })
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
-
-@app.route('/portfolio/quantum.json', methods=['GET'])
-def portfolio_quantum_detail():
-    """Portfolio metadata endpoint - detailed Quantum API documentation."""
+@app.route(f'{API_PREFIX}/portfolio.json', methods=['GET'])
+def portfolio_metadata():
+    """Consolidated portfolio metadata endpoint - API info and detailed documentation."""
     response = jsonify({
         "api": {
             "id": "quantum",
             "name": "Quantum API",
             "version": API_VERSION,
+            "icon": "⚛️",
+            "description": "General-purpose quantum services for games and applications: simulations, text transformations, gate operations, and more.",
             "baseUrl": "https://davidjgrimsley.com/api/quantum",
             "docsUrl": "https://davidjgrimsley.com/api/quantum/docs",
             "healthUrl": "https://davidjgrimsley.com/api/quantum/health",
-            "status": "active"
+            "status": "active",
+            "featured": True,
+            "tags": ["quantum", "simulation", "gaming", "text-processing"],
+            "uptime": "99.5%"
         },
         "endpoints": [
             {

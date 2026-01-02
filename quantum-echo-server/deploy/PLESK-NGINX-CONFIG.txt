@@ -6,7 +6,7 @@
 # Only proxy specific API endpoints and docs to the Flask app
 
 # Proxy API endpoints to the Flask app running locally
-location ~ ^/api/quantum/(quantum_text|quantum_gate|quantum_echo_types|health)$ {
+location ~ ^/api/quantum/(quantum_text|quantum_gate|quantum_echo_types|health|portfolio\.json)$ {
     proxy_pass http://127.0.0.1:8000;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

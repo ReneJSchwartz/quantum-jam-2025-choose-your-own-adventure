@@ -4,7 +4,7 @@ from app import app
 
 def test_health():
     with app.test_client() as client:
-        rv = client.get('/health')
+        rv = client.get('/api/quantum/health')
         assert rv.status_code == 200
         data = rv.get_json()
         assert 'status' in data
@@ -12,7 +12,7 @@ def test_health():
 
 def test_quantum_text():
     with app.test_client() as client:
-        rv = client.post('/quantum_text', json={'text': 'Hello world'})
+        rv = client.post('/api/quantum/quantum_text', json={'text': 'Hello world'})
         # If qiskit is not installed in this environment the endpoint returns 503 with helpful message.
         if rv.status_code == 200:
             data = rv.get_json()
@@ -22,3 +22,14 @@ def test_quantum_text():
             assert 'error' in data and 'qiskit' in data.get('message', '').lower()
         else:
             pytest.fail(f"Unexpected status code: {rv.status_code} - {rv.data.decode()}")
+
+
+def test_portfolio_metadata():
+    with app.test_client() as client:
+        rv = client.get('/api/quantum/portfolio.json')
+        assert rv.status_code == 200
+        assert rv.is_json
+        data = rv.get_json()
+        assert 'api' in data
+        assert 'endpoints' in data
+        assert rv.headers.get('Access-Control-Allow-Origin') == '*'

@@ -2,12 +2,12 @@
 
 ## Overview
 
-The Quantum Echo API v2.0.0 is hosted at `DavidJGrimsley.com/api/quantum/` using a reverse proxy architecture. The Flask API runs locally on the VPS and nginx proxies requests from the public domain.
+The Quantum Echo API v2.0.0 is hosted at `DavidJGrimsley.com/public-facing/api/quantum/` using a reverse proxy architecture. The Flask API runs locally on the VPS and nginx proxies requests from the public domain. The interactive info page stays at `DavidJGrimsley.com/api/quantum/`.
 
 ### Architecture
 
 ```
-User Request → DavidJGrimsley.com/api/quantum/* 
+User Request → DavidJGrimsley.com/public-facing/api/quantum/* 
               ↓ (nginx reverse proxy)
            Flask App (127.0.0.1:8000) 
               ↑ (gunicorn + pm2)
@@ -92,7 +92,7 @@ sudo systemctl status quantum-echo-server
 
 The nginx configuration:
 - Proxies API endpoints to `http://127.0.0.1:8000`
-- Proxies `/api/quantum/docs` and `/api/quantum/openapi.yaml` for documentation
+- Proxies `/public-facing/api/quantum/docs` and `/public-facing/api/quantum/openapi.yaml` for documentation
 - Lets Expo/React app handle `/api` and `/api/quantum` root paths
 - Adds CORS headers for browser access
 
@@ -100,13 +100,13 @@ The nginx configuration:
 
 Test Flask app directly (should work):
 ```bash
-curl http://127.0.0.1:8000/api/quantum/health
+curl http://127.0.0.1:8000/public-facing/api/quantum/health
 ```
 
 Test through nginx proxy (should work after nginx config):
 ```bash
-curl https://DavidJGrimsley.com/api/quantum/health
-curl -X POST https://DavidJGrimsley.com/api/quantum/quantum_text \
+curl https://DavidJGrimsley.com/public-facing/api/quantum/health
+curl -X POST https://DavidJGrimsley.com/public-facing/api/quantum/quantum_text \
   -H "Content-Type: application/json" \
   -d '{"text": "hello quantum"}'
 ```
@@ -114,23 +114,23 @@ curl -X POST https://DavidJGrimsley.com/api/quantum/quantum_text \
 Test Swagger documentation:
 ```bash
 # Should serve Swagger UI HTML
-curl https://DavidJGrimsley.com/api/quantum/docs
+curl https://DavidJGrimsley.com/public-facing/api/quantum/docs
 
 # Should return OpenAPI YAML spec
-curl https://DavidJGrimsley.com/api/quantum/openapi.yaml
+curl https://DavidJGrimsley.com/public-facing/api/quantum/openapi.yaml
 ```
 
 Visit in browser:
 - API Info: https://DavidJGrimsley.com/api/quantum/ (Expo React page)
-- Swagger UI: https://DavidJGrimsley.com/api/quantum/docs
-- Health Check: https://DavidJGrimsley.com/api/quantum/health
+- Swagger UI: https://DavidJGrimsley.com/public-facing/api/quantum/docs
+- Health Check: https://DavidJGrimsley.com/public-facing/api/quantum/health
 
 ## Configuration Details
 
 ### Environment Variables
 
 No environment variables required. All configuration is in `app.py`:
-- `API_PREFIX = "/api/quantum"` - URL prefix for all routes
+- `API_PREFIX = "/public-facing/api/quantum"` - Public URL prefix for all routes
 - `API_VERSION = "2.0.0"` - Current version
 - CORS enabled for all origins
 
@@ -202,19 +202,19 @@ pip install --upgrade -r requirements.txt
 
 1. Check nginx syntax: Plesk validates on save
 2. View nginx error logs in Plesk
-3. Verify upstream is reachable: `curl http://127.0.0.1:8000/api/quantum/health`
+3. Verify upstream is reachable: `curl http://127.0.0.1:8000/public-facing/api/quantum/health`
 
 ## URL Structure
 
 ### Public URLs (via DavidJGrimsley.com)
 
 - `GET /api/quantum/` - API info (Expo page)
-- `GET /api/quantum/health` - Health check
-- `POST /api/quantum/quantum_text` - Transform text with quantum
-- `POST /api/quantum/quantum_gate` - Apply quantum gate
-- `GET /api/quantum/quantum_echo_types` - List available effects
-- `GET /api/quantum/docs` - Swagger UI documentation
-- `GET /api/quantum/openapi.yaml` - OpenAPI specification
+- `GET /public-facing/api/quantum/health` - Health check
+- `POST /public-facing/api/quantum/quantum_text` - Transform text with quantum
+- `POST /public-facing/api/quantum/quantum_gate` - Apply quantum gate
+- `GET /public-facing/api/quantum/quantum_echo_types` - List available effects
+- `GET /public-facing/api/quantum/docs` - Swagger UI documentation
+- `GET /public-facing/api/quantum/openapi.yaml` - OpenAPI specification
 
 ### Version Information
 
@@ -230,7 +230,7 @@ Version is not in the URL path but available in API responses:
 ## Client Updates
 
 After deployment, clients automatically use the new URLs:
-- Godot game clients: `https://DavidJGrimsley.com/api/quantum`
+- Godot game clients: `https://DavidJGrimsley.com/public-facing/api/quantum`
 - React/Expo web app: `https://DavidJGrimsley.com/api/quantum`
 
 No client-side changes needed after initial migration to v2.
@@ -281,5 +281,5 @@ All files are in git repository, so regular commits serve as backups.
 For issues, check:
 1. pm2 logs: `pm2 logs quantum-echo-server`
 2. nginx logs: Plesk → Logs
-3. Flask app directly: `curl http://127.0.0.1:8000/api/quantum/health`
+3. Flask app directly: `curl http://127.0.0.1:8000/public-facing/api/quantum/health`
 4. GitHub issues: https://github.com/ReneJSchwartz/quantum-jam-2025-choose-your-own-adventure/issues

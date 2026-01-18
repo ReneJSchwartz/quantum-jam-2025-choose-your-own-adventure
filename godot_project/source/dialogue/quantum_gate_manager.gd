@@ -15,7 +15,7 @@
 ## - Story state tracking with quantum-influenced branching
 ##
 ## 📡 SERVER INTEGRATION:
-## - Connects to quantum echo server at DavidJGrimsley.com/api/quantum
+## - Connects to quantum echo server at DavidJGrimsley.com/public-facing/api/quantum
 ## - Uses /quantum_gates endpoint for circuit execution
 ## - Processes quantum measurement results for story outcomes
 ## - Generates memory fragments from quantum superposition states
@@ -101,7 +101,7 @@ func _send_quantum_gate_request(text: String, gate_sequence: String, gate_type: 
 	var headers = ["Content-Type: application/json"]
 	
 	print("🎯 Sending quantum gate request: ", gate_sequence)
-	var error = http_request.request("https://DavidJGrimsley.com/api/quantum/quantum_gate", headers, HTTPClient.METHOD_POST, json_string)
+	var error = http_request.request("https://DavidJGrimsley.com/public-facing/api/quantum/quantum_gate", headers, HTTPClient.METHOD_POST, json_string)
 	
 	if error != OK:
 		print("❌ Failed to send quantum gate request: ", error)

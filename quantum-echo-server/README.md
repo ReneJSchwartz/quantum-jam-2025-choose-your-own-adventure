@@ -6,8 +6,8 @@ A Flask-based quantum computing server that uses Qiskit to create "quantum echoe
 
 ## 🌐 Access the API
 
-- **Production API**: `https://DavidJGrimsley.com/api/quantum/`
-- **Documentation**: `https://DavidJGrimsley.com/api/quantum/docs`
+- **Production API**: `https://DavidJGrimsley.com/public-facing/api/quantum/`
+- **Documentation**: `https://DavidJGrimsley.com/public-facing/api/quantum/docs`
 - **Interactive Page**: `https://DavidJGrimsley.com/api/quantum`
 
 > **Note**: Version 2.0.0 introduces a new URL structure. The API runs locally and is proxied through nginx.
@@ -24,13 +24,13 @@ A Flask-based quantum computing server that uses Qiskit to create "quantum echoe
 
 ## API Endpoints
 
-All endpoints use the `/api/quantum/` prefix:
+All API endpoints use the `/public-facing/api/quantum/` prefix:
 
-- `GET /api/quantum/` - Service information including version
-- `GET /api/quantum/health` - Health check with qiskit status
-- `POST /api/quantum/quantum_text` - Transform text using quantum echoes
-- `POST /api/quantum/quantum_gate` - Apply quantum gate operations
-- `GET /api/quantum/quantum_echo_types` - List available transformation types
+- `GET /public-facing/api/quantum/` - Service information including version
+- `GET /public-facing/api/quantum/health` - Health check with qiskit status
+- `POST /public-facing/api/quantum/quantum_text` - Transform text using quantum echoes
+- `POST /public-facing/api/quantum/quantum_gate` - Apply quantum gate operations
+- `GET /public-facing/api/quantum/quantum_echo_types` - List available transformation types
 
 ## Echo Types
 

@@ -7,15 +7,15 @@ info:
     simulations, text transformations, gate operations, and more.
     
     **Version 2.0.0** - Major update with new URL structure.
-    All endpoints are under `/api/quantum/` path.
+    All endpoints are under `/public-facing/api/quantum/` path.
     
     **Note:** The base URL `https://DavidJGrimsley.com/api/quantum/` serves an 
-    interactive info page (HTML). For JSON service metadata, use `/health` endpoint.
+    interactive info page (HTML). For JSON service metadata, use the public-facing `/health` endpoint.
     
-    Access the API at: https://DavidJGrimsley.com/api/quantum/
-    Interactive docs: https://DavidJGrimsley.com/api/quantum/docs
+    Access the API at: https://DavidJGrimsley.com/public-facing/api/quantum/
+    Interactive docs: https://DavidJGrimsley.com/public-facing/api/quantum/docs
 servers:
-  - url: https://DavidJGrimsley.com/api/quantum
+  - url: https://DavidJGrimsley.com/public-facing/api/quantum
     description: Production API
 tags:
   - name: Service Info

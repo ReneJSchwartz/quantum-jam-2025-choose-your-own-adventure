@@ -8,7 +8,7 @@ signal quantum_echo_received(original_text: String, echo_text: String, echo_type
 signal quantum_echo_error(error_message: String)
 
 var http_request: HTTPRequest
-var server_url: String = "https://DavidJGrimsley.com/api/quantum"  # Production API
+var server_url: String = "https://DavidJGrimsley.com/public-facing/api/quantum"  # Production API
 
 # Available echo types
 enum EchoType {
@@ -58,7 +58,7 @@ func get_quantum_echo(dialogue_text: String, echo_type: EchoType = EchoType.SCRA
     var json_string = JSON.stringify(json_data)
     
     print("Requesting quantum echo for: ", dialogue_text)
-    http_request.request(server_url + "/quantum_echo", headers, HTTPClient.METHOD_POST, json_string)
+    http_request.request(server_url + "/quantum_text", headers, HTTPClient.METHOD_POST, json_string)
 
 func _echo_type_to_string(echo_type: EchoType) -> String:
     """Convert EchoType enum to string"""
@@ -93,13 +93,13 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
                     print("⚠ Quantum Echo Server health check failed")
                 return
             
-            # Handle quantum echo response
-            if response_data.has("echo"):
+            # Handle quantum text response
+            if response_data.has("transformed"):
                 var original = response_data.get("original", "")
-                var echo = response_data.get("echo", "")
+                var echo = response_data.get("transformed", "")
                 var echo_type = response_data.get("echo_type", "")
                 
-                print("Quantum echo received:")
+                print("Quantum response received:")
                 print("  Original: ", original)
                 print("  Echo: ", echo)
                 print("  Type: ", echo_type)

@@ -70,7 +70,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 # API versioning (version info available in responses, not in URLs)
 API_VERSION = "2.1.1"
-API_PREFIX = "/api/quantum"
+API_PREFIX = "/public-facing/api/quantum"
 
 # Quantum gate types
 class GateType(Enum):
@@ -537,9 +537,9 @@ def portfolio_metadata():
             "version": API_VERSION,
             "icon": "⚛️",
             "description": "General-purpose quantum services for games and applications: simulations, text transformations, gate operations, and more.",
-            "baseUrl": "https://davidjgrimsley.com/api/quantum",
-            "docsUrl": "https://davidjgrimsley.com/api/quantum/docs",
-            "healthUrl": "https://davidjgrimsley.com/api/quantum/health",
+            "baseUrl": "https://davidjgrimsley.com/public-facing/api/quantum",
+            "docsUrl": "https://davidjgrimsley.com/public-facing/api/quantum/docs",
+            "healthUrl": "https://davidjgrimsley.com/public-facing/api/quantum/health",
             "status": "active",
             "featured": True,
             "tags": ["quantum", "simulation", "gaming", "text-processing"],
@@ -677,9 +677,9 @@ def portfolio_metadata():
                                 "id": "quantum",
                                 "name": "Quantum API",
                                 "version": API_VERSION,
-                                "baseUrl": "https://davidjgrimsley.com/api/quantum",
-                                "docsUrl": "https://davidjgrimsley.com/api/quantum/docs",
-                                "healthUrl": "https://davidjgrimsley.com/api/quantum/health",
+                                "baseUrl": "https://davidjgrimsley.com/public-facing/api/quantum",
+                                "docsUrl": "https://davidjgrimsley.com/public-facing/api/quantum/docs",
+                                "healthUrl": "https://davidjgrimsley.com/public-facing/api/quantum/health",
                                 "status": "active"
                             }
                         }

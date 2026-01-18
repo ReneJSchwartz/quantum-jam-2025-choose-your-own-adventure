@@ -19,7 +19,7 @@ extends Node
 ## - Default content gets scramble transformation
 ##
 ## 📡 SERVER ARCHITECTURE:
-## - Flask server running at DavidJGrimsley.com/api/quantum (production)
+## - Flask server running at DavidJGrimsley.com/public-facing/api/quantum (production)
 ## - Async HTTP requests with fallback to original text on errors
 ## - JSON API with comprehensive error handling and logging
 ## - Health check endpoint for server status monitoring
@@ -46,8 +46,8 @@ extends Node
 ## 🌐 QUANTUM ECHO SERVER CONFIGURATION
 ## The base URL of your quantum echo server
 ## 
-## Current Setup: VPS deployment at 108.175.12.95:8000
-## Local Development: Change to "https://108.175.12.95:8000" for local testing
+## Current Setup: Public API at DavidJGrimsley.com/public-facing/api/quantum
+## Local Development: Change to "http://127.0.0.1:8000/public-facing/api/quantum" for local testing
 ## 
 ## Server Requirements:
 ## - Flask application with qiskit integration
@@ -55,7 +55,7 @@ extends Node
 ## - qiskit==2.1.2, qiskit-aer==0.17.1
 ## - CORS enabled for cross-origin requests
 ## 
-const SERVER_URL = "https://108.175.12.95:8000"
+const SERVER_URL = "https://DavidJGrimsley.com/public-facing/api/quantum"
 
 ## 🎭 QUANTUM ECHO TYPES - Text Transformation Categories
 ## Available echo types from the server - each uses different quantum circuits
@@ -142,8 +142,8 @@ func _ready():
 ## 🚀 SERVER-SIDE COMPREHENSIVE QUANTUM PROCESSING
 ## NEW: Process entire text on server with single request instead of 30+ individual calls
 ##
-## This method sends the full text to the quantum server's new /quantum_comprehensive_text
-## endpoint which processes ~70% of words with appropriate quantum effects in a single batch.
+## This method sends the full text to the quantum server's /quantum_text
+## endpoint which processes words with appropriate quantum effects in a single batch.
 ##
 ## Performance Benefits:
 ## - 1 HTTP request instead of 30+ individual requests
@@ -172,7 +172,7 @@ func process_comprehensive_quantum_text(text: String, callback: Callable) -> voi
 	
 	# Single request to process entire text on server
 	http_request.request_completed.connect(_on_comprehensive_server_response.bind(callback, http_request, text))
-	http_request.request(SERVER_URL + "/quantum_comprehensive_text", headers, HTTPClient.METHOD_POST, json_string)
+	http_request.request(SERVER_URL + "/quantum_text", headers, HTTPClient.METHOD_POST, json_string)
 	
 	print("📡 Single batch request sent (replaces 30+ individual requests)")
 
@@ -188,15 +188,13 @@ func _on_comprehensive_server_response(callback: Callable, http_request: HTTPReq
 		if parse_result == OK:
 			var data = json.data
 			var transformed_text = data.get("transformed", "")
-			var stats = data.get("stats", {})
-			var performance = data.get("performance", {})
 			
 			print("✨ Comprehensive quantum processing complete!")
-			print("📊 Coverage: %d/%d words (%.1f%%)" % [stats.get("quantum_words", 0), stats.get("total_words", 0), stats.get("coverage_percent", 0)])
-			print("🎭 Effects applied: ", stats.get("effects_applied", {}))
-			print("⚡ Performance: ", performance.get("efficiency_gain", "Single batch request"))
-			
-			callback.call(transformed_text)
+			if transformed_text.is_empty():
+				print("⚠️ No 'transformed' field in response")
+				callback.call(original_text)
+			else:
+				callback.call(transformed_text)
 		else:
 			print("❌ Failed to parse comprehensive server response")
 			callback.call(original_text)  # Fallback to original
@@ -242,9 +240,9 @@ func _replace_word_case_insensitive(text: String, old_word: String, new_word: St
 ## Process text through quantum echo server
 ## Returns the transformed text via callback when complete
 ##
-## API Endpoint: POST /quantum_echo
-## Request Format: {"text": string, "echo_type": string}  
-## Response Format: {"echo": string, "quantum_state": dict, "measurement_result": list}
+## API Endpoint: POST /quantum_text
+## Request Format: {"text": string}
+## Response Format: {"transformed": string, "coverage_percent": number}
 ##
 ## Parameters:
 ## - text: Input text to transform
@@ -274,8 +272,7 @@ func process_quantum_echo(text: String, echo_type: EchoType, callback: Callable,
 	
 	# Prepare request data
 	var request_data = {
-		"text": text,
-		"echo_type": echo_type_to_string(echo_type)
+		"text": text
 	}
 	
 	var json_string = JSON.stringify(request_data)
@@ -284,7 +281,7 @@ func process_quantum_echo(text: String, echo_type: EchoType, callback: Callable,
 	print("🌀 Sending quantum echo request: ", echo_type_to_string(echo_type), " for text: ", text.substr(0, 50), "...")
 	
 	# Make the request
-	var error = http_request.request(SERVER_URL + "/quantum_echo", headers, HTTPClient.METHOD_POST, json_string)
+	var error = http_request.request(SERVER_URL + "/quantum_text", headers, HTTPClient.METHOD_POST, json_string)
 	
 	if error != OK:
 		print("❌ Failed to make quantum echo request: ", error)
@@ -307,13 +304,13 @@ func _on_quantum_echo_response(http_request: HTTPRequest, _result: int, response
 		
 		if parse_result == OK:
 			var response_data = json.data
-			if response_data.has("echo"):
-				var quantum_text = response_data["echo"]
-				print("✨ Quantum echo received: ", quantum_text.substr(0, 100), "...")
+			if response_data.has("transformed"):
+				var quantum_text = response_data["transformed"]
+				print("✨ Quantum response received: ", quantum_text.substr(0, 100), "...")
 				callback.call(quantum_text)
 				return
 			else:
-				print("❌ Invalid response format from quantum server - missing 'echo' field")
+				print("❌ Invalid response format from quantum server - missing 'transformed' field")
 				print("Response data: ", response_data)
 	else:
 		print("❌ Quantum echo server error. Response code: ", response_code)
@@ -325,9 +322,9 @@ func _on_quantum_echo_response(http_request: HTTPRequest, _result: int, response
 ## 🧬 ADVANCED QUANTUM MEMORY PROCESSING METHOD
 ## NEW: Process text using quantum memory effects for storytelling
 ##
-## API Endpoint: POST /quantum_memory
-## Request Format: {"text": string, "memory_type": string, "intensity": float}
-## Response Format: {"memory_echo": string, "memory_state": string, "quantum_coherence": float}
+## API Endpoint: POST /quantum_text
+## Request Format: {"text": string}
+## Response Format: {"transformed": string, "coverage_percent": number}
 ##
 ## Parameters:
 ## - text: Input text for memory processing
@@ -362,9 +359,7 @@ func process_quantum_memory(text: String, memory_type: QuantumMemoryType, intens
 	
 	# Prepare request data
 	var request_data = {
-		"text": text,
-		"memory_type": memory_type_to_string(memory_type),
-		"intensity": intensity
+		"text": text
 	}
 	
 	var json_string = JSON.stringify(request_data)
@@ -373,7 +368,7 @@ func process_quantum_memory(text: String, memory_type: QuantumMemoryType, intens
 	print("🧠 Sending quantum memory request: ", memory_type_to_string(memory_type), " intensity: ", intensity, " for text: ", text.substr(0, 50), "...")
 	
 	# Make the request
-	var error = http_request.request(SERVER_URL + "/quantum_memory", headers, HTTPClient.METHOD_POST, json_string)
+	var error = http_request.request(SERVER_URL + "/quantum_text", headers, HTTPClient.METHOD_POST, json_string)
 	
 	if error != OK:
 		print("❌ Failed to make quantum memory request: ", error)
@@ -396,15 +391,13 @@ func _on_quantum_memory_response(http_request: HTTPRequest, _result: int, respon
 		
 		if parse_result == OK:
 			var response_data = json.data
-			if response_data.has("memory_echo"):
-				var quantum_memory_text = response_data["memory_echo"]
-				print("🧠✨ Quantum memory received: ", quantum_memory_text.substr(0, 100), "...")
-				print("Memory state: ", response_data.get("memory_state", "unknown"))
-				print("Quantum coherence: ", response_data.get("quantum_coherence", 0.0))
+			if response_data.has("transformed"):
+				var quantum_memory_text = response_data["transformed"]
+				print("🧠✨ Quantum response received: ", quantum_memory_text.substr(0, 100), "...")
 				callback.call(quantum_memory_text)
 				return
 			else:
-				print("❌ Invalid response format from quantum memory - missing 'memory_echo' field")
+				print("❌ Invalid response format from quantum server - missing 'transformed' field")
 				print("Response data: ", response_data)
 	else:
 		print("❌ Quantum memory server error. Response code: ", response_code)

@@ -536,7 +536,7 @@ def portfolio_metadata():
             "name": "Quantum API",
             "version": API_VERSION,
             "icon": "⚛️",
-            "description": "General-purpose quantum services for games and applications: simulations, text transformations, gate operations, and more.",
+            "description": "Flask-based Quantum Echo Server using Qiskit to transform text and run quantum gate operations for games and interactive applications.",
             "baseUrl": "https://davidjgrimsley.com/public-facing/api/quantum",
             "docsUrl": "https://davidjgrimsley.com/public-facing/api/quantum/docs",
             "healthUrl": "https://davidjgrimsley.com/public-facing/api/quantum/health",

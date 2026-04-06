@@ -1,44 +1,63 @@
 extends Node
-## Test script to verify quantum gate integration
+## Test script for gate-related Quantum API smoke checks.
+
+const QuantumApiBridgeScript = preload("res://source/dialogue/quantum_api_bridge.gd")
+
+signal gate_call_completed(call_success: bool, call_payload: Dictionary)
 
 func _ready():
-	print("🧪 Testing Quantum Gate Integration")
-	test_quantum_gates()
+	print("🧪 Testing Quantum API gate integration through addon bridge")
+	await test_quantum_gates()
 
-func test_quantum_gates():
-	# Test quantum gate endpoint with different gate sequences
-	test_gate("H-X", "Hello quantum world!")
-	test_gate("X-Z", "The burst vanishes into memory")
-	test_gate("Y-ROT", "I remember the quantum echo")
+func test_quantum_gates() -> void:
+	await _test_gate("bit_flip")
+	await _test_gate("phase_flip")
+	await _test_gate("rotation", 0.5)
+	await _test_rotation_validation_error()
 
-func test_gate(gate_sequence: String, text: String):
-	var http_request = HTTPRequest.new()
-	add_child(http_request)
-	
-	http_request.request_completed.connect(_on_gate_response)
-	
-	var request_data = {
-		"text": text,
-		"gate_sequence": gate_sequence
-	}
-	
-	var json_string = JSON.stringify(request_data)
-	var headers = ["Content-Type: application/json"]
-	
-	print("🎯 Testing gate sequence: ", gate_sequence, " with text: ", text)
-	http_request.request("https://DavidJGrimsley.com/api/quantum/quantum_gate", headers, HTTPClient.METHOD_POST, json_string)
+func _test_gate(gate_type: String, rotation_angle_rad: Variant = null) -> void:
+	var result := await _await_gate(gate_type, rotation_angle_rad)
+	var request_success := bool(result["request_success"])
+	var payload := result["payload"] as Dictionary
 
-func _on_gate_response(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
-	if response_code == 200:
-		var json = JSON.new()
-		var parse_result = json.parse(body.get_string_from_utf8())
-		
-		if parse_result == OK:
-			var response_data = json.data
-			print("✨ Gate result: ", response_data.get("transformed", ""))
-			print("📊 Superposition average: ", response_data.get("superposition_average", 0))
-			print("🔬 Gates applied: ", response_data.get("gates_applied", []))
-		else:
-			print("❌ Failed to parse response")
+	if request_success:
+		print("✅ ", gate_type, " call succeeded")
+		print("   measurement: ", payload.get("measurement", "n/a"))
+		print("   superposition_strength: ", payload.get("superposition_strength", "n/a"))
+		print("   success: ", payload.get("success", false))
+		return
+
+	print("❌ ", gate_type, " call failed: ", payload)
+
+func _test_rotation_validation_error() -> void:
+	var result := await _await_gate("rotation")
+	var request_success := bool(result["request_success"])
+	var payload := result["payload"] as Dictionary
+
+	if request_success:
+		print("❌ Expected rotation validation failure but got success payload: ", payload)
+		return
+
+	var status_code := int(payload.get("status_code", 0))
+	var message := str(payload.get("message", ""))
+	if status_code == 400 and !message.is_empty():
+		print("✅ Rotation validation failure returned clearly: ", message)
 	else:
-		print("❌ Server error: ", response_code)
+		print("⚠️ Rotation without angle failed, but error details were unclear: ", payload)
+
+func _await_gate(gate_type: String, rotation_angle_rad: Variant = null) -> Dictionary:
+	QuantumApiBridgeScript.run_gate(
+		self,
+		gate_type,
+		Callable(self, "_on_gate_call_complete"),
+		rotation_angle_rad
+	)
+
+	var result: Array = await gate_call_completed
+	return {
+		"request_success": bool(result[0]),
+		"payload": result[1] as Dictionary,
+	}
+
+func _on_gate_call_complete(call_success: bool, call_payload: Dictionary) -> void:
+	gate_call_completed.emit(call_success, call_payload)

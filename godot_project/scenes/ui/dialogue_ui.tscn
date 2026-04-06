@@ -79,9 +79,9 @@ size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 32
 bbcode_enabled = true
 text = "Scrolling text box"
-scroll_active = false
-scroll_following = true
-vertical_alignment = 1
+scroll_active = true
+scroll_following = false
+vertical_alignment = 0
 
 [node name="Spacer" type="Control" parent="ContainerScrollView/MarginContainer/VBoxContainer"]
 layout_mode = 2

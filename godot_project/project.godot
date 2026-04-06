@@ -8,11 +8,14 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
-config/name="Choose Your Own Quantum Adventure"
 run/main_scene="uid://baeb3r511rshg"
-config/features=PackedStringArray("4.5", "GL Compatibility")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -34,6 +37,12 @@ folder_colors={
 "res://scenes/": "pink",
 "res://source/": "blue"
 }
+
+[quantum_api]
+
+base_url="https://davidjgrimsley.com/public-facing/api/quantum/v1"
+backend_proxy_mode=false
+direct_api_key="qapi_3mitnox2faya_v7wl9o8ifgunligvgnq310snbr9cx5jvlefjdjay"
 
 [rendering]
 

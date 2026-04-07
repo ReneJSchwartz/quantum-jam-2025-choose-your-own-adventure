@@ -160,9 +160,10 @@ func _process(_delta: float):
 ## button callbacks and calls them through this method.
 func _on_user_choice_button_pressed(button_index: int):
 	print("[DialogueUI] Player selected option index=", button_index)
-	button_callbacks[button_index].call()
+	var _callback_result: Variant = await button_callbacks[button_index].call()
 	if next_dialogue_callback.is_null():
 		print("[DialogueUI] WARNING: next_dialogue_callback is null after option press")
+		return
 	next_dialogue_callback.call()
 
 ## Temporary write text refactor step.

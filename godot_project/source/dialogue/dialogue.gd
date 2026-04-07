@@ -247,13 +247,13 @@ Theo: "... Don't." """)
   
 	add_option("Apply a bit-flip gate first.", func(): 
 		completed_bit_flip = true
-		processor_bit_flip())
+		return await processor_bit_flip())
 	add_option("Start with a phase-flip gate.", func():
 		completed_phase_flip = true
-		processor_phase_flip()) 
+		return await processor_phase_flip()) 
 	add_option("Rotate the qubit superposition to reveal hidden states", func():
 		completed_rotation = true
-		processor_rotate())
+		return await processor_rotate())
 	queue_added_options()
 	
 func processor_bit_flip():
@@ -375,11 +375,11 @@ Theo: It's holding stable.""")
 		if completed_phase_flip == false:
 			add_option("Phase-flip gate.", func():
 				completed_phase_flip = true
-				processor_phase_flip())
+				return await processor_phase_flip())
 		if completed_rotation == false:
 			add_option("Rotate the qubit superposition to reveal hidden states.", func():
 				completed_rotation = true
-				processor_rotate())
+				return await processor_rotate())
 		queue_added_options()
 	
 func processor_bit_flip_fail():
@@ -417,11 +417,11 @@ Theo: It's holding stable. Choose the next gate carefully to avoid collapse.""")
 		if completed_bit_flip == false:
 			add_option("Apply a bit-flip gate.", func():
 				completed_bit_flip = true
-				processor_bit_flip())
+				return await processor_bit_flip())
 		if completed_rotation == false:
 			add_option("Rotate the qubit superposition to reveal hidden states.", func():
 				completed_rotation = true
-				processor_rotate())
+				return await processor_rotate())
 		queue_added_options()
 
 func processor_phase_flip_fail():
@@ -472,11 +472,11 @@ The memory from the flare fades.""")
 		if completed_phase_flip == false:
 			add_option("Phase-flip gate.", func():
 				completed_phase_flip = true
-				processor_phase_flip())
+				return await processor_phase_flip())
 		if completed_bit_flip == false:
 			add_option("Apply a bit-flip gate.", func():
 				completed_bit_flip = true
-				processor_bit_flip())
+				return await processor_bit_flip())
 		queue_added_options()
 
 func explore_faint_echoes():
@@ -503,11 +503,11 @@ I must decide which world the echoes will sing… and which will fade into silen
 		if completed_phase_flip == false:
 			add_option("Phase-flip gate.", func():
 				completed_phase_flip = true
-				processor_phase_flip())
+				return await processor_phase_flip())
 		if completed_bit_flip == false:
 			add_option("Apply a bit-flip gate.", func():
 				completed_bit_flip = true
-				processor_bit_flip())
+				return await processor_bit_flip())
 		queue_added_options()
 
 func processor_complete():

@@ -104,14 +104,14 @@ func apply_settings() -> void:
 ## Keyboard Remapping
 
 ```gdscript
-# Allow players to rebind keys
+# Allow players to rebind keys using layout-independent physical positions
 func rebind_action(action: String, new_key: Key) -> void:
     # Remove existing
     InputMap.action_erase_events(action)
     
     # Add new
     var event := InputEventKey.new()
-    event.keycode = new_key
+    event.physical_keycode = new_key
     InputMap.action_add_event(action, event)
     
     # Save

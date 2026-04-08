@@ -101,7 +101,7 @@ func save_to_browser() -> void:
         return
     
     var data := JSON.stringify(get_save_data())
-    JavaScriptBridge.eval("localStorage.setItem('savegame', '%s')" % data)
+    JavaScriptBridge.eval("localStorage.setItem('savegame', %s)" % data)
 
 func load_from_browser() -> Dictionary:
     if not OS.has_feature("web"):

@@ -51,7 +51,7 @@ Staggered path update strategy for massive AI crowds to prevent pathfinding bott
 - **NEVER use complex collision shapes for physics queries** — High-poly convex shapes are expensive to resolve. Prefer simplified primitives (Circle, Rectangle, Box).
 - **NEVER forget to disconnect local lambda signals** — Anonymous lambdas connected to global signals can cause memory leaks if the capturing object is freed.
 - **NEVER use large textures without compression** — VRAM is limited. Use VRAM Compressed (S3TC/BPTC) for fast lookup and reduced memory footprint.
-- **NEVER perform tree modifications during physics steps** — Adding/removing nodes during `_inter_ray` or `_physics_process` can lock the physics server. Use `call_deferred`.
+- **NEVER perform tree modifications during physics steps** — Adding/removing nodes during `intersect_ray(...)` queries, `_physics_process()`, or physics callbacks can lock the physics server. Use `call_deferred`.
 
 ---
 

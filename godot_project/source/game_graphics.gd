@@ -15,8 +15,10 @@ static var instance: GameGraphics
 
 func _ready() -> void:
 	instance = self
+	print("[GameGraphics] Ready. node=", get_path())
 	#SignalBus.instance.sub("game_started", func (data): show_text_box())
 	_hide_all()
+	print("[GameGraphics] Initial visibility | text_box_bg=", text_box_bg.visible, " ava=", ava.visible, " ava_volume=", ava_volume.visible)
 
 func _hide_all():
 	line_graph.visible = false
@@ -27,22 +29,29 @@ func _hide_all():
 	ava_volume.visible = false
 
 func show_text_box():
-	print("show_text_box")
+	print("[GameGraphics] show_text_box")
 	text_box_bg.visible = true
+	print("[GameGraphics] text_box_bg.visible=", text_box_bg.visible)
 
 func show_widgets_at_right():
+	print("[GameGraphics] show_widgets_at_right")
 	qubit.visible = true
 	line_graph.visible = true
 	bar_graph.visible = true
+	print("[GameGraphics] right_widgets | qubit=", qubit.visible, " line_graph=", line_graph.visible, " bar_graph=", bar_graph.visible)
 
 func show_ava():
+	print("[GameGraphics] show_ava")
 	ava.visible = true
 
 func hide_ava():
+	print("[GameGraphics] hide_ava")
 	ava.visible = false
 
 func ava_start_talking():
+	print("[GameGraphics] ava_start_talking")
 	ava_volume.visible = true
 
 func ava_stop_talking():
+	print("[GameGraphics] ava_stop_talking")
 	ava_volume.visible = false

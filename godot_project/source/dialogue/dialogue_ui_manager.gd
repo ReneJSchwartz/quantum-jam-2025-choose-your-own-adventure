@@ -3,6 +3,8 @@ extends Node
 ## Controls Dialogue UI (speaker name, dialogue text, showing and hiding the 
 ## dialogue UI, changing talker picture (when implemented), etc.
 
+const QuantumApiBridgeScript = preload("res://source/dialogue/quantum_api_bridge.gd")
+
 ## Corresponds to settings menu speeds.
 enum TextSpeedOption { SLOW, NORMAL, FAST }
 ## Get from options.
@@ -28,7 +30,7 @@ var hide_tween_duration = 0.53
 ## How long showing or hiding the dialogue overlay should take.
 var show_tween_duration = 0.32
 ## Access pattern to the script.
-static var instance: DialogueUiManager = self
+static var instance: DialogueUiManager
 ## What code call to get the next dialogue. This is usually Dialogue script's
 ## continue_dialogue().
 var next_dialogue_callback: Callable
@@ -70,31 +72,8 @@ var next_dialogue_callback: Callable
 ## Options the player can select (option's topmost node), these are dynamically
 ## populated.
 @export var dialogue_options: Array[Button]
-## Reference to the quantum echo service for text transformation  
-## 🌟 QUANTUM TEXT API: This connects to the Flask quantum echo server at DavidJGrimsley.com/api/quantum
-## 
-## Available API Endpoints:
-## - /quantum_echo: Transform text with various echo effects (scramble, case_flip, ghost, quantum_caps)
-## - /quantum_memory: Process text with memory-based quantum transformations (fragmented, entangled, superposition)
-## - /health: Check server status and qiskit availability
-##
-## Echo Types Available:
-## - SCRAMBLE: Randomly scrambles characters using quantum measurement  
-## - CASE_FLIP: Flips case using quantum superposition collapse
-## - GHOST: Creates ghostly text effects with quantum interference
-## - QUANTUM_CAPS: Applies quantum-based capitalization patterns
-## - ORIGINAL: Returns unmodified text (quantum bypass)
-##
-## Memory Types for Advanced Storytelling:
-## - FRAGMENTED: Simulates fragmented memory states (intensity controls fragmentation)
-## - ENTANGLED: Creates text entanglement effects between phrases
-## - SUPERPOSITION: Text exists in quantum superposition until observed
-##
-## Usage Pattern:
-##   quantum_echo_service.process_quantum_echo(text, EchoType.SCRAMBLE, callback, fallback)
-##   quantum_echo_service.process_quantum_memory(text, MemoryType.FRAGMENTED, intensity, callback, fallback)
-##
-var quantum_echo_service: Node
+## Runtime Quantum API transport is centralized through QuantumApiBridge.
+var quantum_api_bridge: Node
 
 
 func _ready():
@@ -102,22 +81,27 @@ func _ready():
 	#test_show_overlay = false
 	#test_write_mock_message = false
 	instance = self
+	print("[DialogueUI] Ready. node=", get_path())
+	quantum_api_bridge = QuantumApiBridgeScript.get_or_create(self)
+	print("[DialogueUI] Quantum bridge ready=", quantum_api_bridge != null)
 	
 	ui_container.visible = false
-	
-	# Note: No longer using quantum_echo_service - direct Flask server communication
+	print("[DialogueUI] UI container hidden on ready. options_count=", dialogue_options.size())
 	
 	# Default text speed, remove when options script sets this. 
 	set_text_speed(TextSpeedOption.NORMAL)
+	text_area.scroll_following = false
+	text_area.scroll_to_line(0)
 	
-	for i in len(dialogue_options):
-		dialogue_options[i].pressed.connect(func(): _on_user_choice_button_pressed(i))
+	for i in range(len(dialogue_options)):
+		var button_index := i
+		dialogue_options[i].pressed.connect(func(): _on_user_choice_button_pressed(button_index))
 		dialogue_options[i].pressed.connect(func(): hide_player_options())
 	
 	button_callbacks.append_array([func(): pass, func(): pass, func(): pass, func(): pass])
 
 func show_dialogue_overlay() -> void:
-	print(show_dialogue_overlay.get_method().get_basename())
+	print("[DialogueUI] show_dialogue_overlay")
 	ui_container.visible = true
 	hide_player_options()
 	text_area.text = " "
@@ -132,7 +116,7 @@ func show_dialogue_overlay() -> void:
 		show_tween_duration)
 
 func hide_dialogue_overlay(_instantly: bool = false) -> void:
-	print(hide_dialogue_overlay.get_method().get_basename())
+	print("[DialogueUI] hide_dialogue_overlay")
 	#ui_container.visible = false
 	#if instantly:
 		#ui_container.position = Vector2(0, container_down_y_position_that_hides_player_options)
@@ -175,11 +159,16 @@ func _process(_delta: float):
 ## as that is hard with reusing buttons but instead this class stores 
 ## button callbacks and calls them through this method.
 func _on_user_choice_button_pressed(button_index: int):
-	button_callbacks[button_index].call()
+	print("[DialogueUI] Player selected option index=", button_index)
+	var _callback_result: Variant = await button_callbacks[button_index].call()
+	if next_dialogue_callback.is_null():
+		print("[DialogueUI] WARNING: next_dialogue_callback is null after option press")
+		return
 	next_dialogue_callback.call()
 
 ## Temporary write text refactor step.
 func show_text(content: DialogueContent):
+	print("[DialogueUI] show_text | speaker=", content.speaker_name, " text_len=", content.dialogue_text.length())
 	write_text(content.dialogue_text, content.speaker_name, content.speaker_image)
 	pass
 
@@ -187,10 +176,12 @@ func show_text(content: DialogueContent):
 ## other info to the player as well. Showing player selectable options is done
 ## in show_player_options() however. Now enhanced with quantum echo processing!
 func write_text(bbcode_text: String, talker: String, _speaker_image: String):
+	print("[DialogueUI] write_text | speaker=", talker, " source_text_len=", bbcode_text.length())
 	# reset variables
 	text_speed_multiplier = 1
 	current_typewriter_audio_index = 0
 	text_area.visible_characters = 0
+	text_area.scroll_to_line(0)
 	
 	# set speaker name first (no quantum processing for names)
 	speaker_name.text = talker
@@ -214,77 +205,32 @@ func write_text(bbcode_text: String, talker: String, _speaker_image: String):
 	# 🌟 NEW: Direct quantum server processing (simplified!)
 	_process_text_with_quantum_server(bbcode_text)
 
-## 🌟 SIMPLIFIED QUANTUM TEXT PROCESSING
-## Directly calls the Flask server's /quantum_text endpoint for comprehensive processing
+## Uses the shared addon bridge for text transform.
 func _process_text_with_quantum_server(text: String):
-	print("[QuantumUI] Processing text with quantum server...")
-	
-	var http_request = HTTPRequest.new()
-	add_child(http_request)
-	
-	# Store original text in the HTTPRequest node for later retrieval
-	http_request.set_meta("original_text", text)
-	
-	# Create request data
-	var json_data = {
-		"text": text
-	}
-	
-	var json_string = JSON.stringify(json_data)
-	var headers = ["Content-Type: application/json"]
-	
-	# Connect response handler - signal parameters come first, then bound parameters
-	http_request.request_completed.connect(_on_quantum_server_response)
-	
-	# Send request to Flask server (production server)
-	var server_url = "https://DavidJGrimsley.com/public-facing/api/quantum/quantum_text"
-	print("[QuantumUI] Sending request to: %s" % server_url)
-	http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)
+	print("[QuantumUI] Processing text with shared Quantum API bridge...")
+	QuantumApiBridgeScript.transform_text(
+		self,
+		text,
+		Callable(self, "_on_quantum_text_processed").bind(text),
+		text
+	)
 
-## Handle quantum server response
-## Signal signature: request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray)
-func _on_quantum_server_response(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray):
-	# Get the HTTPRequest node that sent the signal
-	var http_request = get_tree().get_nodes_in_group("http_requests")[0] if get_tree().get_nodes_in_group("http_requests").size() > 0 else null
-	
-	# If we can't find the request node, look through children
-	if not http_request:
-		for child in get_children():
-			if child is HTTPRequest:
-				http_request = child
-				break
-	
-	var original_text = ""
-	if http_request and http_request.has_meta("original_text"):
-		original_text = http_request.get_meta("original_text")
-		# Clean up HTTP request node
-		http_request.queue_free()
-	
-	var processed_text = original_text  # Fallback to original
-	
-	if response_code == 200:
-		var response_text = body.get_string_from_utf8()
-		print("[QuantumUI] Quantum server response: %s" % response_text.substr(0, 100))
-		
-		var json = JSON.new()
-		var parse_result = json.parse(response_text)
-		
-		if parse_result == OK:
-			var response_data = json.data
-			if response_data.has("transformed"):
-				processed_text = response_data["transformed"]
-				var coverage = response_data.get("coverage_percent", 0)
-				print("[QuantumUI] ✨ Quantum processing complete! Coverage: %s%%" % coverage)
-			else:
-				print("[QuantumUI] ⚠️ No 'transformed' field in response")
-		else:
-			print("[QuantumUI] ⚠️ Failed to parse JSON response")
+func _on_quantum_text_processed(request_success: bool, payload: Dictionary, fallback_text: String) -> void:
+	var processed_text := str(payload.get("transformed", fallback_text))
+	if request_success:
+		print("[QuantumUI] transform_text success | sample=", processed_text.substr(0, 80))
 	else:
-		print("[QuantumUI] ⚠️ Quantum server error: %s - using original text" % response_code)
-	
-	# Display the processed text
-	_display_processed_text(processed_text)
-	# Display the processed text with typewriter animation
+		print(
+			"[QuantumUI] transform_text FAILED | status=", int(payload.get("status_code", 0)),
+			" error=", str(payload.get("error", "unknown")),
+			" result=", str(payload.get("result_text", payload.get("result", "n/a"))),
+			" message=", str(payload.get("message", "no message")),
+			" url=", str(payload.get("request_url", "n/a")),
+			" api_key_present=", bool(payload.get("api_key_present", false)),
+			" backend_proxy_mode=", bool(payload.get("backend_proxy_mode", true))
+		)
+		if processed_text == fallback_text:
+			print("[QuantumUI] Using fallback text because transform failed.")
 	_display_processed_text(processed_text)
 
 ## Display the final processed text with typewriter animation
@@ -292,13 +238,23 @@ func _display_processed_text(processed_text: String):
 	print("[QuantumUI] ✨ Displaying processed text: %s" % processed_text.substr(0, 80))
 	text_area.text = processed_text
 	text_area.visible_characters = 0
+	text_area.scroll_to_line(0)
 	
 	# Start typewriter animation
 	_animate_typewriter_effect()
 
 ## 🎭 TYPEWRITER ANIMATION
 func _animate_typewriter_effect():
-	var length_adjusted_text_speed = text_speed / text_area.get_total_character_count()
+	var total_characters: int = text_area.get_total_character_count()
+	if total_characters < 1:
+		total_characters = 1
+	# Prevent very long entries from taking 60-90s to reveal.
+	var max_reveal_duration_seconds: float = 8.0
+	var chars_per_second_from_length: float = float(total_characters) / max_reveal_duration_seconds
+	var effective_chars_per_second: float = text_speed
+	if chars_per_second_from_length > effective_chars_per_second:
+		effective_chars_per_second = chars_per_second_from_length
+	var length_adjusted_text_speed: float = effective_chars_per_second / float(total_characters)
 	while !is_text_finished():
 		text_area.visible_ratio += length_adjusted_text_speed * get_process_delta_time() * text_speed_multiplier
 		if text_area.visible_characters != previous_shown_letters_amount:

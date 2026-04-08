@@ -2,6 +2,14 @@
 
 This integration connects your Godot choose-your-own-adventure game to the Quantum Echo Server for real-time text transformation using quantum effects.
 
+## Addon Source and Update Policy
+
+- Canonical addon source: Godot Asset Library asset `5008` (Quantum API Client 0.1.0).
+- Current pinned package: `https://github.com/DavidJGrimsley/quantum-api/archive/71ffacd1fb5f156805f25d3f72270f1d48140f14.zip`.
+- Vendored install path (tracked in git): `addons/quantum_api_client/`.
+- Update procedure: replace the entire vendored folder with the pinned package contents from `addons/quantum_api_client/` in the zip.
+- Secret policy: keep `quantum_api/direct_api_key` empty in tracked `project.godot`; set keys only in local runtime/editor settings for development.
+
 ## 🔧 **What I've Added**
 
 ### **New Files Created:**

@@ -3,19 +3,23 @@ extends Node
 ## Can be used to trigger a dialogue sequence and design the dialogue
 ## in editor. Can also be filled programmatically if wanted.
 
+const QuantumApiBridgeScript = preload("res://source/dialogue/quantum_api_bridge.gd")
+
 ## Index that keeps track of when the dialogue is finished.
-var current_dialogue_step = 0
+var current_dialogue_step: int = 0
 ## Dialogue running.
 static var dialogue_running: bool = false
 ## Stores the used dialogue.
 var steps: Array[DialogueStep] = []
 ## Stores temporary options that can be fed to add_options()
-var temp_options: Array[DialogueOption]
+var temp_options: Array[DialogueOption] = []
 var on_dialogue_end_callback: Callable = func(): pass
 var dialogue_step_end_callback: Callable = func(): pass
 ## Delay hiding dialogue by this amount. 
 var hide_dialogue_delay: float = 0
 static var instance: Dialogue
+var _game_started_signal_connected: bool = false
+var _connected_signal_bus_path: String = ""
 
 func _init():
 	# Find SignalBus in the scene tree when ready
@@ -23,15 +27,31 @@ func _init():
 
 func _ready() -> void:
 	instance = self
+	print("[Dialogue] Ready. node=", get_path())
 	# Connect to game_started signal once SignalBus is available
 	call_deferred("_connect_signal_bus")
 	
 func _connect_signal_bus():
-	var signal_bus = get_node("/root/GameTree/Scripts/SignalBus")
-	if signal_bus:
-		signal_bus.sub("game_started", func(_data): beginning())
+	if _game_started_signal_connected:
+		print("[Dialogue] game_started already connected via: ", _connected_signal_bus_path)
+		return
+
+	var signal_bus: Node = SignalBus.instance
+	if signal_bus == null:
+		signal_bus = get_node_or_null("/root/SignalBus")
+	if signal_bus == null:
+		signal_bus = get_node_or_null("/root/GameTree/Scripts/SignalBus")
+
+	if signal_bus != null and signal_bus.has_method("sub"):
+		signal_bus.sub("game_started", func(_data: Variant):
+			print("[Dialogue] Received game_started on bus: ", signal_bus.get_path())
+			beginning()
+		)
+		_game_started_signal_connected = true
+		_connected_signal_bus_path = str(signal_bus.get_path())
+		print("[Dialogue] Connected game_started listener on bus: ", _connected_signal_bus_path)
 	else:
-		print("Warning: SignalBus not found!")
+		print("[Dialogue] ERROR: SignalBus not found; beginning() cannot auto-start")
 	
 	# testing non-interactive demo
 	#add_text("text sample <b>bold</b>", "speaker name", "not used yet")
@@ -58,8 +78,13 @@ func queue_added_options():
 	temp_options = []
 
 func start_dialogue():
+	print("[Dialogue] start_dialogue | steps=", steps.size())
 	current_dialogue_step = 0
 	dialogue_running = true
+	if DialogueUiManager.instance == null:
+		print("[Dialogue] ERROR: DialogueUiManager.instance is null")
+		return
+
 	DialogueUiManager.instance.show_dialogue_overlay()
 	DialogueUiManager.instance.next_dialogue_callback = continue_dialogue
 	await get_tree().process_frame
@@ -69,10 +94,12 @@ func start_dialogue():
 ## Called by DialogueUiManager after first step. Either supplies the next step or ends the
 ## dialogue.
 func continue_dialogue():
+	print("[Dialogue] continue_dialogue | current_step=", current_dialogue_step, " total_steps=", steps.size())
 	dialogue_step_end_callback.call()
 	dialogue_step_end_callback = func(): pass
 	
 	if len(steps) <= current_dialogue_step:
+		print("[Dialogue] Reached end of dialogue sequence")
 		on_dialogue_end_callback.call()
 		on_dialogue_end_callback = func(): pass
 		get_tree().create_timer(hide_dialogue_delay).timeout.connect(
@@ -85,16 +112,22 @@ func continue_dialogue():
 	
 	var step = steps[current_dialogue_step]
 	if step.isOptions:
+		print("[Dialogue] Showing options step with ", step.options.size(), " options")
 		DialogueUiManager.instance.show_player_options(step.options)
 		dialogue_step_end_callback = func (): Sounds.instance.play_button_ding()
 	else:
+		print("[Dialogue] Showing text step")
 		DialogueUiManager.instance.show_text(step.content)
 	
 	current_dialogue_step += 1
 
 # Game specific dialogue.
 func beginning():
-	Sounds.instance.play_email_typing()
+	print("[Dialogue] beginning() called")
+	if Sounds.instance == null:
+		print("[Dialogue] WARNING: Sounds.instance is null; skipping typing sound")
+	else:
+		Sounds.instance.play_email_typing()
 	
 	add_text("""NovaCore
 Quantum Gate Operation
@@ -119,9 +152,16 @@ Kaela - you must master quantum echo technology.""")
 	
 	add_option("Close email", func(): 
 		discovery()
-		GameGraphics.instance.show_widgets_at_right()
-		GameGraphics.instance.show_ava()
-		Sounds.instance.stop_email_typing())
+		if GameGraphics.instance != null:
+			GameGraphics.instance.show_widgets_at_right()
+			GameGraphics.instance.show_ava()
+		else:
+			print("[Dialogue] WARNING: GameGraphics.instance is null while handling 'Close email'")
+
+		if Sounds.instance != null:
+			Sounds.instance.stop_email_typing()
+		else:
+			print("[Dialogue] WARNING: Sounds.instance is null while handling 'Close email'"))
 	queue_added_options()
 	
 	start_dialogue()
@@ -195,6 +235,8 @@ Theo: "We should run a diagnostic. Capturing them directly without more informat
 var completed_bit_flip: bool
 var completed_phase_flip: bool
 var completed_rotation: bool
+var _gate_request_finished := false
+var _gate_request_success := false
 
 func processor():
 	add_text("""Theo (Engineer): "Kaela, timing is critical here. Feed the qubits gently into the processor. Each quantum gate you apply must be precise — one wrong flip could collapse the entire superposition. The echoes are fragile but hold the key to forgotten memories."
@@ -205,13 +247,13 @@ Theo: "... Don't." """)
   
 	add_option("Apply a bit-flip gate first.", func(): 
 		completed_bit_flip = true
-		processor_bit_flip())
+		return await processor_bit_flip())
 	add_option("Start with a phase-flip gate.", func():
 		completed_phase_flip = true
-		processor_phase_flip()) 
+		return await processor_phase_flip()) 
 	add_option("Rotate the qubit superposition to reveal hidden states", func():
 		completed_rotation = true
-		processor_rotate())
+		return await processor_rotate())
 	queue_added_options()
 	
 func processor_bit_flip():
@@ -242,116 +284,59 @@ func quantum_gate_request(gate_type: String):
 	print("[Quantum] =========================")
 	print("[Quantum] Starting quantum gate request: ", gate_type)
 	print("[Quantum] =========================")
-	
-	var http_request = HTTPRequest.new()
-	add_child(http_request)
-	
-	# Store gate_type in the HTTPRequest node for later retrieval
-	http_request.set_meta("gate_type", gate_type)
-	
-	# Prepare request data
-	var request_data = {
-		"gate_type": gate_type,
-		"rotation_angle": 0.5  # Default rotation angle
-	}
-	
-	var json_string = JSON.stringify(request_data)
-	print("[Quantum] Request JSON: ", json_string)
-	
-	var headers = ["Content-Type: application/json"]
-	
-	# Configure request - FIXED: Don't bind parameters, use metadata instead
-	http_request.request_completed.connect(_on_quantum_gate_response)
-	
-	var server_url = "https://DavidJGrimsley.com/api/quantum/quantum_gate"
-	print("[Quantum] Sending request to: ", server_url)
-	
-	var error = http_request.request(server_url, headers, HTTPClient.METHOD_POST, json_string)
-	
-	if error != OK:
-		print("[Quantum] ❌ Failed to make quantum gate request, error code: ", error)
-		# Fallback to classical random
-		var success = randi() % 2 == 0
-		print("[Quantum] 🎲 Classical fallback result: ", "SUCCESS" if success else "FAILURE")
-		if success:
-			processor_gate_success(gate_type)
-		else:
-			processor_gate_failure(gate_type)
-	else:
-		print("[Quantum] ✅ HTTP request sent successfully")
 
-# FIXED: Proper signal handler signature
-func _on_quantum_gate_response(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
-	print("[Quantum] =========================")
-	print("[Quantum] Received HTTP response!")
-	print("[Quantum] Result code: ", result)
-	print("[Quantum] Response code: ", response_code)
-	print("[Quantum] Headers: ", headers)
-	print("[Quantum] Body length: ", body.size())
-	print("[Quantum] =========================")
-	
-	# Find the HTTPRequest node that sent the signal
-	var http_request = null
-	var gate_type = ""
-	
-	for child in get_children():
-		if child is HTTPRequest and child.has_meta("gate_type"):
-			http_request = child
-			gate_type = child.get_meta("gate_type")
-			print("[Quantum] 📡 Found HTTPRequest with gate_type: ", gate_type)
-			break
-	
-	# Clean up the HTTPRequest node
-	if http_request:
-		http_request.queue_free()
-		print("[Quantum] 🧹 Cleaned up HTTPRequest node")
+	var rotation_angle_rad: Variant = null
+
+	if gate_type == "rotation":
+		rotation_angle_rad = 0.5
+
+	_gate_request_finished = false
+	_gate_request_success = false
+
+	QuantumApiBridgeScript.run_gate(
+		self,
+		gate_type,
+		Callable(self, "_on_quantum_gate_bridge_response").bind(gate_type),
+		rotation_angle_rad
+	)
+
+	while !_gate_request_finished:
+		await get_tree().process_frame
+
+	if _gate_request_success:
+		print("[Quantum] Quantum gate SUCCESS for: ", gate_type)
+		processor_gate_success(gate_type)
 	else:
-		print("[Quantum] ⚠️ Could not find HTTPRequest node with metadata!")
-		return
-	
-	if response_code == 200:
-		var response_text = body.get_string_from_utf8()
-		print("[Quantum] 📄 Response body: ", response_text)
-		
-		var json = JSON.new()
-		var parse_result = json.parse(response_text)
-		
-		if parse_result == OK:
-			var response_data = json.data
-			print("[Quantum] 📊 Parsed response data: ", response_data)
-			
-			# Check if the gate operation was successful
-			if response_data.has("success"):
-				var success = response_data["success"]
-				print("[Quantum] 🎯 Gate operation success: ", success)
-				
-				if success:
-					print("[Quantum] ✅ Quantum gate SUCCESS for: ", gate_type)
-					processor_gate_success(gate_type)
-				else:
-					print("[Quantum] ❌ Quantum gate FAILURE for: ", gate_type)
-					processor_gate_failure(gate_type)
-			else:
-				print("[Quantum] ⚠️ No 'success' field in response, treating as failure")
-				processor_gate_failure(gate_type)
-		else:
-			print("[Quantum] ❌ Failed to parse JSON response, error: ", parse_result)
-			# Fallback to classical random
-			var success = randi() % 2 == 0
-			print("[Quantum] 🎲 JSON parse fallback: ", "SUCCESS" if success else "FAILURE")
-			if success:
-				processor_gate_success(gate_type)
-			else:
-				processor_gate_failure(gate_type)
+		print("[Quantum] Quantum gate FAILURE for: ", gate_type)
+		processor_gate_failure(gate_type)
+
+func _on_quantum_gate_bridge_response(request_success: bool, payload: Dictionary, _gate_type: String) -> void:
+	if request_success:
+		_gate_request_success = bool(payload.get("success", false))
+		print(
+			"[Quantum] Gate call SUCCEEDED | gate=", _gate_type,
+			" gate_success=", _gate_request_success,
+			" measurement=", str(payload.get("measurement", "n/a")),
+			" superposition_strength=", str(payload.get("superposition_strength", "n/a")),
+			" payload=", payload
+		)
+	elif int(payload.get("status_code", 0)) == 400:
+		print("[Quantum] Validation error from Quantum API: ", payload.get("message", "invalid gate payload"))
+		_gate_request_success = false
 	else:
-		print("[Quantum] ❌ Server error response code: ", response_code)
-		# Fallback to classical random
-		var success = randi() % 2 == 0
-		print("[Quantum] 🎲 Server error fallback: ", "SUCCESS" if success else "FAILURE") 
-		if success:
-			processor_gate_success(gate_type)
-		else:
-			processor_gate_failure(gate_type)
+		_gate_request_success = false
+		print(
+			"[Quantum] Gate request FAILED | gate=", _gate_type,
+			" status=", int(payload.get("status_code", 0)),
+			" error=", str(payload.get("error", "unknown")),
+			" result=", str(payload.get("result_text", payload.get("result", "n/a"))),
+			" message=", str(payload.get("message", "no message")),
+			" url=", str(payload.get("request_url", "n/a")),
+			" api_key_present=", bool(payload.get("api_key_present", false)),
+			" backend_proxy_mode=", bool(payload.get("backend_proxy_mode", true))
+		)
+
+	_gate_request_finished = true
 
 func processor_gate_success(gate_type: String):
 	print("[Quantum] Processing SUCCESS for gate: ", gate_type)
@@ -390,11 +375,11 @@ Theo: It's holding stable.""")
 		if completed_phase_flip == false:
 			add_option("Phase-flip gate.", func():
 				completed_phase_flip = true
-				processor_phase_flip())
+				return await processor_phase_flip())
 		if completed_rotation == false:
 			add_option("Rotate the qubit superposition to reveal hidden states.", func():
 				completed_rotation = true
-				processor_rotate())
+				return await processor_rotate())
 		queue_added_options()
 	
 func processor_bit_flip_fail():
@@ -432,11 +417,11 @@ Theo: It's holding stable. Choose the next gate carefully to avoid collapse.""")
 		if completed_bit_flip == false:
 			add_option("Apply a bit-flip gate.", func():
 				completed_bit_flip = true
-				processor_bit_flip())
+				return await processor_bit_flip())
 		if completed_rotation == false:
 			add_option("Rotate the qubit superposition to reveal hidden states.", func():
 				completed_rotation = true
-				processor_rotate())
+				return await processor_rotate())
 		queue_added_options()
 
 func processor_phase_flip_fail():
@@ -487,11 +472,11 @@ The memory from the flare fades.""")
 		if completed_phase_flip == false:
 			add_option("Phase-flip gate.", func():
 				completed_phase_flip = true
-				processor_phase_flip())
+				return await processor_phase_flip())
 		if completed_bit_flip == false:
 			add_option("Apply a bit-flip gate.", func():
 				completed_bit_flip = true
-				processor_bit_flip())
+				return await processor_bit_flip())
 		queue_added_options()
 
 func explore_faint_echoes():
@@ -518,11 +503,11 @@ I must decide which world the echoes will sing… and which will fade into silen
 		if completed_phase_flip == false:
 			add_option("Phase-flip gate.", func():
 				completed_phase_flip = true
-				processor_phase_flip())
+				return await processor_phase_flip())
 		if completed_bit_flip == false:
 			add_option("Apply a bit-flip gate.", func():
 				completed_bit_flip = true
-				processor_bit_flip())
+				return await processor_bit_flip())
 		queue_added_options()
 
 func processor_complete():

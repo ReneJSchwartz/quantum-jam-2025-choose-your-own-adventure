@@ -24,7 +24,7 @@ Reactive VBox UI that dynamically adds and removes objective labels based on man
 ### [branching_quest_data.gd](../scripts/quest_system_branching_quest_data.gd)
 Extended quest logic for handling multiple outcomes and player-driven narrative paths.
 
-### [ quest_giver_dialogue_hook.gd](../scripts/quest_system_quest_giver_dialogue_hook.gd)
+### [quest_giver_dialogue_hook.gd](../scripts/quest_system_quest_giver_dialogue_hook.gd)
 Hook for integrating NPCs with the quest system, allowing for conditional dialogue branches.
 
 ### [quest_persistence_loader.gd](../scripts/quest_system_quest_persistence_loader.gd)
@@ -59,7 +59,8 @@ Strategy for supporting multi-language quest text using `tr()` keys instead of h
 class_name Quest
 extends Resource
 
-signal progress_updated(objective_id: String, progress: int)signal completed
+signal progress_updated(objective_id: String, progress: int)
+signal completed
 
 @export var quest_id: String
 @export var quest_name: String

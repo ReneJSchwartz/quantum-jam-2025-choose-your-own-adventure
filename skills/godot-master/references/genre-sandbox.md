@@ -63,7 +63,13 @@ enum Type { SOLID, LIQUID, GAS, POWDER }
 # SOLUTION: Use secondary sort (type enum priority: SOLID > LIQUID > POWDER > GAS)
 func should_swap_with(other: ElementData) -> bool:
     if density == other.density:
-        return type > other.type  # Enum comparison: SOLID(0) > GAS(3)
+        var type_priority := {
+            Type.SOLID: 3,
+            Type.LIQUID: 2,
+            Type.POWDER: 1,
+            Type.GAS: 0,
+        }
+        return int(type_priority.get(type, 0)) > int(type_priority.get(other.type, 0))
     return density > other.density
 ```
 

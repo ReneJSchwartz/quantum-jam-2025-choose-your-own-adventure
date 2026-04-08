@@ -17,7 +17,17 @@ enum EchoType {
 
 func _ready():
     QuantumApiBridgeScript.get_or_create(self)
+    _apply_runtime_api_auth_from_environment()
     test_server_connection()
+
+func _apply_runtime_api_auth_from_environment() -> void:
+    var runtime_api_key := OS.get_environment("QUANTUM_API_KEY").strip_edges()
+    if runtime_api_key.is_empty():
+        return
+
+    set_backend_proxy_mode(false)
+    set_direct_api_key(runtime_api_key)
+    print("Loaded Quantum API key from QUANTUM_API_KEY for this run")
 
 func set_server_url(url: String):
     server_url = url.strip_edges()

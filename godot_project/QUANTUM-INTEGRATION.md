@@ -1,105 +1,40 @@
-# 🌀 Quantum Echo Integration for Godot
+# Quantum Integration for Godot
 
-This integration connects your Godot choose-your-own-adventure game to the Quantum Echo Server for real-time text transformation using quantum effects.
+This game now targets the public Quantum Gateway flow by default.
 
-## Addon Source and Update Policy
+## Runtime Model
 
-- Canonical addon source: Godot Asset Library asset `5008` (Quantum API Client 0.1.0).
-- Current pinned package: `https://github.com/DavidJGrimsley/quantum-api/archive/71ffacd1fb5f156805f25d3f72270f1d48140f14.zip`.
-- Vendored install path (tracked in git): `addons/quantum_api_client/`.
-- Update procedure: replace the entire vendored folder with the pinned package contents from `addons/quantum_api_client/` in the zip.
-- Secret policy: keep `quantum_api/direct_api_key` empty in tracked `project.godot`; set keys only in local runtime/editor settings for development.
+- The Godot client talks to `https://davidjgrimsley.com/public-facing/api/quantum-gateway/v1`.
+- Protected runtime calls do not ship a raw Quantum API key.
+- The client uses a publishable Gateway client key to mint a short-lived runtime token.
+- Gateway forwards the request to Quantum API through the internal Gateway trust path.
+- Direct Quantum API key mode stays available only for local/dev fallback.
 
-## 🔧 **What I've Added**
+## Tracked Settings
 
-### **New Files Created:**
-1. **`quantum_echo_service.gd`** - Service to communicate with your quantum server
-2. **`quantum_test.gd`** - Test script to verify the integration works
-3. **Modified existing dialogue system** - Now processes all dialogue through quantum effects
+The tracked `project.godot` file should keep these empty:
 
-### **Modified Files:**
-1. **`dialogue_ui_manager.gd`** - Now processes text through quantum server before display
-2. **`dialogue.gd`** - Fixed SignalBus references for proper scene structure
-3. **`main_menu_screen.gd`** - Fixed SignalBus references
-4. **`game_tree.tscn`** - Added SignalBus to the scene tree
+- `quantum_api/publishable_gateway_client_key`
+- `quantum_api/direct_api_key`
 
-## 🎮 **How It Works**
+For local testing, set one of these at runtime:
 
-1. **Player starts dialogue** → Text is sent to your quantum echo server
-2. **Server processes text** → Using quantum circuits (scramble, ghost, etc.)
-3. **Transformed text returns** → Displayed with quantum effects to the player
-4. **Fallback system** → If server is down, shows original text
+- `QUANTUM_GATEWAY_CLIENT_KEY`
+- `QUANTUM_API_KEY`
 
-## 🚀 **Testing the Integration**
+If both are empty, health checks still work and protected runtime routes fail with clear diagnostics.
 
-### **Option 1: Quick Test Script**
-1. Add the `quantum_test.gd` script to any scene
-2. Run the scene to see console output testing the quantum service
+## Vendored Addon Policy
 
-### **Option 2: Full Game Test**
-1. Run your main game scene (`game_tree.tscn`)
-2. Click "New Game" to start the dialogue
-3. Watch dialogue text get quantum-processed in real-time!
+- Vendored install path: `addons/quantum_api_client/`
+- Canonical source: `DavidJGrimsley/quantum-api`
+- Update procedure: replace the vendored addon with the current `addons/quantum_api_client/` contents from the shared source repo
 
-## ⚡ **Current Configuration**
+## Jeff Flow
 
-- **Echo Type**: SCRAMBLE (you can easily change this in `dialogue_ui_manager.gd`)
-- **Server URL**: `http://108.175.12.95:8000`
-- **Fallback**: Shows original text if server is unavailable
-
-## 🎨 **Available Echo Types**
-
-You can change the echo type in `dialogue_ui_manager.gd` line 185:
-
-```gdscript
-quantum_echo_service.EchoType.SCRAMBLE    # Scrambles letters
-quantum_echo_service.EchoType.CASE_FLIP   # Flips case randomly  
-quantum_echo_service.EchoType.GHOST       # Ghostly appearance
-quantum_echo_service.EchoType.QUANTUM_CAPS # Quantum capitalization
-quantum_echo_service.EchoType.ORIGINAL    # No transformation
-```
-
-## 🔍 **How to Change Echo Types**
-
-To use different echo effects for different characters or situations:
-
-```gdscript
-# In dialogue_ui_manager.gd, modify the write_text function:
-var echo_type = quantum_echo_service.EchoType.SCRAMBLE
-
-# For different speakers, you could do:
-if talker == "Mysterious Voice":
-    echo_type = quantum_echo_service.EchoType.GHOST
-elif talker == "AI Assistant":  
-    echo_type = quantum_echo_service.EchoType.QUANTUM_CAPS
-else:
-    echo_type = quantum_echo_service.EchoType.SCRAMBLE
-```
-
-## 🐛 **Troubleshooting**
-
-### **Server Not Responding**
-- Check if your quantum server is still running
-- Look in Godot console for "❌ Quantum echo server error" messages
-- Game will automatically fall back to original text
-
-### **No Quantum Effects Visible**
-- Check Godot console for "✨ Quantum echo received:" messages
-- Verify your server URL is correct in `quantum_echo_service.gd`
-- Test the quantum_test.gd script first
-
-### **Console Messages to Look For**
-```
-🌀 Sending quantum echo request: scramble for text: Hello quantum world!...
-✅ Quantum server is healthy!
-✨ Quantum echo received: Hlleo qautnum wrodl!...
-```
-
-## 🎯 **Next Steps**
-
-1. **Start your quantum server** (check if it's still running)
-2. **Test in Godot** - Run the game and start a new game to see quantum dialogue
-3. **Customize echo types** - Different effects for different characters/situations
-4. **Add more effects** - You can extend the server with more quantum transformations
-
-Your game now has **REAL QUANTUM-POWERED DIALOGUE**! 🚀✨
+1. Jeff signs in with an Identerest account.
+2. Jeff creates a Quantum API key and IBM profile on the Quantum API page.
+3. Jeff creates a Gateway project on the Gateway page.
+4. Jeff creates a publishable Gateway client key for this game.
+5. Jeff sets `QUANTUM_GATEWAY_CLIENT_KEY` locally while testing.
+6. The game mints runtime tokens automatically before protected runtime calls.

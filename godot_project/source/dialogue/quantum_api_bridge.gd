@@ -6,16 +6,18 @@ const QUANTUM_API_CLIENT_PATH := "res://addons/quantum_api_client/quantum_api_cl
 const SETTINGS_BASE_URL := "quantum_api/base_url"
 const SETTINGS_BACKEND_PROXY_MODE := "quantum_api/backend_proxy_mode"
 const SETTINGS_DIRECT_API_KEY := "quantum_api/direct_api_key"
+const SETTINGS_PUBLISHABLE_GATEWAY_CLIENT_KEY := "quantum_api/publishable_gateway_client_key"
 const SETTINGS_GATE_EXECUTION_MODE := "quantum_api/gate_execution_mode"
 const SETTINGS_DEFAULT_IBM_BACKEND := "quantum_api/default_ibm_backend"
 const SETTINGS_IBM_SHOTS := "quantum_api/ibm_shots"
 const SETTINGS_IBM_JOB_POLL_INTERVAL_SEC := "quantum_api/ibm_job_poll_interval_sec"
 const SETTINGS_IBM_JOB_TIMEOUT_SEC := "quantum_api/ibm_job_timeout_sec"
 const ENV_DIRECT_API_KEY := "QUANTUM_API_KEY"
+const ENV_PUBLISHABLE_GATEWAY_CLIENT_KEY := "QUANTUM_GATEWAY_CLIENT_KEY"
 
-const DEFAULT_BASE_URL := "https://davidjgrimsley.com/public-facing/api/quantum/v1"
+const DEFAULT_BASE_URL := "https://davidjgrimsley.com/public-facing/api/quantum-gateway/v1"
 const PLACEHOLDER_BASE_URL_FRAGMENT := "your-backend.example.com"
-const DEFAULT_BACKEND_PROXY_MODE := true
+const DEFAULT_BACKEND_PROXY_MODE := false
 const DEFAULT_DIRECT_API_KEY := ""
 const DEFAULT_GATE_EXECUTION_MODE := "simulator"
 const DEFAULT_IBM_SHOTS := 1024
@@ -775,9 +777,12 @@ func _configure_client_from_settings() -> void:
 
 	gate_execution_mode = _resolve_gate_execution_mode()
 	var direct_api_key := _resolve_direct_api_key()
+	var publishable_gateway_client_key := _resolve_publishable_gateway_client_key()
 
 	if client.has_method("apply_project_settings"):
 		client.call("apply_project_settings")
+		if !publishable_gateway_client_key.is_empty() and client.has_method("set_publishable_gateway_client_key"):
+			client.call("set_publishable_gateway_client_key", publishable_gateway_client_key)
 		if !direct_api_key.is_empty() and client.has_method("set_api_key"):
 			client.call("set_api_key", direct_api_key)
 	else:
@@ -790,6 +795,8 @@ func _configure_client_from_settings() -> void:
 
 		client.call("set_base_url", base_url)
 		client.call("set_backend_proxy_mode", backend_proxy_mode)
+		if !publishable_gateway_client_key.is_empty() and client.has_method("set_publishable_gateway_client_key"):
+			client.call("set_publishable_gateway_client_key", publishable_gateway_client_key)
 		client.call("set_api_key", direct_api_key)
 
 	var snapshot: Dictionary = {}
@@ -800,7 +807,8 @@ func _configure_client_from_settings() -> void:
 		"[QuantumApiBridge] Configured client | base_url=", str(snapshot.get("base_url", "n/a")),
 		" gate_execution_mode=", gate_execution_mode,
 		" backend_proxy_mode=", bool(snapshot.get("backend_proxy_mode", DEFAULT_BACKEND_PROXY_MODE)),
-		" api_key_present=", bool(snapshot.get("api_key_present", false))
+		" api_key_present=", bool(snapshot.get("api_key_present", false)),
+		" publishable_gateway_client_key_present=", bool(snapshot.get("publishable_gateway_client_key_present", false))
 	)
 
 func _resolve_direct_api_key() -> String:
@@ -813,3 +821,23 @@ func _resolve_direct_api_key() -> String:
 		print("[QuantumApiBridge] Loaded direct API key from ", ENV_DIRECT_API_KEY, " environment variable")
 
 	return env_api_key
+
+func _resolve_publishable_gateway_client_key() -> String:
+	var configured_client_key := str(
+		ProjectSettings.get_setting(
+			SETTINGS_PUBLISHABLE_GATEWAY_CLIENT_KEY,
+			""
+		)
+	).strip_edges()
+	if !configured_client_key.is_empty():
+		return configured_client_key
+
+	var env_client_key := OS.get_environment(ENV_PUBLISHABLE_GATEWAY_CLIENT_KEY).strip_edges()
+	if !env_client_key.is_empty():
+		print(
+			"[QuantumApiBridge] Loaded publishable Gateway client key from ",
+			ENV_PUBLISHABLE_GATEWAY_CLIENT_KEY,
+			" environment variable"
+		)
+
+	return env_client_key

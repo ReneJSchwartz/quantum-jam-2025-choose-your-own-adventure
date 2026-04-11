@@ -21,6 +21,13 @@ func _ready():
     test_server_connection()
 
 func _apply_runtime_api_auth_from_environment() -> void:
+    var publishable_gateway_client_key := OS.get_environment("QUANTUM_GATEWAY_CLIENT_KEY").strip_edges()
+    if !publishable_gateway_client_key.is_empty():
+        set_backend_proxy_mode(false)
+        set_publishable_gateway_client_key(publishable_gateway_client_key)
+        print("Loaded publishable Gateway client key from QUANTUM_GATEWAY_CLIENT_KEY for this run")
+        return
+
     var runtime_api_key := OS.get_environment("QUANTUM_API_KEY").strip_edges()
     if runtime_api_key.is_empty():
         return
@@ -45,6 +52,15 @@ func set_backend_proxy_mode(enabled: bool) -> void:
 
 func set_direct_api_key(key: String) -> void:
     ProjectSettings.set_setting(QuantumApiBridgeScript.SETTINGS_DIRECT_API_KEY, key.strip_edges())
+    var bridge = QuantumApiBridgeScript.get_or_create(self)
+    if bridge != null:
+        bridge.refresh_config()
+
+func set_publishable_gateway_client_key(key: String) -> void:
+    ProjectSettings.set_setting(
+        QuantumApiBridgeScript.SETTINGS_PUBLISHABLE_GATEWAY_CLIENT_KEY,
+        key.strip_edges()
+    )
     var bridge = QuantumApiBridgeScript.get_or_create(self)
     if bridge != null:
         bridge.refresh_config()

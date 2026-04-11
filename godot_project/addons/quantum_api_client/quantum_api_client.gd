@@ -1,18 +1,21 @@
 class_name QuantumApiClient
 extends Node
 
-const DEFAULT_BASE_URL := "https://davidjgrimsley.com/public-facing/api/quantum/v1"
+const DEFAULT_BASE_URL := "https://davidjgrimsley.com/public-facing/api/quantum-gateway/v1"
 const DIRECT_API_KEY := ""
 const DEFAULT_IBM_PROFILE := ""
 const SETTINGS_BASE_URL := "quantum_api/base_url"
 const SETTINGS_BACKEND_PROXY_MODE := "quantum_api/backend_proxy_mode"
 const SETTINGS_DIRECT_API_KEY := "quantum_api/direct_api_key"
 const SETTINGS_DEFAULT_IBM_PROFILE := "quantum_api/default_ibm_profile"
+const SETTINGS_GATEWAY_PROJECT_ID := "quantum_api/gateway_project_id"
 const DEFAULT_BACKEND_PROXY_MODE := true
+const DEFAULT_GATEWAY_PROJECT_ID := "echos-of-light"
 
 var base_url: String = DEFAULT_BASE_URL
 var api_key: String = DIRECT_API_KEY
 var default_ibm_profile: String = DEFAULT_IBM_PROFILE
+var gateway_project_id: String = DEFAULT_GATEWAY_PROJECT_ID
 var backend_proxy_mode: bool = DIRECT_API_KEY.is_empty()
 
 func _init(
@@ -20,10 +23,12 @@ func _init(
 	custom_api_key: String = DIRECT_API_KEY,
 	use_backend_proxy: bool = DIRECT_API_KEY.is_empty(),
 	custom_default_ibm_profile: String = DEFAULT_IBM_PROFILE,
+	custom_gateway_project_id: String = DEFAULT_GATEWAY_PROJECT_ID,
 ) -> void:
 	base_url = _normalize_base_url(custom_base_url)
 	api_key = custom_api_key.strip_edges()
 	default_ibm_profile = custom_default_ibm_profile.strip_edges()
+	gateway_project_id = custom_gateway_project_id.strip_edges()
 	backend_proxy_mode = use_backend_proxy
 
 func set_base_url(url: String) -> void:
@@ -34,6 +39,9 @@ func set_api_key(key: String) -> void:
 
 func set_default_ibm_profile(profile_name: String) -> void:
 	default_ibm_profile = profile_name.strip_edges()
+
+func set_gateway_project_id(project_id: String) -> void:
+	gateway_project_id = project_id.strip_edges()
 
 func set_backend_proxy_mode(enabled: bool) -> void:
 	backend_proxy_mode = enabled
@@ -52,6 +60,7 @@ func apply_project_settings() -> void:
 	)
 	set_api_key(str(ProjectSettings.get_setting(SETTINGS_DIRECT_API_KEY, DIRECT_API_KEY)).strip_edges())
 	set_default_ibm_profile(str(ProjectSettings.get_setting(SETTINGS_DEFAULT_IBM_PROFILE, DEFAULT_IBM_PROFILE)).strip_edges())
+	set_gateway_project_id(str(ProjectSettings.get_setting(SETTINGS_GATEWAY_PROJECT_ID, DEFAULT_GATEWAY_PROJECT_ID)).strip_edges())
 
 func get_default_base_url() -> String:
 	return DEFAULT_BASE_URL
@@ -62,6 +71,7 @@ func get_config_snapshot() -> Dictionary:
 		"backend_proxy_mode": backend_proxy_mode,
 		"api_key_present": !api_key.is_empty(),
 		"default_ibm_profile": default_ibm_profile,
+		"gateway_project_id": gateway_project_id,
 	}
 
 func health_check(callback: Callable) -> void:
@@ -225,6 +235,8 @@ func _build_headers(requires_api_key: bool, include_json_content_type: bool) -> 
 	var headers: PackedStringArray = []
 	if include_json_content_type:
 		headers.append("Content-Type: application/json")
+	if requires_api_key and !gateway_project_id.is_empty():
+		headers.append("X-Project-Id: " + gateway_project_id)
 	if requires_api_key and !api_key.is_empty():
 		headers.append("X-API-Key: " + api_key)
 	return headers

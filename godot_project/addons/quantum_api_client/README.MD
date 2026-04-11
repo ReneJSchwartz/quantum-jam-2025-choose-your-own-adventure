@@ -29,9 +29,10 @@ Add this to your `project.godot`:
 
 ```ini
 [quantum_api]
-base_url="https://davidjgrimsley.com/public-facing/api/quantum"
+base_url="https://davidjgrimsley.com/public-facing/api/quantum-gateway"
 backend_proxy_mode=true
 direct_api_key=""
+gateway_project_id="echos-of-light"
 default_ibm_profile=""
 ```
 
@@ -40,6 +41,7 @@ Field usage:
 - `base_url`: mounted Quantum API root (`/v1` is auto-normalized by the addon)
 - `backend_proxy_mode`: when `true`, runtime endpoints can go through your backend proxy
 - `direct_api_key`: API key used for protected runtime endpoints in direct mode
+- `gateway_project_id`: sent as `X-Project-Id` on protected runtime calls
 - `default_ibm_profile`: optional fallback profile name for IBM routes
 
 ## Layout
@@ -62,8 +64,8 @@ Use these values for the current AssetLib submission form:
 
 The client normalizes either of these:
 
-- `https://your-backend.example.com/public-facing/api/quantum`
-- `https://your-backend.example.com/public-facing/api/quantum/v1`
+- `https://your-backend.example.com/public-facing/api/quantum-gateway`
+- `https://your-backend.example.com/public-facing/api/quantum-gateway/v1`
 
 ## Auth Modes
 

@@ -40,9 +40,10 @@ folder_colors={
 
 [quantum_api]
 
-base_url="https://davidjgrimsley.com/public-facing/api/quantum/v1"
-backend_proxy_mode=false
+base_url="https://davidjgrimsley.com/public-facing/api/quantum-gateway"
+backend_proxy_mode=true
 direct_api_key=""
+gateway_project_id="echos-of-light"
 gate_execution_mode="simulator"
 default_ibm_profile="Echo Text Adventure Godot Game"
 default_ibm_backend=""

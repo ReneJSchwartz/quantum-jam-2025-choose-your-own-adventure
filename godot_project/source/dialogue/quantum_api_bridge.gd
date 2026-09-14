@@ -13,7 +13,7 @@ const SETTINGS_IBM_JOB_POLL_INTERVAL_SEC := "quantum_api/ibm_job_poll_interval_s
 const SETTINGS_IBM_JOB_TIMEOUT_SEC := "quantum_api/ibm_job_timeout_sec"
 const ENV_DIRECT_API_KEY := "QUANTUM_API_KEY"
 
-const DEFAULT_BASE_URL := "https://davidjgrimsley.com/public-facing/api/quantum/v1"
+const DEFAULT_BASE_URL := "https://davidjgrimsley.com/public-facing/games/echoes-of-light/quantum/v1"
 const PLACEHOLDER_BASE_URL_FRAGMENT := "your-backend.example.com"
 const DEFAULT_BACKEND_PROXY_MODE := true
 const DEFAULT_DIRECT_API_KEY := ""
@@ -28,6 +28,8 @@ static var pending_bridge: QuantumApiBridge
 var client: Node
 var cached_ibm_backend_name: String = ""
 var gate_execution_mode: String = DEFAULT_GATE_EXECUTION_MODE
+var bridge_ready := false
+var queued_operations: Array[Callable] = []
 
 static func get_or_create(context: Node) -> QuantumApiBridge:
 	if context == null or context.get_tree() == null:
@@ -53,24 +55,43 @@ static func health_check(context: Node, callback: Callable) -> void:
 	if bridge == null:
 		callback.call(false, {"error": "bridge_unavailable", "message": "Quantum API bridge is unavailable"})
 		return
-	bridge._health_check(callback)
+	bridge._queue_or_dispatch(func() -> void:
+		bridge._health_check(callback)
+	)
 
 static func transform_text(context: Node, text: String, callback: Callable, fallback_text: String = "") -> void:
 	var bridge := get_or_create(context)
 	if bridge == null:
 		callback.call(false, {"original": text, "transformed": fallback_text if !fallback_text.is_empty() else text})
 		return
-	bridge._transform_text(text, callback, fallback_text)
+	bridge._queue_or_dispatch(func() -> void:
+		bridge._transform_text(text, callback, fallback_text)
+	)
 
 static func run_gate(context: Node, gate_type: String, callback: Callable, rotation_angle_rad: Variant = null) -> void:
 	var bridge := get_or_create(context)
 	if bridge == null:
 		callback.call(false, {"error": "bridge_unavailable", "message": "Quantum API bridge is unavailable"})
 		return
-	bridge._run_gate(gate_type, callback, rotation_angle_rad)
+	bridge._queue_or_dispatch(func() -> void:
+		bridge._run_gate(gate_type, callback, rotation_angle_rad)
+	)
 
 func _ready() -> void:
 	_ensure_client()
+	bridge_ready = true
+	if pending_bridge == self:
+		pending_bridge = null
+	var operations := queued_operations.duplicate()
+	queued_operations.clear()
+	for operation in operations:
+		operation.call()
+
+func _queue_or_dispatch(operation: Callable) -> void:
+	if bridge_ready:
+		operation.call()
+		return
+	queued_operations.append(operation)
 
 func refresh_config() -> void:
 	_ensure_client()

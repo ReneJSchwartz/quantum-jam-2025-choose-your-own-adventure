@@ -22,6 +22,9 @@ Validated on 2026-09-14 from the clean game worktree.
   requests, proxy/direct headers, missing key, request-start failure, 401/429/
   5xx, empty and malformed JSON, timeout, unreachable host, text fallback,
   all three gates, and IBM discovery/transpile/job methods.
+- GitHub Actions run 34879977930 passed the archived-addon harness on Godot
+  4.4.1, 4.5.2, 4.6.3, and 4.7.2. Its complete Quantum API lint, test, package,
+  and Docker build job also passed.
 - Godot 4.6.3 stable: the real game loaded headlessly and its committed
   `tests/quantum_regression.tscn` passed health, text, simulator gate, and
   API-down fallback checks against a local fixture. Its process exit status was
@@ -40,15 +43,14 @@ Validated on 2026-09-14 from the clean game worktree.
 
 ## Follow-up gates before release completion
 
-- Godot package CI is configured for 4.4.1, 4.5.2, 4.6.3, and 4.7.2. The local
-  4.6.3 run is complete; the other package matrix jobs require CI. The official
-  4.7.2 Windows release asset was unavailable at validation time (HTTP 404), so
-  no 4.7.2 result is claimed.
-- The full pre-existing Quantum API test suite did not complete in this local
-  environment: it first required the omitted optional `networkx` dependency,
-  then stopped on an existing integration expectation because unavailable
-  Redis/Supabase services returned 503 where a test expected 400. This must be
-  resolved or reproduced in CI before merging.
+- The local game run remains 4.6.3. The archived-addon CI matrix passed 4.4.1,
+  4.5.2, 4.6.3, and 4.7.2; a separate local 4.7.2 game-editor run was not
+  performed. A direct Windows 4.7.2 download URL returned 404 during local
+  setup, but this does not affect the successful Linux CI matrix.
+- A reduced local Quantum API test invocation first lacked optional `networkx`
+  and then encountered unavailable Redis/Supabase services. The repository CI
+  installs all declared extras and its complete Python test stages passed, so
+  that local environment limitation is not a merge blocker.
 - The production game gateway URL returned HTTP 404 at validation time. Deploy
   the systemd and Plesk configuration with a newly created dedicated Echoes of
   Light gateway key, then repeat the production HTTPS smoke test.

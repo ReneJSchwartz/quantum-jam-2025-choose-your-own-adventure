@@ -1,14 +1,30 @@
 # Godot hardening validation record
 
-Validated on 2026-09-14 from the clean game worktree.
+Initially validated on 2026-09-14 from the clean game worktree, with the
+direct-mode update recorded below on 2026-09-15.
+
+## Current game shipping choice (2026-09-15)
+
+The earlier game-only gateway approach is retired. Echoes of Light again calls
+the existing hosted Quantum API at
+`https://davidjgrimsley.com/public-facing/api/quantum/v1` directly with its
+bundled game key. There is no additional game server, gateway, VPS process, or
+reverse-proxy deployment to operate.
+
+This is the requested jam-game trade-off: the key is present in source and can
+be extracted from the build. The game does not block IBM backend discovery,
+transpilation, circuit-job submission, status, or result calls provided by the
+addon. The gateway-specific files and deployment instructions were removed
+from the game branch.
 
 ## Revisions and layout
 
 - Quantum API addon hardening commit: `3021222b3019b134dcb1490713d8f94b6d45dcd9`
   on `feature/phase-6-5-godot-hardening`; intended immutable release tag:
   `godot-v0.1.2` after merge.
-- Game hardening commit: `ce7b10cbda0900f9e316bfcc94c36db3b10925b9` on
-  `feature/godot-addon-0.1.2`.
+- Game baseline commit: `ce7b10cbda0900f9e316bfcc94c36db3b10925b9` on
+  `feature/godot-addon-0.1.2`; the following branch commit restores the direct
+  jam-build arrangement and removes the gateway files.
 - Vendored runtime install path:
   `godot_project/addons/quantum_api_client/quantum_api_client.gd`.
 - The game copy compares byte-for-byte with the addon source apart from line
@@ -27,18 +43,16 @@ Validated on 2026-09-14 from the clean game worktree.
   and Docker build job also passed.
 - Godot 4.6.3 stable: the real game loaded headlessly and its committed
   `tests/quantum_regression.tscn` passed health, text, simulator gate, and
-  API-down fallback checks against a local fixture. Its process exit status was
-  zero.
+  API-down fallback checks against a local fixture while running in direct-key
+  mode. Its process exit status was zero.
 - Godot 4.6.3 stable: Web export succeeded. The rebuilt public and Expo asset
-  mirrors have identical SHA-256 values and the package contains the game-only
-  HTTPS gateway URL.
-- Game gateway: `python -m compileall -q quantum-game-gateway` and
-  `python -m pytest quantum-game-gateway/tests -q` passed (3 tests).
+  mirrors had identical SHA-256 values under the previous gateway configuration.
 - Expo: lint completed with zero errors and seven pre-existing unused-variable
   warnings. Web export completed, a local static server served the rebuilt
   Godot page, and the wrapper iframe used `/godot_web/index.html`.
-- Security scan: no key-shaped `qapi_...` values were found in game source,
-  rebuilt public assets, Expo asset mirror, or the local Expo export.
+- Rebuilt Web package: contains the direct hosted-API address, contains no
+  reference to the retired game gateway, and contains the expected bundled game
+  key. The key was not printed during validation.
 - Quantum API: `uv run ruff check .` passed.
 
 ## Follow-up gates before release completion
@@ -51,12 +65,15 @@ Validated on 2026-09-14 from the clean game worktree.
   and then encountered unavailable Redis/Supabase services. The repository CI
   installs all declared extras and its complete Python test stages passed, so
   that local environment limitation is not a merge blocker.
-- The production game gateway URL returned HTTP 404 at validation time. Deploy
-  the systemd and Plesk configuration with a newly created dedicated Echoes of
-  Light gateway key, then repeat the production HTTPS smoke test.
-- Revoke historical/local exposed credentials. With a fresh developer-only
-  direct key supplied through the process environment, run and record the live
-  IBM backend, transpile, 128-shot bit-flip job, poll, and result checks.
+- Direct production smoke: health and simulator gate execution succeeded. Text
+  transformation currently receives an HTTP 500 from the existing hosted
+  Quantum API, so the hardened regression runner now correctly fails rather
+  than treating the local fallback text as an API success. An API-side fallback
+  fix is committed in Quantum API PR #16 and must be merged and deployed before
+  repeating this production text check.
+- After that API deployment, repeat the direct production smoke, then run and
+  record the IBM backend, transpile, 128-shot bit-flip job, poll, and result
+  checks.
 - Merge the addon PR, create `godot-v0.1.2`, verify the downloadable AssetLib
   archive, update Asset Library asset 5008, pin the game to that released tag,
   merge the game PR, and only then mark the Phase 6.5 TODOs complete.

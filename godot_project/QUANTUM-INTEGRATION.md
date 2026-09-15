@@ -7,21 +7,23 @@ dialogue and gate requests cannot race that lifecycle.
 
 ## Public build configuration
 
-`project.godot` is deliberately credential-free:
+`project.godot` talks directly to Quantum API:
 
 ```ini
 [quantum_api]
-base_url="https://davidjgrimsley.com/public-facing/games/echoes-of-light/quantum/v1"
-backend_proxy_mode=true
-direct_api_key=""
+base_url="https://davidjgrimsley.com/public-facing/api/quantum/v1"
+backend_proxy_mode=false
+direct_api_key="<shipped game key>"
 request_timeout_seconds=10.0
 gate_execution_mode="simulator"
 ```
 
-The public endpoint is the game-only gateway in `../quantum-game-gateway/`.
-It forwards only health, text transform, and simulator gate calls. It is not a
-general-purpose Quantum API proxy and it never receives a browser or player API
-key.
+There is no game-specific gateway or VPS deployment. The game calls the
+existing hosted Quantum API directly and sends its bundled key on protected
+requests. This is the deliberately simple jam-game choice: anyone can extract
+and reuse that key from the game build. The addon still exposes direct IBM
+backend, transpile, job submission, status, and result methods; no route is
+being blocked by the game.
 
 ## Vendored addon release
 
@@ -31,13 +33,11 @@ commit to be released as immutable tag `godot-v0.1.2` after its pull request is
 merged. Do not make game-specific edits in that addon; keep integration logic
 in `source/dialogue/quantum_api_bridge.gd`.
 
-## Local direct-mode validation
+## Direct-mode note
 
-For an operator-only live IBM check, set `QUANTUM_API_KEY` in the process that
-launches Godot, set `backend_proxy_mode=false` for that local process, and use a
-fresh key. Do not save that setting, put it in `.env`, commit it, or export it.
-The supplied `.env.example` is documentation only; Godot reads the process
-environment, not `.env` files.
+The checked-in game configuration is already in direct mode. `QUANTUM_API_KEY`
+can still override the key for a developer-only test, but it is not required to
+run the shipped game. Do not expect the shipped key to remain private.
 
 ## Regression runner
 
@@ -45,6 +45,6 @@ Run the committed `tests/quantum_regression.tscn` scene with
 `-- --quantum-regression` when running Godot headlessly. It exits nonzero when
 health, transformation, gate execution, or the API-down text fallback check
 fails. For a deterministic local run only, set `QUANTUM_API_TEST_BASE_URL` to a
-fixture URL; this never changes the committed public configuration. The bridge
-uses the configured request timeout, so an outage cannot leave gameplay waiting
+fixture URL; this overrides only that regression run. The bridge uses the
+configured request timeout, so an outage cannot leave gameplay waiting
 indefinitely.

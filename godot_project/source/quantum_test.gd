@@ -49,6 +49,11 @@ func _test_transform_text() -> void:
 	var payload := result["payload"] as Dictionary
 	var transformed := str(payload.get("transformed", ""))
 
+	if !bool(result["request_success"]):
+		_regression_failed = true
+		print("❌ Transform request failed: ", payload)
+		return
+
 	if transformed.is_empty():
 		_regression_failed = true
 		print("❌ Transform returned empty payload: ", payload)

@@ -2,7 +2,6 @@ venv/
 
 temp/
 godot_project/.env
-quantum-game-gateway/.env
 __pycache__/
 *.py[cod]
 .pytest_cache/

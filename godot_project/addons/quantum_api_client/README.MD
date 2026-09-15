@@ -40,9 +40,9 @@ request_timeout_seconds=10.0
 Field usage:
 
 - `base_url`: mounted Quantum API root (`/v1` is auto-normalized by the addon)
-- `backend_proxy_mode`: when `true`, runtime endpoints can go through your backend proxy
-- `direct_api_key`: optional developer-only direct-mode key; leave it empty in
-  committed settings and every native or Web build
+- `backend_proxy_mode`: when `false`, protected runtime endpoints call Quantum API directly
+- `direct_api_key`: direct-mode key used by this jam game; it is intentionally
+  bundled and therefore not private
 - `default_ibm_profile`: optional fallback profile name for IBM routes
 - `request_timeout_seconds`: positive REST timeout in seconds (defaults to `10.0`)
 
@@ -71,16 +71,15 @@ The client normalizes either of these:
 
 ## Auth Modes
 
-- Backend proxy mode: required for shipped Echoes of Light builds; the addon
-  sends no `X-API-Key` and the narrow server-side gateway authenticates upstream.
-- Direct API-key mode: developer-only local validation. Read a fresh key from a
-  process environment variable at runtime, never from project settings, source,
-  a native build, or a Web export.
+- Echoes of Light uses direct API-key mode. It sends `X-API-Key` to the hosted
+  Quantum API and does not require a separate game server.
+- Backend proxy mode remains supported by the reusable addon for projects that
+  want to keep a key off the player device.
 
 If required auth is missing, the addon now fails early with clear diagnostics instead of sending doomed requests.
 
-Never embed a live API key in `project.godot`, source control, a native build,
-or a Web export. Anything sent to a player can be extracted.
+For a reusable production game, do not embed a live API key in a player build.
+This game deliberately accepts that trade-off to stay simple for the jam.
 
 ## IBM Profiles (Per-User IBM Credentials)
 
@@ -104,31 +103,23 @@ const QuantumApiClientScript = preload("res://addons/quantum_api_client/quantum_
 var quantum_api_client: QuantumApiClient
 
 func _ready() -> void:
-    quantum_api_client = QuantumApiClientScript.new()
-    add_child(quantum_api_client)
-  quantum_api_client.apply_project_settings()
+	quantum_api_client = QuantumApiClientScript.new()
+	add_child(quantum_api_client)
+	quantum_api_client.apply_project_settings()
 ```
 
-Developer-only direct API usage (never ship this path):
+Echoes of Light direct API usage:
 
 ```gdscript
+quantum_api_client.apply_project_settings()
 quantum_api_client.set_backend_proxy_mode(false)
-var developer_key := OS.get_environment("QUANTUM_API_KEY")
-if developer_key.is_empty():
-    push_error("QUANTUM_API_KEY is required for this local direct-mode test")
-    return
-quantum_api_client.set_api_key(developer_key)
 ```
 
 IBM hardware usage example:
 
 ```gdscript
+quantum_api_client.apply_project_settings()
 quantum_api_client.set_backend_proxy_mode(false)
-var developer_key := OS.get_environment("QUANTUM_API_KEY")
-if developer_key.is_empty():
-    push_error("QUANTUM_API_KEY is required for this local direct-mode test")
-    return
-quantum_api_client.set_api_key(developer_key)
 quantum_api_client.set_default_ibm_profile("Echo Text Adventure Godot Game")
 
 quantum_api_client.list_backends(func(success: bool, payload: Dictionary) -> void:

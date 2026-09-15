@@ -18,7 +18,8 @@ This folder is the promoted home for the reusable Godot addon/client.
 
 ## Install
 
-1. Copy the `addons/` folder from this directory into your Godot project root.
+1. Install the addon directory as `addons/quantum_api_client/` in your Godot
+   project. This game already vendors that exact directory.
 2. In your game script, preload `res://addons/quantum_api_client/quantum_api_client.gd`.
 3. Create the client as a child node at runtime.
 4. Call `apply_project_settings()` at startup (or set values manually via setters).
@@ -33,14 +34,17 @@ base_url="https://davidjgrimsley.com/public-facing/api/quantum"
 backend_proxy_mode=true
 direct_api_key=""
 default_ibm_profile=""
+request_timeout_seconds=10.0
 ```
 
 Field usage:
 
 - `base_url`: mounted Quantum API root (`/v1` is auto-normalized by the addon)
-- `backend_proxy_mode`: when `true`, runtime endpoints can go through your backend proxy
-- `direct_api_key`: API key used for protected runtime endpoints in direct mode
+- `backend_proxy_mode`: when `false`, protected runtime endpoints call Quantum API directly
+- `direct_api_key`: direct-mode key used by this jam game; it is intentionally
+  bundled and therefore not private
 - `default_ibm_profile`: optional fallback profile name for IBM routes
+- `request_timeout_seconds`: positive REST timeout in seconds (defaults to `10.0`)
 
 ## Layout
 
@@ -67,14 +71,19 @@ The client normalizes either of these:
 
 ## Auth Modes
 
-- Backend proxy mode: recommended for shipped games
-- Direct API-key mode: useful for local/dev/demo setups for protected runtime routes
+- Echoes of Light uses direct API-key mode. It sends `X-API-Key` to the hosted
+  Quantum API and does not require a separate game server.
+- Backend proxy mode remains supported by the reusable addon for projects that
+  want to keep a key off the player device.
 
 If required auth is missing, the addon now fails early with clear diagnostics instead of sending doomed requests.
 
+For a reusable production game, do not embed a live API key in a player build.
+This game deliberately accepts that trade-off to stay simple for the jam.
+
 ## IBM Profiles (Per-User IBM Credentials)
 
-How a normal hosted user gets credentials and profiles:
+How a developer running an operator-only direct-mode IBM validation gets credentials and profiles:
 
 1. Open `https://davidjgrimsley.com/public-facing/api/quantum` and sign in with an Identerest account.
 2. In the `Api Keys` panel, create a Quantum API key and copy the raw key immediately (it is shown once).
@@ -94,23 +103,23 @@ const QuantumApiClientScript = preload("res://addons/quantum_api_client/quantum_
 var quantum_api_client: QuantumApiClient
 
 func _ready() -> void:
-    quantum_api_client = QuantumApiClientScript.new()
-    add_child(quantum_api_client)
-  quantum_api_client.apply_project_settings()
+	quantum_api_client = QuantumApiClientScript.new()
+	add_child(quantum_api_client)
+	quantum_api_client.apply_project_settings()
 ```
 
-Direct API usage:
+Echoes of Light direct API usage:
 
 ```gdscript
+quantum_api_client.apply_project_settings()
 quantum_api_client.set_backend_proxy_mode(false)
-quantum_api_client.set_api_key("your-runtime-api-key")
 ```
 
 IBM hardware usage example:
 
 ```gdscript
+quantum_api_client.apply_project_settings()
 quantum_api_client.set_backend_proxy_mode(false)
-quantum_api_client.set_api_key("your-runtime-api-key")
 quantum_api_client.set_default_ibm_profile("Echo Text Adventure Godot Game")
 
 quantum_api_client.list_backends(func(success: bool, payload: Dictionary) -> void:

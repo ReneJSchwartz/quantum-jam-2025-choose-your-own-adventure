@@ -42,9 +42,10 @@ folder_colors={
 
 base_url="https://davidjgrimsley.com/public-facing/api/quantum/v1"
 backend_proxy_mode=false
-direct_api_key=""
+direct_api_key="qapi_fxtkr7t2aa7o_lmz7ts6m7g847d635tkvh34xkne5tii66mlwf3vc"
+request_timeout_seconds=10.0
 gate_execution_mode="simulator"
-default_ibm_profile="Echo Text Adventure Godot Game"
+default_ibm_profile=""
 default_ibm_backend=""
 ibm_shots=1024
 ibm_job_poll_interval_sec=3.0

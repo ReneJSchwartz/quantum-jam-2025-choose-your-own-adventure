@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://source/quantum_test.gd" id="1_quantum_test"]
+
+[node name="QuantumRegression" type="Node"]
+script = ExtResource("1_quantum_test")

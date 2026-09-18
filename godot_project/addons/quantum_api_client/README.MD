@@ -1,119 +1,46 @@
-# Quantum API Godot Client
+# Quantum API Client for Godot
 
-Reusable Godot runtime client for the mounted Quantum API `/v1` contract.
+This game contains the Quantum API runtime addon at
+`addons/quantum_api_client/`. It handles text transformation, quick simulator
+gate effects, IBM backend discovery, transpilation, and asynchronous IBM
+hardware jobs.
 
-## What This Is
+## Configure This Game
 
-This folder is the promoted home for the reusable Godot addon/client.
+1. Open **Project > Project Settings > Plugins** in Godot.
+2. Enable **Quantum API Client Settings**. This is an editor helper only; it
+   adds the Quantum API fields to **General > Quantum Api**.
+3. For the jam's direct connection, turn **Backend Proxy Mode** off, set the
+   Quantum API base URL, and enter the direct API key.
+4. To choose a specific IBM credential profile, enter its exact profile name in
+   **Default Ibm Profile**. Leave it blank to use the Quantum API account's
+   default IBM profile.
 
-- Runtime-focused, not an editor plugin
-- Intended to be copied into a Godot project as `addons/quantum_api_client/`
-- Supports gameplay/runtime plus IBM hardware profile usage:
-  - `health_check`
-  - `transform_text`
-  - `run_gate`
-  - `list_backends`
-  - `transpile`
-  - `submit_circuit_job`
+The key and IBM credentials are separate: the game sends its Quantum API key;
+Quantum API holds the IBM token in the selected profile.
 
-## Install
+## What Runs Where
 
-1. Copy the `addons/` folder from this directory into your Godot project root.
-2. In your game script, preload `res://addons/quantum_api_client/quantum_api_client.gd`.
-3. Create the client as a child node at runtime.
-4. Call `apply_project_settings()` at startup (or set values manually via setters).
+| Game action | Result | IBM hardware job? |
+| --- | --- | --- |
+| Dialogue text transformation | API returns transformed text | No |
+| Quick gate visual/effect | API simulator response | No |
+| Hardware gate mode | Game submits a circuit job and polls it | Yes |
 
-## Project Settings
+Text successfully transforming proves the game can reach Quantum API. It does
+not create an IBM job. To test IBM, reach a gate choice in the game while
+**Gate Execution Mode** is `hardware`; the game will submit and wait for the
+job result. IBM queues can take a while.
 
-Add this to your `project.godot`:
+## Troubleshooting
 
-```ini
-[quantum_api]
-base_url="https://davidjgrimsley.com/public-facing/api/quantum"
-backend_proxy_mode=true
-direct_api_key=""
-default_ibm_profile=""
-```
+- **No Default Ibm Profile field:** enable **Quantum API Client Settings** in
+  Project Settings > Plugins, then open General > Quantum Api again.
+- **No IBM job appears:** make sure Gate Execution Mode is `hardware`, then
+  actually choose a gate in dialogue. Text transformation alone is unrelated.
+- **Profile error:** verify the profile in the Quantum API web portal and make
+  sure the spelling in Godot matches it exactly. Or leave the field blank to
+  use your account default profile.
 
-Field usage:
-
-- `base_url`: mounted Quantum API root (`/v1` is auto-normalized by the addon)
-- `backend_proxy_mode`: when `true`, runtime endpoints can go through your backend proxy
-- `direct_api_key`: API key used for protected runtime endpoints in direct mode
-- `default_ibm_profile`: optional fallback profile name for IBM routes
-
-## Layout
-
-- `addons/quantum_api_client/quantum_api_client.gd` - shared runtime client
-
-## AssetLib Submission Metadata
-
-Use these values for the current AssetLib submission form:
-
-- Asset Name: Quantum API Client
-- Category: Network
-- Godot Version: 4.x
-- License: Apache-2.0
-- Repository URL: https://github.com/DavidJGrimsley/quantum-api
-- Install Path Inside ZIP: addons/quantum_api_client
-- Icon URL (direct): https://i.imgur.com/mbMnGVA.jpeg
-
-## Base URL Behavior
-
-The client normalizes either of these:
-
-- `https://your-backend.example.com/public-facing/api/quantum`
-- `https://your-backend.example.com/public-facing/api/quantum/v1`
-
-## Auth Modes
-
-- Backend proxy mode: recommended for shipped games
-- Direct API-key mode: useful for local/dev/demo setups for protected runtime routes
-
-If required auth is missing, the addon now fails early with clear diagnostics instead of sending doomed requests.
-
-## IBM Profiles (Per-User IBM Credentials)
-
-How a normal hosted user gets credentials and profiles:
-
-1. Open `https://davidjgrimsley.com/public-facing/api/quantum` and sign in with an Identerest account.
-2. In the `Api Keys` panel, create a Quantum API key and copy the raw key immediately (it is shown once).
-3. In the `IBM Credentials` panel, create an IBM profile (`profile_name`, IBM API token, IBM instance/CRN, channel), then click verify.
-4. Optionally mark one profile as default on that same public page.
-
-Profile management (create/list/update/delete/verify) stays on your portfolio website.
-This addon only consumes existing profile names for IBM runtime calls.
-
-For IBM-specific runtime routes, pass `ibm_profile` explicitly or configure `default_ibm_profile` in project settings.
-
-## Sample Usage
-
-```gdscript
-const QuantumApiClientScript = preload("res://addons/quantum_api_client/quantum_api_client.gd")
-
-var quantum_api_client: QuantumApiClient
-
-func _ready() -> void:
-    quantum_api_client = QuantumApiClientScript.new()
-    add_child(quantum_api_client)
-  quantum_api_client.apply_project_settings()
-```
-
-Direct API usage:
-
-```gdscript
-quantum_api_client.set_backend_proxy_mode(false)
-quantum_api_client.set_api_key("your-runtime-api-key")
-```
-
-IBM hardware usage example:
-
-```gdscript
-quantum_api_client.set_backend_proxy_mode(false)
-quantum_api_client.set_api_key("your-runtime-api-key")
-quantum_api_client.set_default_ibm_profile("Echo Text Adventure Godot Game")
-
-quantum_api_client.list_backends(func(success: bool, payload: Dictionary) -> void:
-    print(success, payload)
-, "ibm")
-```
+The full reusable-addon guide is maintained in the Quantum API repository at
+`addons/quantum_api_client/README.md`.

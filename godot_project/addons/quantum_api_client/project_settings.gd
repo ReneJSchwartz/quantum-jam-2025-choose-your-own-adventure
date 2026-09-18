@@ -3,6 +3,8 @@ class_name QuantumApiProjectSettings
 extends RefCounted
 
 ## Makes the Quantum API runtime settings discoverable in Godot's editor.
+const ACCOUNT_DEFAULT_PROFILE_INITIAL_VALUE := "__quantum_api_use_account_default__"
+
 const SETTINGS := [
 	{
 		"name": "quantum_api/base_url",
@@ -28,6 +30,7 @@ const SETTINGS := [
 	{
 		"name": "quantum_api/default_ibm_profile",
 		"default": "",
+		"initial": ACCOUNT_DEFAULT_PROFILE_INITIAL_VALUE,
 		"type": TYPE_STRING,
 		"hint": PROPERTY_HINT_NONE,
 		"hint_string": "",
@@ -45,8 +48,9 @@ static func register() -> void:
 	for setting_info in SETTINGS:
 		var setting_name := str(setting_info["name"])
 		var default_value: Variant = setting_info["default"]
+		var initial_value: Variant = setting_info.get("initial", default_value)
 		if !ProjectSettings.has_setting(setting_name):
 			ProjectSettings.set_setting(setting_name, default_value)
-		ProjectSettings.set_initial_value(setting_name, default_value)
+		ProjectSettings.set_initial_value(setting_name, initial_value)
 		ProjectSettings.set_as_basic(setting_name, true)
 		ProjectSettings.add_property_info(setting_info)

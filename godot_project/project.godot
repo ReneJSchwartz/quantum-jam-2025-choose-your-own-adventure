@@ -51,6 +51,9 @@ ibm_shots=1024
 ibm_job_poll_interval_sec=3.0
 ibm_job_timeout_sec=420.0
 
+[editor_plugins]
+enabled=PackedStringArray("res://addons/quantum_api_client/plugin.cfg")
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
